@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from '@vercel/analytics/react';
 import { Mail, MessageSquare, X, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -100,6 +101,7 @@ const App: React.FC = () => {
           </BlogProvider>
         </UIProvider>
       </Router>
+      <Analytics />
     </HelmetProvider>
   );
 };
