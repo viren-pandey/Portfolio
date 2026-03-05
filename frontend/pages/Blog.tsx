@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Calendar, ChevronRight, Tag, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 
 const Blog: React.FC = () => {
@@ -39,10 +40,15 @@ const Blog: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
               {post.image && (
-                <div className="h-48 overflow-hidden relative">
-                  <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <Link to={`/blog/${post.permalink}`} className="block h-48 overflow-hidden relative">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
+                </Link>
               )}
 
               <div className="p-8 relative z-10 flex flex-col flex-grow">
@@ -57,7 +63,6 @@ const Blog: React.FC = () => {
                       <span>{post.readTime}</span>
                     </div>
                   </div>
-                  {/* Admin delete button for demo purposes */}
                   <button 
                     onClick={(e) => { e.preventDefault(); deletePost(post.id); }}
                     className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -67,13 +72,14 @@ const Blog: React.FC = () => {
                   </button>
                 </div>
 
-                <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-tight">
-                  {post.title}
-                </h3>
-                
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3 flex-grow">
-                  {post.excerpt}
-                </p>
+                <Link to={`/blog/${post.permalink}`} className="block flex-grow">
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-tight">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                </Link>
 
                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-black/5 dark:border-white/5">
                   <div className="flex flex-wrap gap-2">
@@ -84,9 +90,13 @@ const Blog: React.FC = () => {
                       </span>
                     ))}
                   </div>
-                  <button className="p-2 rounded-full bg-black/5 dark:bg-white/5 group-hover:bg-purple-500 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]">
+                  <Link
+                    to={`/blog/${post.permalink}`}
+                    className="p-2 rounded-full bg-black/5 dark:bg-white/5 group-hover:bg-purple-500 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]"
+                    aria-label={`Read ${post.title}`}
+                  >
                     <ChevronRight size={16} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </motion.article>

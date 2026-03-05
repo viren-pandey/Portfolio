@@ -11,12 +11,25 @@ export interface BlogPost {
   tags: string[];
   image?: string;
   author: string;
+  permalink: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
 }
+
+export const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 
 interface BlogContextType {
   posts: BlogPost[];
   addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => void;
   deletePost: (id: string) => void;
+  getPostByPermalink: (permalink: string) => BlogPost | undefined;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -24,7 +37,13 @@ const BlogContext = createContext<BlogContextType | undefined>(undefined);
 export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [posts, setPosts] = useState<BlogPost[]>(() => {
     const savedPosts = localStorage.getItem('blog_posts');
-    return savedPosts ? JSON.parse(savedPosts) : [];
+    if (!savedPosts) return [];
+    const parsed: BlogPost[] = JSON.parse(savedPosts);
+    // Migrate old posts that have no permalink
+    return parsed.map(p => ({
+      ...p,
+      permalink: p.permalink || slugify(p.id + '-' + p.title),
+    }));
   });
 
   useEffect(() => {
@@ -45,8 +64,11 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setPosts(prev => prev.filter(post => post.id !== id));
   };
 
+  const getPostByPermalink = (permalink: string) =>
+    posts.find(p => p.permalink === permalink);
+
   return (
-    <BlogContext.Provider value={{ posts, addPost, deletePost }}>
+    <BlogContext.Provider value={{ posts, addPost, deletePost, getPostByPermalink }}>
       {children}
     </BlogContext.Provider>
   );

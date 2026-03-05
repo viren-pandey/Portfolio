@@ -2,10 +2,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { HelmetProvider } from 'react-helmet-async';
 import { Mail, MessageSquare, X, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
+import BlogPostPage from './pages/BlogPostPage';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import AnimatedBackground from './components/AnimatedBackground';
@@ -82,20 +84,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <UIProvider>
-        <BlogProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </Layout>
-        </BlogProvider>
-      </UIProvider>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <UIProvider>
+          <BlogProvider>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:permalink" element={<BlogPostPage />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/login" element={<Login />} />
+              </Routes>
+            </Layout>
+          </BlogProvider>
+        </UIProvider>
+      </Router>
+    </HelmetProvider>
   );
 };
 
