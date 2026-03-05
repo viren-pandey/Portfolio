@@ -2,13 +2,35 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { Message } from '../types';
 import { SKILLS, PROJECTS, EDUCATION } from '../constants';
 
 interface AIChatProps {
   onClose: () => void;
 }
+
+const generateResponse = (query: string): string => {
+  const q = query.toLowerCase();
+  if (q.match(/skill|tech|stack|language|framework/)) {
+    const cats = SKILLS.map((s: any) => `${s.category}: ${s.items?.join(', ') ?? ''}`).join(' | ');
+    return `Viren's skills span: ${cats}.`;
+  }
+  if (q.match(/project|built|made|work/)) {
+    const list = PROJECTS.map((p: any) => `• ${p.title} — ${p.description}`).join('\n');
+    return `Here are some of Viren's projects:\n${list}`;
+  }
+  if (q.match(/education|degree|university|college|study/)) {
+    const edu = EDUCATION.map((e: any) => `${e.degree} at ${e.institution} (${e.year})`).join(', ');
+    return `Viren's education: ${edu}.`;
+  }
+  if (q.match(/contact|email|hire|reach/)) {
+    return "You can reach Viren via the contact section on this portfolio or through LinkedIn.";
+  }
+  if (q.match(/hello|hi|hey|who are you/)) {
+    return "Hi! I'm an assistant for Viren Pandey's portfolio. Ask me about his skills, projects, or education!";
+  }
+  return "I can answer questions about Viren's skills, projects, and education. What would you like to know?";
+};
 
 const AIChat: React.FC<AIChatProps> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -33,33 +55,10 @@ const AIChat: React.FC<AIChatProps> = ({ onClose }) => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const context = `
-        You are an AI assistant representing Viren Pandey. 
-        Viren is a Computer Science Engineer specializing in AI/ML.
-        
-        His background:
-        - Education: ${JSON.stringify(EDUCATION)}
-        - Skills: ${JSON.stringify(SKILLS)}
-        - Projects: ${JSON.stringify(PROJECTS)}
-        
-        Keep your answers concise, professional, and helpful. 
-        Focus on his technical expertise in Computer Vision, YOLOv8, and Full-Stack development.
-      `;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: userMsg,
-        config: {
-          systemInstruction: context,
-          temperature: 0.7,
-        },
-      });
-
-      const aiText = response.text || "I'm sorry, I couldn't process that request.";
+      const aiText = generateResponse(userMsg);
+      await new Promise(r => setTimeout(r, 400));
       setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
     } catch (error) {
-      console.error(error);
       setMessages(prev => [...prev, { role: 'assistant', content: "Oops, something went wrong. Please try again later." }]);
     } finally {
       setIsLoading(false);
