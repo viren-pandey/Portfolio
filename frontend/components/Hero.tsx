@@ -30,7 +30,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           </h1>
           
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-lg mb-10 leading-relaxed">
-            I'm Viren Pandey, specializing in Computer Vision and Real-Time AI systems. Currently pursuing B.Tech in CSE with a focus on Artificial Intelligence.
+            I'm Viren Pandey, specializing in Computer Vision and Real-Time AI systems. Currently pursuing B.Tech in CSE AIML with a focus on Artificial Intelligence(seeking job:)
           </p>
           
           <div className="flex flex-wrap gap-4">
