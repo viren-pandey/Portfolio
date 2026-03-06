@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
-import { Mail, MessageSquare, X, Terminal } from 'lucide-react';
+import { Mail, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
@@ -13,13 +13,14 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Contact from './pages/Contact';
 import AnimatedBackground from './components/AnimatedBackground';
-import AIChat from './components/AIChat';
 import TerminalModal from './components/TerminalModal';
 import { UIProvider, useUI } from './contexts/UIContext';
 import { BlogProvider } from './contexts/BlogContext';
+import { AdminProvider } from './contexts/AdminContext';
+import NotFound from './pages/NotFound';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isTerminalOpen, openTerminal, closeTerminal, isChatOpen, toggleChat, setChatOpen } = useUI();
+  const { isTerminalOpen, openTerminal, closeTerminal } = useUI();
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-[#030014] text-gray-900 dark:text-white selection:bg-purple-500/30 transition-colors duration-300">
@@ -46,7 +47,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </footer>
 
       {/* Floating Buttons */}
-      <div className="fixed bottom-8 right-8 z-[60] flex flex-col space-y-4">
+      <div className="fixed bottom-8 right-8 z-[60]">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -56,23 +57,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         >
           <Terminal size={20} className="text-gray-600 dark:text-gray-400" />
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={toggleChat}
-          className="w-14 h-14 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/40 relative group overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-          {isChatOpen ? <X size={28} className="text-white" /> : <MessageSquare size={28} className="text-white" />}
-        </motion.button>
       </div>
-
-      {/* AI Assistant Overlay */}
-      <AnimatePresence>
-        {isChatOpen && (
-          <AIChat onClose={() => setChatOpen(false)} />
-        )}
-      </AnimatePresence>
 
       {/* Terminal Overlay */}
       <AnimatePresence>
@@ -90,16 +75,19 @@ const App: React.FC = () => {
       <Router>
         <UIProvider>
           <BlogProvider>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:permalink" element={<BlogPostPage />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/contact" element={<Contact />} />
-              </Routes>
-            </Layout>
+            <AdminProvider>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:permalink" element={<BlogPostPage />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            </AdminProvider>
           </BlogProvider>
         </UIProvider>
       </Router>

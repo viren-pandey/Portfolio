@@ -1,18 +1,51 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
+import { useAdmin } from '../contexts/AdminContext';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
 type PopupStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const Blog: React.FC = () => {
   const { posts, loading, error, deletePost } = useBlog();
+  const { ads } = useAdmin();
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const navigate  = useNavigate();
   const location  = useLocation();
+  const initialLoad = useRef(true);
+
+  // Push notification subscription
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+    Notification.requestPermission();
+    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      if (initialLoad.current) {
+        snap.docs.forEach(doc => sessionStorage.setItem(`notif_seen_${doc.id}`, '1'));
+        initialLoad.current = false;
+        return;
+      }
+      snap.docChanges().forEach(change => {
+        if (change.type !== 'added') return;
+        const key = `notif_seen_${change.doc.id}`;
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, '1');
+        if (Notification.permission === 'granted') {
+          const n = change.doc.data();
+          const notif = new Notification(n.title, { body: n.body, icon: '/favicon.ico' });
+          if (n.url) notif.onclick = () => window.open(n.url, '_blank');
+        }
+      });
+    }, () => {});
+    return unsub;
+  }, []);
+
+  const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
 
   // ── Floating contact popup state ──
   const [popupOpen, setPopupOpen]   = useState(false);
@@ -138,7 +171,11 @@ const Blog: React.FC = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post, idx) => (
+          {filteredPosts.map((post, idx) => {
+            const adAfterThis = (idx + 1) % 3 === 0 && betweenAds.length > 0
+              ? betweenAds[Math.floor(idx / 3) % betweenAds.length]
+              : null;
+            return (<React.Fragment key={post.id}>
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -209,7 +246,25 @@ const Blog: React.FC = () => {
                 </div>
               </div>
             </motion.article>
-          ))}
+              {adAfterThis && (
+                <motion.div
+                  key={`ad-after-${idx}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 + 0.2 }}
+                  className="md:col-span-2 lg:col-span-3"
+                >
+                  <a href={adAfterThis.linkUrl} target="_blank" rel="noreferrer sponsored"
+                    className="block relative overflow-hidden rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
+                    <img src={adAfterThis.imageUrl} alt={adAfterThis.title}
+                      className="w-full max-h-36 object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+                    <div className="absolute top-2 right-3 text-[10px] font-semibold bg-black/50 text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">Sponsored</div>
+                  </a>
+                </motion.div>
+              )}
+            </React.Fragment>);
+          })}
         </div>
       )}
       {/* ── Floating contact button + mini popup ── */}

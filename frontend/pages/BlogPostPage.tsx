@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, Tag, ArrowLeft, User, List } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
+import { useAdmin } from '../contexts/AdminContext';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Heading { level: number; text: string; id: string; }
@@ -93,6 +94,8 @@ const TableOfContents: React.FC<{ headings: Heading[] }> = ({ headings }) => {
 };
 
 const BlogPostPage: React.FC = () => {
+  const { ads } = useAdmin();
+  const cornerAd = ads.find(a => a.active && a.position === 'corner') ?? null;
   const { permalink } = useParams<{ permalink: string }>();
   const { getPostByPermalink } = useBlog();
   const navigate = useNavigate();
@@ -459,6 +462,22 @@ const BlogPostPage: React.FC = () => {
 
         </div>{/* end two-column */}
       </div>
+
+      {/* ── Corner floating ad ── */}
+      {cornerAd && (
+        <motion.a
+          href={cornerAd.linkUrl} target="_blank" rel="noreferrer sponsored"
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}
+          className="fixed bottom-28 right-6 z-50 block w-52 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/10 hover:scale-105 transition-transform duration-200 group"
+        >
+          <img src={cornerAd.imageUrl} alt={cornerAd.title} className="w-full h-auto object-cover" onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display='none'; }} />
+          <div className="absolute top-1.5 right-2 text-[9px] font-semibold bg-black/60 text-white/70 px-1.5 py-0.5 rounded-full backdrop-blur-sm">Ad</div>
+          <button
+            type="button"
+            onClick={e => { e.preventDefault(); const el = e.currentTarget.closest('a') as HTMLElement; if (el) el.style.display='none'; }}
+            className="absolute top-1.5 left-2 text-[10px] bg-black/60 text-white/70 rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+        </motion.a>
+      )}
     </>
   );
 };

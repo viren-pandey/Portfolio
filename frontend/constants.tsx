@@ -57,12 +57,14 @@ export const EDUCATION = [
     specialization: "Artificial Intelligence And Machine learning"
   },
   {
-    institution: "Central Hindu Boys School",
+    institution: "Central Hindu Boys School B.H.U.",
     period: "September 2021 – April 2023",
-    degree: "Higher Secondary Education (12th, PCM)"
+    degree: "Higher Secondary Education (12th, PCM)",
+    specialization: "Got admission in CHS BHU and completedd my class 12th and got the prior education from there"
+
   },
   {
-    institution: "D.A.V. Public School - India",
+    institution: "D.A.V. Public School - Varanasi",
     period: "April 2016 – May 2021",
     degree: "CLASS 10"
   }
@@ -112,6 +114,7 @@ export const CERTIFICATIONS: Certification[] = [
   {
     name: "AI for All: From Basics to GenAI Practice",
     issuer: "NVIDIA",
+    link: "https://ibb.co/DDTpQmr4",
     learned: [
       "Core mechanics of how Artificial Intelligence learns and iterates.",
       "Hands-on practice with Generative AI tools and frameworks.",
