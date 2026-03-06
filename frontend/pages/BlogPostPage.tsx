@@ -282,6 +282,99 @@ const BlogPostPage: React.FC = () => {
 
         {/* Post content */}
         <style>{`
+          /* ── Base prose typography ───────────────────────────────── */
+          .blog-content p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+          }
+          .blog-content h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+          }
+          .blog-content h2 {
+            font-size: 1.625rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+          }
+          .blog-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+          }
+          .blog-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.5rem;
+          }
+          .blog-content ul,
+          .blog-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.75rem;
+            line-height: 1.8;
+          }
+          .blog-content ul { list-style-type: disc; }
+          .blog-content ol { list-style-type: decimal; }
+          .blog-content li {
+            font-size: 1.125rem;
+            margin-bottom: 0.4rem;
+          }
+          .blog-content li p { margin-bottom: 0.5rem; }
+          .blog-content hr {
+            margin: 2.5rem 0;
+            border: none;
+            border-top: 1px solid;
+            opacity: 0.2;
+          }
+          .blog-content a {
+            color: #a78bfa;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-color: rgba(167,139,250,0.4);
+            transition: color 0.15s, text-decoration-color 0.15s;
+          }
+          .blog-content a:hover {
+            color: #c4b5fd;
+            text-decoration-color: rgba(196,181,253,0.7);
+          }
+          html:not(.dark) .blog-content a { color: #7c3aed; text-decoration-color: rgba(124,58,237,0.4); }
+          html:not(.dark) .blog-content a:hover { color: #6d28d9; }
+          .blog-content strong { font-weight: 600; }
+          .blog-content em { font-style: italic; }
+          .blog-content code:not(pre code) {
+            font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+            font-size: 0.875em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(167,139,250,0.12);
+            color: #c4b5fd;
+          }
+          html:not(.dark) .blog-content code:not(pre code) {
+            background: rgba(124,58,237,0.08);
+            color: #7c3aed;
+          }
+          .blog-content blockquote {
+            border-left: 3px solid #7c3aed;
+            padding: 0.25rem 0 0.25rem 1.25rem;
+            margin: 1.75rem 0;
+            font-style: italic;
+          }
+          .blog-content blockquote p { margin-bottom: 0.25rem; }
+          /* ── Mobile ─────────────────────────────────────────────── */
+          @media (max-width: 640px) {
+            .blog-content p, .blog-content li { font-size: 1rem; line-height: 1.75; }
+            .blog-content h1 { font-size: 1.75rem; }
+            .blog-content h2 { font-size: 1.375rem; }
+            .blog-content h3 { font-size: 1.125rem; }
+          }
           /* ── Code block box ─────────────────────────────────────── */
           .blog-content pre {
             position: relative;
