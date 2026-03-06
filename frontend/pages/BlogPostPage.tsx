@@ -338,13 +338,17 @@ const BlogPostPage: React.FC = () => {
             margin-bottom: 1.5rem;
             padding-left: 1.75rem;
             line-height: 1.8;
+            list-style: revert;
           }
-          .blog-content ul { list-style-type: disc; }
-          .blog-content ol { list-style-type: decimal; }
+          .blog-content ul { list-style-type: disc !important; }
+          .blog-content ol { list-style-type: decimal !important; }
           .blog-content li {
             font-size: 1.125rem;
             margin-bottom: 0.4rem;
+            display: list-item;
           }
+          .blog-content ul ul { list-style-type: circle !important; padding-left: 1.5rem; }
+          .blog-content ul ul ul { list-style-type: square !important; }
           .blog-content li p { margin-bottom: 0.5rem; }
           .blog-content hr {
             margin: 2.5rem 0;

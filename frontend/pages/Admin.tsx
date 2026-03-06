@@ -708,6 +708,11 @@ const PostsSection: React.FC = () => {
             #blog-editor-wrap button.rsw-btn:hover { background:rgba(124,58,237,0.12); }
             #blog-editor-wrap .rsw-separator { border-color:rgba(0,0,0,0.12); }
             #blog-editor-wrap .rsw-ce a { color:#7c3aed; text-decoration:underline; }
+            #blog-editor-wrap .rsw-ce ul,
+            #blog-editor-wrap .rsw-ce ol { padding-left:1.75em; margin:0.75em 0; list-style:revert; }
+            #blog-editor-wrap .rsw-ce ul { list-style-type:disc !important; }
+            #blog-editor-wrap .rsw-ce ol { list-style-type:decimal !important; }
+            #blog-editor-wrap .rsw-ce li { display:list-item; margin-bottom:0.3em; }
             #blog-editor-wrap .rsw-ce figure { margin:1.4em 0; }
             #blog-editor-wrap .rsw-ce figure img { display:inline-block; border-radius:10px; max-width:100%; height:auto; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
             #blog-editor-wrap .rsw-ce img { display:inline-block; max-width:100%; height:auto; border-radius:10px; }
