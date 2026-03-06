@@ -1211,10 +1211,10 @@ const AdminSidebar: React.FC<{
             <img src={logoSvg} alt="CMS Logo" className="w-10 h-10 rounded-full object-cover border-2 border-purple-500/30" />
             <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight mt-1">CMS Panel</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">{adminName.charAt(0).toUpperCase()}</div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{adminName}</p>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold shrink-0">{adminName.charAt(0).toUpperCase()}</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none truncate">{adminName}</p>
               <p className="text-[10px] text-gray-400 capitalize leading-none mt-0.5">{adminRole}</p>
             </div>
           </div>
