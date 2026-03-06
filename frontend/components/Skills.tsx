@@ -57,10 +57,12 @@ const SkillTag = ({ skill, accent }) => (
   }, skill)
 );
 
+const GROQ_KEY = typeof import.meta !== 'undefined' ? (import.meta.env?.VITE_GROQ_API_KEY || '') : '';
+
 const QUICK_QS = ['What did you build here?', 'Technologies used?', 'Key achievements?', 'How does this work?'];
 
 const MiniChat = ({ category, accent }) => {
-  const [msgs, setMsgs]       = React.useState([{ role: 'bot', text: `Hi! Ask me about Viren's ${category} work.` }]);
+  const [msgs, setMsgs]       = React.useState([{ role: 'bot', text: `Hi! Ask me about Viren's ${category} work. I'm powered by Groq AI!` }]);
   const [input, setInput]     = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const scrollRef             = React.useRef(null);
@@ -71,11 +73,46 @@ const MiniChat = ({ category, accent }) => {
 
   const send = async (text) => {
     if (!text.trim() || loading) return;
+    const history = msgs; // capture before state update
     setInput('');
     setMsgs(prev => [...prev, { role: 'user', text }]);
     setLoading(true);
-    await new Promise(r => setTimeout(r, 400));
-    setMsgs(prev => [...prev, { role: 'bot', text: genResponse(text, category) }]);
+    try {
+      if (!GROQ_KEY || GROQ_KEY === 'your_groq_api_key_here') throw new Error('no-key');
+      const catSkills = SKILLS.find(s => s.category === category);
+      const projList  = getProjectsForCategory(category)
+        .map(p => `${p.title}: ${p.description}. Stack: ${p.tags.join(', ')}.`)
+        .join('\n');
+      const sysPrompt =
+        `You are an AI assistant embedded in Viren Pandey's portfolio website. ` +
+        `Answer visitor questions about his ${category} skills concisely and accurately.\n\n` +
+        `Skills in this category: ${catSkills ? catSkills.skills.join(', ') : 'various'}\n\n` +
+        `Background: ${CATEGORY_CONTEXT[category] || ''}\n\n` +
+        (projList ? `Related projects:\n${projList}` : `No dedicated projects yet for this category. Focus on what was learned.`) +
+        `\n\nKeep replies friendly and under 4 sentences unless the user asks for detail. Use plain text, no markdown.`;
+
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: sysPrompt },
+            ...history.map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.text })),
+            { role: 'user', content: text },
+          ],
+          max_tokens: 350,
+          temperature: 0.7,
+        }),
+      });
+      if (!res.ok) throw new Error('api-error');
+      const data  = await res.json();
+      const reply = data.choices?.[0]?.message?.content?.trim() || 'Sorry, I could not get a response.';
+      setMsgs(prev => [...prev, { role: 'bot', text: reply }]);
+    } catch {
+      // fallback to local rule-based response
+      setMsgs(prev => [...prev, { role: 'bot', text: genResponse(text, category) }]);
+    }
     setLoading(false);
   };
 
