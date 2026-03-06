@@ -154,10 +154,18 @@ const BlogPostPage: React.FC = () => {
           .blog-content figcaption { font-size: 0.85em; color: #6b7280; margin-top: 8px; font-style: italic; }
           .blog-content pre { border-radius: 10px; overflow-x: auto; }
           .blog-content pre code { font-family: 'Fira Code', Consolas, monospace; font-size: inherit; }
-          /* Light mode: override inline dark code-block styles from editor */
-          html:not(.dark) .blog-content pre { background: #f1f5f9 !important; border: 1px solid rgba(0,0,0,0.08) !important; }
+          /* ── Light mode fixes ───────────────────────────────────── */
+          /* Override inline white/light text colors saved by the editor color picker.
+             Inline styles have highest CSS specificity, so !important is required. */
+          html:not(.dark) .blog-content span[style],
+          html:not(.dark) .blog-content font { color: inherit !important; }
+          /* Keep the content div itself dark so inherited color is readable */
+          html:not(.dark) .blog-content { color: #111827; }
+          /* Override inline dark code-block backgrounds from editor */
+          html:not(.dark) .blog-content pre { background: #f1f5f9 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
           html:not(.dark) .blog-content pre code { color: #6d28d9 !important; }
-          /* Dark mode figcaption */
+          /* ── Dark mode ──────────────────────────────────────────── */
+          html.dark .blog-content { color: #e2e8f0; }
           html.dark .blog-content figcaption { color: #9ca3af; }
         `}</style>
         <motion.div
@@ -170,7 +178,7 @@ const BlogPostPage: React.FC = () => {
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
             prose-strong:text-gray-900 dark:prose-strong:text-white
             prose-code:text-purple-600 dark:prose-code:text-purple-400
-            prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:border prose-pre:border-white/10
+            prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10
             prose-img:rounded-2xl prose-img:shadow-xl
             prose-blockquote:border-purple-500 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
           "
