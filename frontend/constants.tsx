@@ -66,7 +66,9 @@ export const EDUCATION = [
   {
     institution: "D.A.V. Public School - Varanasi",
     period: "April 2016 – May 2021",
-    degree: "CLASS 10"
+    degree: "CLASS 10",
+    specialization: "Completed it and got 95.33% in my boards"
+
   }
 ];
 
