@@ -1,4 +1,4 @@
-const INDEXNOW_KEY = 'a1b2c3d4e5f6789012345678901234ab';
+const INDEXNOW_KEY = 'de44bbe49cab4cb8b44ef2eaa2bfa324';
 const SITE_HOST = 'virenp.vercel.app';
 
 export async function notifyIndexNow(permalinks: string | string[]) {
