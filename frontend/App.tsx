@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
@@ -17,10 +17,43 @@ import TerminalModal from './components/TerminalModal';
 import { UIProvider, useUI } from './contexts/UIContext';
 import { BlogProvider } from './contexts/BlogContext';
 import { AdminProvider } from './contexts/AdminContext';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 import NotFound from './pages/NotFound';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isTerminalOpen, openTerminal, closeTerminal } = useUI();
+  const seenIds = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    // Request browser notification permission from blog visitors
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    // Listen for new notifications pushed by admin via Firestore
+    try {
+      const q = query(collection(db, 'notifications'), orderBy('_sentAt', 'desc'));
+      const unsub = onSnapshot(q, snap => {
+        const ids = snap.docs.map(d => d.id);
+        if (seenIds.current === null) {
+          // First snapshot — record existing IDs, don't show them
+          seenIds.current = new Set(ids);
+          return;
+        }
+        for (const d of snap.docs) {
+          if (!seenIds.current.has(d.id)) {
+            seenIds.current.add(d.id);
+            const data = d.data() as { title: string; body: string; url?: string };
+            if (Notification.permission === 'granted') {
+              const notif = new Notification(data.title, { body: data.body, icon: '/favicon.ico' });
+              if (data.url) notif.onclick = () => window.open(data.url, '_blank');
+            }
+          }
+        }
+      }, err => console.warn('notifications listener:', err.code));
+      return () => unsub();
+    } catch { return; }
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-[#030014] text-gray-900 dark:text-white selection:bg-purple-500/30 transition-colors duration-300">

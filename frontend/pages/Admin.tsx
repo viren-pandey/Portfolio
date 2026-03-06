@@ -515,8 +515,8 @@ const PostsSection: React.FC = () => {
                     </button>
                   </>)}
                   {/* Standard actions */}
-                  {status === 'published' && <a href={`/blog/${post.permalink}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors" title="View"><ExternalLink size={14} /></a>}
-                  {(canApprove || status !== 'pending') && status !== 'archived' && status !== 'archive_requested' && <button onClick={() => startEdit(post)} className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors" title="Edit"><Pencil size={14} /></button>}
+                  {status === 'published' && <a href={`/blog/${post.permalink}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors text-xs font-semibold" title="View Live Post"><ExternalLink size={13} /> View</a>}
+                  {(canApprove || status !== 'pending') && status !== 'archived' && status !== 'archive_requested' && <button onClick={() => startEdit(post)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors text-xs font-semibold" title="Edit Post"><Pencil size={13} /> Edit</button>}
                   {/* Archive actions — manager can request, admin can confirm/cancel/unarchive */}
                   {canApprove && status === 'published' && (
                     <button onClick={async () => { if (window.confirm(`Request archival of "${post.title}"? An admin must confirm to fully archive it.`)) await archivePost(post.id); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors text-xs font-semibold" title="Request Archive">
