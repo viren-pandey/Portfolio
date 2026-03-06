@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link as LinkIcon,
   Search, Upload, Pencil, Trash2, FileText, PlusCircle, Code, Users, Megaphone,
   Settings, LayoutDashboard, Globe, X, Copy, Check, Eye, EyeOff, Bell, ChevronDown,
   TrendingUp, Radio, ExternalLink, Shield, UserCheck, AlertTriangle, ToggleLeft, ToggleRight, BarChart2,
-  CheckCircle2, XCircle, GitMerge, Clock,
+  CheckCircle2, XCircle, GitMerge, Clock, Menu, ChevronLeft,
 } from 'lucide-react';
 import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
 import { useBlog } from '../contexts/BlogContext';
@@ -15,7 +15,7 @@ import { useAdmin } from '../contexts/AdminContext';
 import type { TeamMember, SiteAd, SiteSettings } from '../contexts/AdminContext';
 import { useNavigate } from 'react-router-dom';
 
-// ── Colour helpers ─────────────────────────────────────────────────────────
+// -- Colour helpers ---------------------------------------------------------
 const TEXT_COLORS = [
   '#ffffff','#e2e8f0','#94a3b8','#6b7280',
   '#f87171','#fb923c','#fbbf24','#4ade80',
@@ -92,7 +92,7 @@ const FontSizePicker: React.FC = () => {
     <span ref={ref} style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
       <button type="button" onMouseDown={e => { e.preventDefault(); setOpen(v => !v); }}
         style={{ display:'flex', alignItems:'center', gap:2, padding:'3px 7px', cursor:'pointer', background:'none', border:'none', color:'#e2e8f0', fontSize:12, fontWeight:700, whiteSpace:'nowrap' }}>
-        {size}px <span style={{ fontSize:8 }}>▼</span>
+        {size}px <span style={{ fontSize:8 }}>?</span>
       </button>
       {open && (
         <div style={{ position:'absolute', top:'110%', left:0, zIndex:9999, background:'#1e1830', border:'1px solid rgba(255,255,255,0.15)', borderRadius:10, padding:8, minWidth:130, boxShadow:'0 8px 32px rgba(0,0,0,0.6)' }}>
@@ -102,7 +102,7 @@ const FontSizePicker: React.FC = () => {
               style={{ width:54, padding:'3px 7px', borderRadius:5, border:'1px solid rgba(167,139,250,0.3)', background:'rgba(0,0,0,0.3)', color:'#e2e8f0', fontSize:12, outline:'none' }} />
             <span style={{ color:'#9ca3af', fontSize:11 }}>px</span>
             <button type="button" onMouseDown={e => { e.preventDefault(); commit(); }}
-              style={{ padding:'3px 7px', borderRadius:5, background:'rgba(124,58,237,0.5)', border:'none', color:'#e2e8f0', fontSize:11, cursor:'pointer', fontWeight:600 }}>✓</button>
+              style={{ padding:'3px 7px', borderRadius:5, background:'rgba(124,58,237,0.5)', border:'none', color:'#e2e8f0', fontSize:11, cursor:'pointer', fontWeight:600 }}>?</button>
           </div>
           <div style={{ maxHeight:220, overflowY:'auto', scrollbarWidth:'none' }}>
             {FONT_SIZES.map(px => (
@@ -122,9 +122,9 @@ const FontSizePicker: React.FC = () => {
 
 const HEADING_OPTIONS = [
   { label:'Normal', tag:'p', fs:13, fw:400 },
-  { label:'H1 – Title', tag:'h1', fs:20, fw:700 },
-  { label:'H2 – Heading', tag:'h2', fs:16, fw:600 },
-  { label:'H3 – Subheading', tag:'h3', fs:13, fw:600 },
+  { label:'H1 � Title', tag:'h1', fs:20, fw:700 },
+  { label:'H2 � Heading', tag:'h2', fs:16, fw:600 },
+  { label:'H3 � Subheading', tag:'h3', fs:13, fw:600 },
 ];
 const HeadingPicker: React.FC = () => {
   const [open, setOpen] = useState(false); const ref = useRef<HTMLSpanElement>(null);
@@ -136,7 +136,7 @@ const HeadingPicker: React.FC = () => {
     <span ref={ref} style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
       <button type="button" onMouseDown={e => { e.preventDefault(); setOpen(v => !v); }}
         style={{ display:'flex', alignItems:'center', gap:2, padding:'3px 8px', cursor:'pointer', background:'none', border:'none', color:'#e2e8f0', fontSize:13, fontWeight:700 }}>
-        T<span style={{ fontSize:8 }}>▼</span>
+        T<span style={{ fontSize:8 }}>?</span>
       </button>
       {open && (
         <div style={{ position:'absolute', top:'110%', left:0, zIndex:9999, background:'#1e1830', border:'1px solid rgba(255,255,255,0.15)', borderRadius:8, padding:4, minWidth:170, boxShadow:'0 8px 32px rgba(0,0,0,0.6)' }}>
@@ -234,9 +234,9 @@ const CodeBlockButton: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const DashboardSection: React.FC = () => {
   const { posts } = useBlog();
   const { team, ads, notifications } = useAdmin();
@@ -249,7 +249,7 @@ const DashboardSection: React.FC = () => {
     { label:'Notifications Sent', value: notifications.length, icon: Bell, color:'#fb923c', bg:'rgba(251,146,60,0.1)' },
   ];
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
         <LayoutDashboard size={22} className="text-purple-500" /> Dashboard
       </h2>
@@ -273,7 +273,7 @@ const DashboardSection: React.FC = () => {
           <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0a20]">
             <div className="flex-1 min-w-0">
               <p className="font-medium text-gray-900 dark:text-white truncate text-sm">{p.title}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{p.date} · {p.author}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{p.date} � {p.author}</p>
             </div>
             <a href={`/blog/${p.permalink}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg hover:bg-purple-500/10 text-purple-400 transition-colors ml-3">
               <ExternalLink size={14} />
@@ -286,9 +286,9 @@ const DashboardSection: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: POSTS
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const PostsSection: React.FC = () => {
   const { addPost, updatePost, deletePost, posts, approvePost, rejectPost } = useBlog();
   const navigate = useNavigate();
@@ -309,7 +309,7 @@ const PostsSection: React.FC = () => {
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [author] = useState('Viren Pandey');
+  const [author] = useState(adminName);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [showPosts, setShowPosts] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
@@ -373,7 +373,7 @@ const PostsSection: React.FC = () => {
   };
 
   if (view === 'list') return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <FileText size={22} className="text-purple-500" /> Blog Posts
@@ -385,7 +385,7 @@ const PostsSection: React.FC = () => {
       </div>
 
       {/* Tab bar */}
-      <div className="flex items-center gap-1 mb-6 border-b border-black/10 dark:border-white/10">
+      <div className="flex items-center gap-1 mb-6 border-b border-black/10 dark:border-white/10 overflow-x-auto scrollbar-none -mx-4 sm:mx-0 px-4 sm:px-0">
         {(['all','published','pending','rejected'] as PostTab[]).map(tab => {
           const count = tab === 'all' ? posts.length : tab === 'pending' ? pendingPosts.length : tab === 'rejected' ? rejectedPosts.length : posts.filter(p => (p.status ?? 'published') === 'published').length;
           return (
@@ -408,7 +408,7 @@ const PostsSection: React.FC = () => {
       {!canApprove && rejectedPosts.length > 0 && (
         <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-sm text-red-500">
           <XCircle size={14} />
-          {rejectedPosts.length} post{rejectedPosts.length > 1 ? 's' : ''} were rejected — open them to see feedback and re-submit.
+          {rejectedPosts.length} post{rejectedPosts.length > 1 ? 's' : ''} were rejected � open them to see feedback and re-submit.
         </div>
       )}
 
@@ -422,8 +422,8 @@ const PostsSection: React.FC = () => {
               rejected:  { label:'Needs Revision', color:'text-red-400', bg:'bg-red-500/10 border-red-500/20', dot:'bg-red-400' },
             }[status];
             return (
-              <div key={post.id} className={`flex items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
-                {post.image && <img src={post.image} alt={post.title} className="w-14 h-14 object-cover rounded-xl shrink-0 mt-0.5" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
+              <div key={post.id} className={`flex flex-col sm:flex-row items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
+                {post.image && <img src={post.image} alt={post.title} className="w-full sm:w-14 sm:h-14 h-32 object-cover rounded-xl shrink-0 sm:mt-0.5" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${statusMeta.bg} ${statusMeta.color}`}>
@@ -433,7 +433,7 @@ const PostsSection: React.FC = () => {
                     {post.submittedBy && <span className="text-[10px] text-gray-400">by {post.submittedBy}</span>}
                   </div>
                   <p className="font-semibold text-gray-900 dark:text-white truncate">{post.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{post.date} � {post.readTime}</p>
                   {status === 'rejected' && post.reviewNote && (
                     <p className="text-xs text-red-400 mt-1 bg-red-500/5 rounded-lg px-2 py-1 border border-red-500/10">
                       <span className="font-semibold">Feedback:</span> {post.reviewNote}
@@ -445,7 +445,7 @@ const PostsSection: React.FC = () => {
                     <span className="text-[10px] text-gray-500 flex items-center gap-1"><BarChart2 size={10} /> {(post.impressions ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5 shrink-0">
+                <div className="flex flex-row sm:flex-col flex-wrap gap-1.5 shrink-0 w-full sm:w-auto">
                   {/* Manager/Admin: approve/edit-merge/reject on pending posts */}
                   {canApprove && status === 'pending' && (<>
                     <button onClick={() => approvePost(post.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors text-xs font-semibold" title="Approve & Publish">
@@ -484,7 +484,7 @@ const PostsSection: React.FC = () => {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={resetForm} className="p-2 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"><X size={16} /></button>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -520,10 +520,10 @@ const PostsSection: React.FC = () => {
             </div>
             <div className="space-y-2">
               <input type="url" value={typeof image === 'string' && !image.startsWith('data:') ? image : ''} onChange={e => { setImage(e.target.value); setImagePreview(e.target.value); }}
-                className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white text-sm" placeholder="Or paste URL…" />
+                className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white text-sm" placeholder="Or paste URL�" />
               {imagePreview && <div className="relative rounded-xl overflow-hidden h-24 bg-black/20">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setImagePreview('')} />
-                <button type="button" onClick={() => { setImage(''); setImagePreview(''); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-500 transition-colors">✕</button>
+                <button type="button" onClick={() => { setImage(''); setImagePreview(''); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-500 transition-colors">?</button>
               </div>}
             </div>
           </div>
@@ -531,23 +531,23 @@ const PostsSection: React.FC = () => {
         {/* Excerpt */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><AlignLeft size={15} /> Excerpt</label>
-          <textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} required placeholder="Short summary…"
+          <textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} required placeholder="Short summary�"
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white h-20 resize-none" />
         </div>
         {/* Tags */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><Tag size={15} /> Tags (comma separated)</label>
-          <input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="AI, React, Design…"
+          <input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="AI, React, Design�"
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white" />
         </div>
         {/* SEO */}
         <div className="border border-purple-500/20 rounded-2xl p-5 space-y-4 bg-purple-500/5">
           <h3 className="text-sm font-semibold text-purple-500 flex items-center gap-2 uppercase tracking-wider"><Search size={14} /> SEO & Meta</h3>
-          <input type="text" value={metaTitle} onChange={e => setMetaTitle(e.target.value)} maxLength={60} placeholder="Meta title (max 60 chars)…"
+          <input type="text" value={metaTitle} onChange={e => setMetaTitle(e.target.value)} maxLength={60} placeholder="Meta title (max 60 chars)�"
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white text-sm" />
-          <textarea value={metaDescription} onChange={e => setMetaDescription(e.target.value)} maxLength={160} placeholder="Meta description (max 160 chars)…"
+          <textarea value={metaDescription} onChange={e => setMetaDescription(e.target.value)} maxLength={160} placeholder="Meta description (max 160 chars)�"
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white text-sm h-16 resize-none" />
-          <input type="text" value={keywords} onChange={e => setKeywords(e.target.value)} placeholder="Keywords, comma separated…"
+          <input type="text" value={keywords} onChange={e => setKeywords(e.target.value)} placeholder="Keywords, comma separated�"
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white text-sm" />
         </div>
         {/* Content editor */}
@@ -623,9 +623,9 @@ const PostsSection: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: TEAM MANAGEMENT
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const ROLE_META: Record<string, { label:string; color:string; bg:string }> = {
   writer:  { label:'Writer',  color:'#60a5fa', bg:'rgba(96,165,250,0.12)' },
   editor:  { label:'Editor',  color:'#4ade80', bg:'rgba(74,222,128,0.12)' },
@@ -661,7 +661,7 @@ const TeamSection: React.FC = () => {
   const ROLES: ('writer'|'editor'|'manager')[] = ['writer','editor','manager'];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Users size={22} className="text-purple-500" /> Team Management
@@ -734,7 +734,7 @@ const TeamSection: React.FC = () => {
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: ROLE_META[m.role].bg, color: ROLE_META[m.role].color }}>{ROLE_META[m.role].label}</span>
                 {!m.active && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400">Inactive</span>}
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">{m.email} · @{m.username} · Since {m.createdAt}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{m.email} � @{m.username} � Since {m.createdAt}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               {/* Role promote/demote */}
@@ -750,7 +750,7 @@ const TeamSection: React.FC = () => {
                         <button key={r} onClick={() => { updateTeamMember(m.id, { role:r }); setPromoteId(null); }}
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-purple-500/10 transition-colors"
                           style={{ color: m.role === r ? ROLE_META[r].color : undefined, fontWeight: m.role === r ? 700 : 400 }}>
-                          {m.role === r && <span className="text-[10px]">✓</span>} {ROLE_META[r].label}
+                          {m.role === r && <span className="text-[10px]">?</span>} {ROLE_META[r].label}
                         </button>
                       ))}
                     </motion.div>
@@ -825,9 +825,9 @@ const Key: React.FC<{size?:number}> = ({ size=16 }) => (
   </svg>
 );
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: ADS MANAGEMENT
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const AdsSection: React.FC = () => {
   const { ads, addAd, updateAd, deleteAd } = useAdmin();
   const [showForm, setShowForm] = useState(false);
@@ -846,7 +846,7 @@ const AdsSection: React.FC = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Megaphone size={22} className="text-purple-500" /> Ads Management
@@ -857,7 +857,7 @@ const AdsSection: React.FC = () => {
       </div>
       <div className="mb-4 p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-start gap-3">
         <Radio size={16} className="text-blue-400 mt-0.5 shrink-0" />
-        <p className="text-xs text-gray-400"><strong className="text-blue-400">Between Posts</strong> — appears between blog cards on the blog listing page. <strong className="text-green-400">Corner Float</strong> — fixed bottom-right overlay on blog post pages. <strong className="text-orange-400">Sidebar</strong> — reserved for future sidebar slot.</p>
+        <p className="text-xs text-gray-400"><strong className="text-blue-400">Between Posts</strong> � appears between blog cards on the blog listing page. <strong className="text-green-400">Corner Float</strong> � fixed bottom-right overlay on blog post pages. <strong className="text-orange-400">Sidebar</strong> � reserved for future sidebar slot.</p>
       </div>
       <AnimatePresence>
         {showForm && (
@@ -910,9 +910,9 @@ const AdsSection: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: NOTIFICATIONS
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const NotificationsSection: React.FC = () => {
   const { notifications, sendNotification } = useAdmin();
   const [form, setForm] = useState({ title:'', body:'', url:'' });
@@ -927,7 +927,7 @@ const NotificationsSection: React.FC = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
         <Bell size={22} className="text-purple-500" /> Push Notifications
       </h2>
@@ -946,7 +946,7 @@ const NotificationsSection: React.FC = () => {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Message</label>
-              <textarea required value={form.body} onChange={e => setForm(f => ({ ...f, body:e.target.value }))} placeholder="Check out the latest post on AI & React…" rows={3}
+              <textarea required value={form.body} onChange={e => setForm(f => ({ ...f, body:e.target.value }))} placeholder="Check out the latest post on AI & React�" rows={3}
                 className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white resize-none" />
             </div>
             <div>
@@ -956,7 +956,7 @@ const NotificationsSection: React.FC = () => {
             </div>
             <motion.button whileHover={{ scale:1.01 }} whileTap={{ scale:0.98 }} type="submit" disabled={sending}
               className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all ${sent ? 'bg-green-600 shadow-green-500/20' : 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'}`}>
-              {sending ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</> :
+              {sending ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending�</> :
                sent ? <><Check size={18} /> Sent!</> : <><Bell size={18} /> Send Notification</>}
             </motion.button>
           </form>
@@ -985,9 +985,9 @@ const NotificationsSection: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SECTION: SETTINGS
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const SettingsSection: React.FC = () => {
   const { settings, saveSettings } = useAdmin();
   const [form, setForm] = useState<SiteSettings>(settings);
@@ -1014,7 +1014,7 @@ const SettingsSection: React.FC = () => {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
         <Settings size={22} className="text-purple-500" /> Settings
       </h2>
@@ -1049,7 +1049,7 @@ const SettingsSection: React.FC = () => {
         </div>
         <motion.button whileHover={{ scale:1.01 }} whileTap={{ scale:0.98 }} type="submit" disabled={saving}
           className={`px-8 py-3 rounded-xl font-bold text-white flex items-center gap-2 shadow-lg transition-all ${saved ? 'bg-green-600 shadow-green-500/20' : 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'}`}>
-          {saving ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Saving…</> :
+          {saving ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Saving�</> :
            saved ? <><Check size={18} /> Saved!</> : <><Save size={18} /> Save Settings</>}
         </motion.button>
       </form>
@@ -1057,9 +1057,9 @@ const SettingsSection: React.FC = () => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // SIDEBAR
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 type Section = 'dashboard' | 'posts' | 'team' | 'ads' | 'notifications' | 'settings';
 
 const NAV_ITEMS: { id: Section; label: string; Icon: React.FC<{size?:number;className?:string}> }[] = [
@@ -1071,7 +1071,13 @@ const NAV_ITEMS: { id: Section; label: string; Icon: React.FC<{size?:number;clas
   { id:'settings', label:'Settings', Icon: Settings },
 ];
 
-const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void; pendingCount: number }> = ({ active, setActive, pendingCount }) => {
+const AdminSidebar: React.FC<{
+  active: Section;
+  setActive: (s: Section) => void;
+  pendingCount: number;
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}> = ({ active, setActive, pendingCount, open, setOpen }) => {
   const navigate = useNavigate();
   const adminName = localStorage.getItem('adminName') || 'Admin';
   const adminRole = localStorage.getItem('adminRole') || 'admin';
@@ -1083,7 +1089,6 @@ const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void;
     navigate('/login');
   };
 
-  // Sections visible to role
   const visibleRoles: Record<Section, string[]> = {
     dashboard: ['admin','manager','editor','writer'],
     posts: ['admin','manager','editor','writer'],
@@ -1095,60 +1100,87 @@ const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void;
 
   const visibleItems = NAV_ITEMS.filter(item => visibleRoles[item.id].includes(adminRole));
 
+  const handleNav = (id: Section) => { setActive(id); setOpen(false); };
+
   return (
-    <aside className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-[#07051a] border-r border-black/10 dark:border-white/8 flex flex-col z-40 shadow-xl">
-      {/* Brand */}
-      <div className="px-6 pt-8 pb-6 border-b border-black/10 dark:border-white/8">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-            <Layout size={16} className="text-white" />
+    <>
+      {/* Overlay for mobile */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar drawer */}
+      <aside className={[
+        'fixed top-0 left-0 h-full w-64 bg-white dark:bg-[#07051a] border-r border-black/10 dark:border-white/8 flex flex-col z-40 shadow-xl transition-transform duration-300',
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+      ].join(' ')}>
+        {/* Brand */}
+        <div className="px-6 pt-8 pb-6 border-b border-black/10 dark:border-white/8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                <Layout size={16} className="text-white" />
+              </div>
+              <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight">CMS Panel</span>
+            </div>
+            {/* Close button � mobile only */}
+            <button onClick={() => setOpen(false)} className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+              <ChevronLeft size={18} />
+            </button>
           </div>
-          <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight">CMS Panel</span>
-        </div>
-        <div className="flex items-center gap-1.5 mt-3">
-          <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">{adminName.charAt(0).toUpperCase()}</div>
-          <div>
-            <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{adminName}</p>
-            <p className="text-[10px] text-gray-400 capitalize leading-none mt-0.5">{adminRole}</p>
+          <div className="flex items-center gap-1.5 mt-4">
+            <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">{adminName.charAt(0).toUpperCase()}</div>
+            <div>
+              <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{adminName}</p>
+              <p className="text-[10px] text-gray-400 capitalize leading-none mt-0.5">{adminRole}</p>
+            </div>
           </div>
         </div>
-      </div>
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {visibleItems.map(item => (
-          <button key={item.id} onClick={() => setActive(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${active === item.id ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}>
-            <item.Icon size={17} />
-            {item.label}
-            {item.id === 'posts' && pendingCount > 0 && (
-              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-white">
-                {pendingCount}
-              </span>
-            )}
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {visibleItems.map(item => (
+            <button key={item.id} onClick={() => handleNav(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${active === item.id ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}>
+              <item.Icon size={17} />
+              {item.label}
+              {item.id === 'posts' && pendingCount > 0 && (
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-white">
+                  {pendingCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+        {/* Footer */}
+        <div className="px-3 pb-6 space-y-0.5 border-t border-black/10 dark:border-white/8 pt-4">
+          <a href="/blog" target="_blank" rel="noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white transition-all">
+            <Globe size={17} /> View Site
+          </a>
+          <button onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all text-left">
+            <LogOut size={17} /> Logout
           </button>
-        ))}
-      </nav>
-      {/* Footer */}
-      <div className="px-3 pb-6 space-y-0.5 border-t border-black/10 dark:border-white/8 pt-4">
-        <a href="/blog" target="_blank" rel="noreferrer"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white transition-all">
-          <Globe size={17} /> View Site
-        </a>
-        <button onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all text-left">
-          <LogOut size={17} /> Logout
-        </button>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // MAIN Admin
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 const Admin: React.FC = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState<Section>('posts');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { posts } = useBlog();
   const adminRole = localStorage.getItem('adminRole') || 'writer';
   const canSeeApprovals = adminRole === 'admin' || adminRole === 'manager';
@@ -1169,9 +1201,35 @@ const Admin: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-[#030014]">
-      <AdminSidebar active={active} setActive={setActive} pendingCount={canSeeApprovals ? pendingCount : 0} />
-      <main className="flex-1 ml-64 min-h-screen overflow-y-auto">
-        {/* Pending approval notification bar */}
+      <AdminSidebar
+        active={active}
+        setActive={setActive}
+        pendingCount={canSeeApprovals ? pendingCount : 0}
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
+      />
+      <main className="flex-1 lg:ml-64 min-h-screen overflow-y-auto">
+        {/* Mobile top bar */}
+        <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#07051a] border-b border-black/10 dark:border-white/10 shadow-sm">
+          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+            <Menu size={20} />
+          </button>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">
+              <Layout size={12} className="text-white" />
+            </div>
+            <span className="font-bold text-gray-900 dark:text-white text-sm truncate">CMS Panel</span>
+          </div>
+          {canSeeApprovals && pendingCount > 0 && (
+            <button onClick={() => { setActive('posts'); setSidebarOpen(false); }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block" />
+              {pendingCount}
+            </button>
+          )}
+        </div>
+
+        {/* Pending approval notification bar � desktop */}
         <AnimatePresence>
           {canSeeApprovals && pendingCount > 0 && (
             <motion.button
@@ -1179,7 +1237,7 @@ const Admin: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               onClick={() => setActive('posts')}
-              className="w-full flex items-center gap-3 px-6 py-3 bg-amber-500/10 border-b border-amber-500/25 hover:bg-amber-500/15 transition-colors text-left"
+              className="hidden lg:flex w-full items-center gap-3 px-6 py-3 bg-amber-500/10 border-b border-amber-500/25 hover:bg-amber-500/15 transition-colors text-left"
             >
               <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
@@ -1189,7 +1247,7 @@ const Admin: React.FC = () => {
                 {pendingCount} post{pendingCount > 1 ? 's' : ''} awaiting your approval
               </span>
               <span className="ml-auto text-xs text-amber-500 flex items-center gap-1 shrink-0">
-                Review now →
+                Review now ?
               </span>
             </motion.button>
           )}
