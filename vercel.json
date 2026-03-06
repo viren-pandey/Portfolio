@@ -1,9 +1,18 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/sitemap",     "destination": "/api/sitemap" },
-    { "source": "/(.*)",        "destination": "/index.html"  }
+  "routes": [
+    {
+      "src": "/sitemap\\.xml",
+      "dest": "/api/sitemap",
+      "headers": { "Content-Type": "application/xml; charset=utf-8" }
+    },
+    {
+      "src": "/sitemap",
+      "dest": "/api/sitemap",
+      "headers": { "Content-Type": "application/xml; charset=utf-8" }
+    },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
