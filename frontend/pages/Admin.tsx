@@ -157,46 +157,112 @@ const HeadingPicker: React.FC = () => {
 };
 
 const InlineImageButton: React.FC = () => {
-  const [open, setOpen] = useState(false); const [url, setUrl] = useState(''); const [alt, setAlt] = useState(''); const [width, setWidth] = useState('75');
-  const savedRange = useRef<Range | null>(null); const ref = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<'url'|'upload'>('url');
+  const [url, setUrl] = useState('');
+  const [preview, setPreview] = useState('');
+  const [alt, setAlt] = useState('');
+  const [backlink, setBacklink] = useState('');
+  const [widthPx, setWidthPx] = useState('');
+  const [heightPx, setHeightPx] = useState('');
+  const [align, setAlign] = useState<'left'|'center'|'right'>('center');
+  const savedRange = useRef<Range | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const uploadRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h);
   }, []);
-  const saveRange = () => { const sel = window.getSelection(); if (sel && sel.rangeCount > 0) savedRange.current = sel.getRangeAt(0).cloneRange(); };
+
+  const saveRange = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) savedRange.current = sel.getRangeAt(0).cloneRange();
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { const r = ev.target?.result as string; setPreview(r); setUrl(r); };
+    reader.readAsDataURL(file);
+  };
+
+  const reset = () => { setUrl(''); setPreview(''); setAlt(''); setBacklink(''); setWidthPx(''); setHeightPx(''); setAlign('center'); setTab('url'); };
+
   const insert = () => {
-    if (!url) return;
+    const src = url.trim(); if (!src) return;
+    const wStyle = widthPx ? `width:${widthPx}px;` : 'max-width:100%;';
+    const hStyle = heightPx ? `height:${heightPx}px;` : '';
+    const alignStyle = align === 'left' ? 'text-align:left' : align === 'right' ? 'text-align:right' : 'text-align:center';
+    const imgTag = `<img src="${src}" alt="${alt}" style="${wStyle}${hStyle}border-radius:12px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.4);object-fit:cover" />`;
+    const linked = backlink.trim() ? `<a href="${backlink.trim()}" target="_blank" rel="noopener noreferrer">${imgTag}</a>` : imgTag;
     const caption = alt ? `<figcaption style="font-size:0.85em;color:#9ca3af;margin-top:6px;font-style:italic">${alt}</figcaption>` : '';
-    const html = `<figure style="text-align:center;margin:1.5em 0"><img src="${url}" alt="${alt}" style="width:${width}%;max-width:100%;border-radius:12px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.4)" />${caption}</figure><p><br></p>`;
+    const html = `<figure style="${alignStyle};margin:1.5em 0">${linked}${caption}</figure><p><br></p>`;
     if (savedRange.current) { const sel = window.getSelection(); sel?.removeAllRanges(); sel?.addRange(savedRange.current); }
     document.execCommand('insertHTML', false, html);
-    setOpen(false); setUrl(''); setAlt(''); setWidth('75');
+    setOpen(false); reset();
   };
+
   const inp: React.CSSProperties = { width:'100%', padding:'5px 8px', borderRadius:6, border:'1px solid rgba(255,255,255,0.15)', background:'rgba(0,0,0,0.3)', color:'#e2e8f0', fontSize:12, boxSizing:'border-box', outline:'none', marginBottom:6 };
+  const label: React.CSSProperties = { color:'#9ca3af', fontSize:11, margin:'0 0 4px', display:'block' };
+
   return (
     <span ref={ref} style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
-      <button type="button" title="Insert image" onMouseDown={e => { e.preventDefault(); saveRange(); setOpen(v => !v); }}
+      <button type="button" title="Insert media" onMouseDown={e => { e.preventDefault(); saveRange(); setOpen(v => !v); }}
         style={{ display:'flex', alignItems:'center', padding:'3px 7px', cursor:'pointer', background:'none', border:'none', color:'#e2e8f0' }}>
         <ImageIcon size={14} />
       </button>
       {open && (
-        <div style={{ position:'absolute', top:'110%', left:0, zIndex:9999, background:'#1e1830', border:'1px solid rgba(255,255,255,0.15)', borderRadius:10, padding:14, width:280, boxShadow:'0 8px 32px rgba(0,0,0,0.6)' }}>
-          <p style={{ color:'#a78bfa', fontSize:11, fontWeight:600, marginBottom:10, marginTop:0, textTransform:'uppercase', letterSpacing:'0.05em' }}>Insert Image</p>
-          <input type="url" placeholder="Image URL" value={url} onChange={e => setUrl(e.target.value)} style={inp} />
-          <input type="text" placeholder="Alt text / caption" value={alt} onChange={e => setAlt(e.target.value)} style={inp} />
-          <p style={{ color:'#9ca3af', fontSize:11, margin:'0 0 5px' }}>Width</p>
+        <div style={{ position:'absolute', top:'110%', left:0, zIndex:9999, background:'#1e1830', border:'1px solid rgba(255,255,255,0.15)', borderRadius:10, padding:14, width:310, boxShadow:'0 8px 32px rgba(0,0,0,0.6)' }}>
+          <p style={{ color:'#a78bfa', fontSize:11, fontWeight:700, marginBottom:10, marginTop:0, textTransform:'uppercase', letterSpacing:'0.05em' }}>Insert Media</p>
+          {/* Tab: URL vs Upload */}
+          <div style={{ display:'flex', gap:0, marginBottom:10, borderRadius:6, overflow:'hidden', border:'1px solid rgba(255,255,255,0.1)' }}>
+            {(['url','upload'] as const).map(t => (
+              <button key={t} type="button" onMouseDown={e => { e.preventDefault(); setTab(t); }}
+                style={{ flex:1, padding:'5px 0', fontSize:11, fontWeight:600, border:'none', cursor:'pointer', background: tab===t ? '#7c3aed' : 'rgba(0,0,0,0.2)', color: tab===t ? '#fff' : '#9ca3af', transition:'all 0.15s', textTransform:'capitalize' }}>
+                {t === 'url' ? '🔗 URL' : '💻 Upload'}
+              </button>
+            ))}
+          </div>
+          {tab === 'url' ? (
+            <input type="url" placeholder="https://example.com/image.jpg" value={url} onChange={e => { setUrl(e.target.value); setPreview(e.target.value); }} style={inp} />
+          ) : (
+            <div onMouseDown={e => { e.preventDefault(); uploadRef.current?.click(); }}
+              style={{ border:'2px dashed rgba(167,139,250,0.35)', borderRadius:8, padding:'10px', textAlign:'center', cursor:'pointer', marginBottom:6, background:'rgba(124,58,237,0.05)' }}>
+              <input ref={uploadRef} type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }} />
+              {preview ? <img src={preview} alt="preview" style={{ maxHeight:80, maxWidth:'100%', borderRadius:6, objectFit:'cover' }} /> :
+                <span style={{ color:'#9ca3af', fontSize:12 }}>Click to choose image from computer</span>}
+            </div>
+          )}
+          {/* Alt text */}
+          <input type="text" placeholder="Alt text / caption (optional)" value={alt} onChange={e => setAlt(e.target.value)} style={inp} />
+          {/* Backlink */}
+          <input type="url" placeholder="Backlink URL (optional)" value={backlink} onChange={e => setBacklink(e.target.value)} style={{ ...inp, borderColor: backlink ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.15)' }} />
+          {/* Size */}
+          <span style={label}>Size (px) — leave blank for auto</span>
+          <div style={{ display:'flex', gap:6, marginBottom:8 }}>
+            <div style={{ flex:1 }}>
+              <input type="number" min={10} placeholder="Width px" value={widthPx} onChange={e => setWidthPx(e.target.value)} style={{ ...inp, marginBottom:0 }} />
+            </div>
+            <span style={{ color:'#6b7280', alignSelf:'center', fontSize:14 }}>×</span>
+            <div style={{ flex:1 }}>
+              <input type="number" min={10} placeholder="Height px" value={heightPx} onChange={e => setHeightPx(e.target.value)} style={{ ...inp, marginBottom:0 }} />
+            </div>
+          </div>
+          {/* Alignment */}
+          <span style={label}>Align</span>
           <div style={{ display:'flex', gap:4, marginBottom:10 }}>
-            {[['25','S'],['50','M'],['75','L'],['100','Full']].map(item => (
-              <button key={item[0]} type="button" onMouseDown={e => { e.preventDefault(); setWidth(item[0]); }}
-                style={{ flex:1, padding:'4px 2px', borderRadius:5, fontSize:11, border:'1px solid', borderColor: width === item[0] ? '#7c3aed' : 'rgba(255,255,255,0.15)', background: width === item[0] ? 'rgba(124,58,237,0.3)' : 'none', color:'#e2e8f0', cursor:'pointer' }}>
-                {item[1]}
+            {(['left','center','right'] as const).map(a => (
+              <button key={a} type="button" onMouseDown={e => { e.preventDefault(); setAlign(a); }}
+                style={{ flex:1, padding:'4px 2px', borderRadius:5, fontSize:11, border:'1px solid', borderColor: align===a ? '#7c3aed' : 'rgba(255,255,255,0.15)', background: align===a ? 'rgba(124,58,237,0.3)' : 'none', color:'#e2e8f0', cursor:'pointer', textTransform:'capitalize' }}>
+                {a === 'left' ? '⬅ Left' : a === 'center' ? '↔ Center' : 'Right ➡'}
               </button>
             ))}
           </div>
           <div style={{ display:'flex', gap:6 }}>
             <button type="button" onMouseDown={e => { e.preventDefault(); insert(); }} disabled={!url}
               style={{ flex:1, padding:'6px 0', borderRadius:6, background: url ? '#7c3aed' : 'rgba(124,58,237,0.3)', color:'#fff', border:'none', cursor: url ? 'pointer' : 'not-allowed', fontSize:12, fontWeight:600 }}>Insert</button>
-            <button type="button" onMouseDown={e => { e.preventDefault(); setOpen(false); }}
+            <button type="button" onMouseDown={e => { e.preventDefault(); setOpen(false); reset(); }}
               style={{ flex:1, padding:'6px 0', borderRadius:6, background:'rgba(255,255,255,0.08)', color:'#e2e8f0', border:'1px solid rgba(255,255,255,0.1)', cursor:'pointer', fontSize:12 }}>Cancel</button>
           </div>
         </div>
