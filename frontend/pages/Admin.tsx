@@ -83,6 +83,105 @@ const HighlightPicker: React.FC = () => {
   return <ColorDropdown label={<span style={{ fontWeight: 700, fontSize: 12, padding: '0 3px', borderRadius: 2, background: color === 'transparent' ? 'none' : color, color: '#1a1a2e' }}>H</span>} colors={HIGHLIGHT_COLORS} onPick={apply} activeColor={color} />;
 };
 
+// ── Font Size Picker (pixel-precise) ────────────────────────────────────────
+const FONT_SIZES = [10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 28, 32, 36, 42, 48];
+
+const FontSizePicker: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const [size, setSize] = useState(16);
+  const [inputVal, setInputVal] = useState('16');
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const apply = (px: number) => {
+    setSize(px);
+    setInputVal(String(px));
+    setOpen(false);
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+    // font-size=7 trick: most reliable cross-browser way to wrap selection
+    document.execCommand('fontSize', false, '7');
+    const editorEl = document.querySelector('#blog-editor-wrap .rsw-ce') as HTMLElement;
+    if (!editorEl) return;
+    editorEl.querySelectorAll('font[size="7"]').forEach((font) => {
+      const s = document.createElement('span');
+      s.style.fontSize = `${px}px`;
+      s.innerHTML = font.innerHTML;
+      font.parentNode?.replaceChild(s, font);
+    });
+  };
+
+  const handleInputCommit = () => {
+    const px = Math.max(6, Math.min(200, parseInt(inputVal) || size));
+    apply(px);
+  };
+
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        title="Font size (px)"
+        onMouseDown={(e) => { e.preventDefault(); setOpen(v => !v); }}
+        style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '3px 7px', cursor: 'pointer', background: 'none', border: 'none', color: '#e2e8f0', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+      >
+        {size}px <span style={{ fontSize: 8, lineHeight: 1 }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 9999, background: '#1e1830', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: 8, minWidth: 130, boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+          {/* Manual px input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0 4px 6px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 4 }}>
+            <input
+              type="number"
+              min={6} max={200}
+              value={inputVal}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleInputCommit(); } }}
+              style={{ width: 54, padding: '3px 7px', borderRadius: 5, border: '1px solid rgba(167,139,250,0.3)', background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', fontSize: 12, outline: 'none' }}
+            />
+            <span style={{ color: '#9ca3af', fontSize: 11 }}>px</span>
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); handleInputCommit(); }}
+              style={{ padding: '3px 7px', borderRadius: 5, background: 'rgba(124,58,237,0.5)', border: 'none', color: '#e2e8f0', fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+            >
+              ✓
+            </button>
+          </div>
+          {/* Preset sizes */}
+          <div style={{ maxHeight: 220, overflowY: 'auto', scrollbarWidth: 'none' }}>
+            {FONT_SIZES.map(px => (
+              <button
+                key={px}
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); apply(px); }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  width: '100%', padding: '5px 10px',
+                  background: size === px ? 'rgba(167,139,250,0.2)' : 'none',
+                  border: 'none', color: size === px ? '#a78bfa' : '#e2e8f0',
+                  cursor: 'pointer', borderRadius: 5, fontSize: 12, textAlign: 'left',
+                }}
+                onMouseEnter={e => { if (size !== px) e.currentTarget.style.background = 'rgba(167,139,250,0.1)'; }}
+                onMouseLeave={e => { if (size !== px) e.currentTarget.style.background = 'none'; }}
+              >
+                <span>{px}px</span>
+                <span style={{ fontSize: px > 20 ? 14 : px < 12 ? 10 : 12, lineHeight: 1, opacity: 0.5 }}>Aa</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </span>
+  );
+};
+
 // ── Heading / Text-size Picker ─────────────────────────────────────────────
 const HEADING_OPTIONS = [
   { label: 'Normal',          tag: 'p',  fs: 13, fw: 400 },
@@ -672,14 +771,16 @@ const Admin: React.FC = () => {
               /* ── Editor base (both modes) ───────────────────── */
               #blog-editor-wrap .rsw-ce {
                 min-height: 380px;
-                font-size: 15px;
+                /* Match prose-lg published size (1.125rem = 18px at 16px root) */
+                font-size: 18px;
                 line-height: 1.8;
                 padding: 16px 20px;
                 color: #111827;
               }
-              #blog-editor-wrap .rsw-ce h1 { font-size: 1.8em; font-weight: 700; margin: .6em 0 .4em; }
-              #blog-editor-wrap .rsw-ce h2 { font-size: 1.4em; font-weight: 600; margin: .6em 0 .3em; }
-              #blog-editor-wrap .rsw-ce h3 { font-size: 1.15em; font-weight: 600; margin: .5em 0 .2em; }
+              /* Match Tailwind prose-lg heading scales exactly */
+              #blog-editor-wrap .rsw-ce h1 { font-size: 2.25em; font-weight: 700; margin: .6em 0 .4em; }
+              #blog-editor-wrap .rsw-ce h2 { font-size: 1.875em; font-weight: 600; margin: .6em 0 .3em; }
+              #blog-editor-wrap .rsw-ce h3 { font-size: 1.5em; font-weight: 600; margin: .5em 0 .2em; }
               #blog-editor-wrap .rsw-toolbar {
                 flex-wrap: wrap; gap: 2px; padding: 4px 6px;
                 background: rgba(245, 245, 255, 0.98) !important;
@@ -734,6 +835,7 @@ const Admin: React.FC = () => {
                     <BtnClearFormatting />
                     <Separator />
                     <HeadingPicker />
+                    <FontSizePicker />
                     <Separator />
                     <InlineImageButton />
                     <CodeBlockButton />
