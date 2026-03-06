@@ -35,10 +35,11 @@ async function fetchBlogPosts() {
     .map((doc) => {
       const fields    = doc.fields ?? {};
       const permalink = fields.permalink?.stringValue ?? '';
+      const status    = fields.status?.stringValue ?? 'published';
       const lastmod   = doc.updateTime?.split('T')[0] ?? today();
-      return { loc: `/blog/${permalink}`, changefreq: 'monthly', priority: '0.6', lastmod };
+      return { loc: `/blog/${permalink}`, changefreq: 'monthly', priority: '0.6', lastmod, status };
     })
-    .filter((p) => p.loc !== '/blog/');
+    .filter((p) => p.loc !== '/blog/' && p.status === 'published');
 }
 
 export default async function handler(req, res) {

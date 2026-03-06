@@ -1,11 +1,13 @@
 const INDEXNOW_KEY = 'de44bbe49cab4cb8b44ef2eaa2bfa324';
 const SITE_HOST = 'virenp.vercel.app';
+const SITEMAP_URL = `https://${SITE_HOST}/sitemap.xml`;
 
 export async function notifyIndexNow(permalinks: string | string[]) {
   const urls = (Array.isArray(permalinks) ? permalinks : [permalinks]).map(
     (slug) => `https://${SITE_HOST}/blog/${slug}`
   );
 
+  // Bing IndexNow
   try {
     await fetch('https://api.indexnow.org/indexnow', {
       method: 'POST',
@@ -18,6 +20,15 @@ export async function notifyIndexNow(permalinks: string | string[]) {
       }),
     });
   } catch {
-    // Non-critical — silently fail if indexing ping doesn't reach Bing
+    // Non-critical
+  }
+
+  // Google — ping sitemap so Googlebot re-crawls updated content
+  try {
+    await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}`, {
+      mode: 'no-cors',
+    });
+  } catch {
+    // Non-critical
   }
 }
