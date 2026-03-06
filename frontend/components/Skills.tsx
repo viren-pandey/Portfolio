@@ -118,7 +118,7 @@ const MiniChat = ({ category, accent }) => {
 
   return (
     React.createElement('div', { className: 'flex flex-col h-full gap-3', style: { fontFamily: FONT } },
-      React.createElement('div', { className: 'flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-white/10' },
+      React.createElement('div', { className: 'flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700' },
         React.createElement('div', { className: 'w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0', style: { background: accent + '20' } },
           React.createElement(Bot, { size: 17, style: { color: accent } })
         ),
@@ -134,12 +134,12 @@ const MiniChat = ({ category, accent }) => {
         msgs.map((m, i) =>
           React.createElement('div', { key: i, className: 'flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start') },
             React.createElement('div', {
-              className: 'max-w-[85%] px-3.5 py-2.5 text-sm leading-relaxed font-medium ' + (m.role === 'bot' ? 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/8 border border-gray-200 dark:border-white/10' : 'text-white'),
+              className: 'max-w-[85%] px-3.5 py-2.5 text-sm leading-relaxed font-medium ' + (m.role === 'bot' ? 'text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700' : 'text-white'),
               style: { fontFamily: FONT, borderRadius: m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px', background: m.role === 'user' ? accent : undefined, whiteSpace: 'pre-wrap' }
             }, m.text)
           )
         ),
-        loading && React.createElement('div', { className: 'flex gap-1.5 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-white/8 border border-gray-200 dark:border-white/10 w-[68px]' },
+        loading && React.createElement('div', { className: 'flex gap-1.5 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 w-[68px]' },
           [0,1,2].map(i => React.createElement('div', { key: i, style: { width: 6, height: 6, borderRadius: '50%', background: accent, animation: `bounce 0.9s ${i * 0.15}s ease-in-out infinite` } }))
         )
       ),
@@ -152,13 +152,13 @@ const MiniChat = ({ category, accent }) => {
           }, q)
         )
       ),
-      React.createElement('div', { className: 'flex gap-2 bg-gray-100 dark:bg-white/6 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-2 items-center' },
+      React.createElement('div', { className: 'flex gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-2 items-center' },
         React.createElement('input', {
           value: input,
           onChange: e => setInput(e.target.value),
           onKeyDown: e => e.key === 'Enter' && !e.shiftKey && send(input),
           placeholder: 'Ask about ' + category + '...',
-          className: 'flex-1 bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400',
+          className: 'flex-1 bg-transparent border-none outline-none text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500',
           style: { fontFamily: FONT }
         }),
         React.createElement('button', {
