@@ -309,7 +309,7 @@ const PostsSection: React.FC = () => {
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [author] = useState(adminName);
+  const [author, setAuthor] = useState(adminName);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [showPosts, setShowPosts] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
@@ -343,7 +343,7 @@ const PostsSection: React.FC = () => {
     setEditingPost(null); setTitle(''); setPermalink(''); setPermalinkManual(false);
     setExcerpt(''); setContent(''); setTags(''); setImage(''); setImagePreview('');
     setMetaTitle(''); setMetaDescription(''); setKeywords(''); setEditorKey(k => k + 1); setHtmlMode(false); setView('list');
-    setApproveOnSubmit(false);
+    setApproveOnSubmit(false); setAuthor(adminName);
   };
 
   const startEdit = (post: BlogPost, andApprove = false) => {
@@ -352,7 +352,7 @@ const PostsSection: React.FC = () => {
     setImage(post.image ?? ''); setImagePreview(post.image ?? '');
     setMetaTitle(post.metaTitle ?? ''); setMetaDescription(post.metaDescription ?? '');
     setKeywords(post.keywords?.join(', ') ?? ''); setEditorKey(k => k + 1); setHtmlMode(false); setView('editor');
-    setApproveOnSubmit(andApprove);
+    setApproveOnSubmit(andApprove); setAuthor(post.author || adminName);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -492,6 +492,21 @@ const PostsSection: React.FC = () => {
         </h2>
       </div>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+        {/* Author */}
+        <div className="flex items-center gap-3 px-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl">
+          <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-bold shrink-0">{author ? author.charAt(0).toUpperCase() : '?'}</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Written by</p>
+            <input
+              type="text"
+              value={author}
+              onChange={e => setAuthor(e.target.value)}
+              placeholder="Author name..."
+              className="w-full bg-transparent focus:outline-none text-gray-900 dark:text-white text-sm font-semibold"
+            />
+          </div>
+          <UserCheck size={15} className="text-purple-400 shrink-0" />
+        </div>
         {/* Title */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><Type size={15} /> Title</label>
