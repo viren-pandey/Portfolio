@@ -17,6 +17,7 @@
     }
   ],
   "routes": [
+    { "src": "/sitemap",     "headers": { "Location": "/sitemap.xml" }, "status": 301 },
     { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
     { "src": "/robots.txt",  "dest": "/robots.txt"  },
     { "handle": "filesystem" },
