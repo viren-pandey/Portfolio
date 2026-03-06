@@ -44,7 +44,8 @@ export const PROJECTS: Project[] = [
       "Implemented complete end-to-end pipeline including training, testing, and deployment."
     ],
     tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV"],
-    github: "https://github.com/viren-pandey"
+    github: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
+    link: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model"
   }
 ];
 

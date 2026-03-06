@@ -11,6 +11,7 @@ import Blog from './pages/Blog';
 import BlogPostPage from './pages/BlogPostPage';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Contact from './pages/Contact';
 import AnimatedBackground from './components/AnimatedBackground';
 import AIChat from './components/AIChat';
 import TerminalModal from './components/TerminalModal';
@@ -33,7 +34,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <footer className="relative z-10 py-12 border-t border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#030014] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           <div className="text-gray-500 text-sm">
-            © 2024 Viren Pandey. Built with React & Love.
+            © March 2026 Viren Pandey. Built with React & Love.
           </div>
           <div className="flex space-x-6">
             <a href="mailto:pandeyviren78@gmail.com" className="text-gray-400 hover:text-purple-400 flex items-center space-x-2 transition-colors">
@@ -96,6 +97,7 @@ const App: React.FC = () => {
                 <Route path="/blog/:permalink" element={<BlogPostPage />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/contact" element={<Contact />} />
               </Routes>
             </Layout>
           </BlogProvider>

@@ -1,13 +1,42 @@
 
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Clock, Calendar, ChevronRight, Tag, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
+
+const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
+type PopupStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const Blog: React.FC = () => {
   const { posts, loading, error, deletePost } = useBlog();
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const navigate  = useNavigate();
+  const location  = useLocation();
+
+  // ── Floating contact popup state ──
+  const [popupOpen, setPopupOpen]   = useState(false);
+  const [pName,     setPName]       = useState('');
+  const [pEmail,    setPEmail]      = useState('');
+  const [pMessage,  setPMessage]    = useState('');
+  const [pStatus,   setPStatus]     = useState<PopupStatus>('idle');
+
+  const handlePopupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPStatus('loading');
+    try {
+      const fd = new FormData();
+      fd.append('access_key', ACCESS_KEY);
+      fd.append('name',    pName);
+      fd.append('email',   pEmail);
+      fd.append('subject', 'Blog Feedback / Write for us');
+      fd.append('message', pMessage);
+      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+      const data = await res.json();
+      setPStatus(data.success ? 'success' : 'error');
+      if (data.success) setTimeout(() => { setPopupOpen(false); setPStatus('idle'); setPName(''); setPEmail(''); setPMessage(''); }, 2200);
+    } catch { setPStatus('error'); }
+  };
 
   // Unique tags with post counts, sorted by frequency
   const tagCounts = useMemo(() => {
@@ -183,6 +212,97 @@ const Blog: React.FC = () => {
           ))}
         </div>
       )}
+      {/* ── Floating contact button + mini popup ── */}
+      <div className="fixed bottom-36 right-8 z-50 flex flex-col items-end gap-3">
+        <AnimatePresence>
+          {popupOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+              className="w-80 bg-white dark:bg-[#0d0b22] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              {/* Accent */}
+              <div className="h-0.5 w-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400" />
+
+              {pStatus === 'success' ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-5">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <CheckCircle2 size={26} className="text-emerald-500" />
+                  </div>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">Message sent!</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Thanks — I'll get back to you soon.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-black/5 dark:border-white/5">
+                    <div>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">Write for us / Feedback</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Got ideas or want to contribute?</p>
+                    </div>
+                    <button onClick={() => setPopupOpen(false)} className="text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors">
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {/* Form */}
+                  <form onSubmit={handlePopupSubmit} className="px-4 py-4 space-y-3">
+                    {pStatus === 'error' && (
+                      <p className="text-xs text-red-500 bg-red-500/10 rounded-lg px-3 py-2 border border-red-500/20">Something went wrong — try again.</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="relative">
+                        <User size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <input required type="text" value={pName} onChange={e => setPName(e.target.value)} placeholder="Name"
+                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all" />
+                      </div>
+                      <div className="relative">
+                        <Mail size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <input required type="email" value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email"
+                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all" />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <MessageSquare size={12} className="absolute left-2.5 top-2.5 text-gray-400 pointer-events-none" />
+                      <textarea required rows={3} value={pMessage} onChange={e => setPMessage(e.target.value)} placeholder="Your idea, suggestion, or topic you'd like to write about…"
+                        className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all resize-none" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button type="submit" disabled={pStatus === 'loading'}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-60 text-white text-xs font-semibold py-2 rounded-xl shadow-lg shadow-purple-500/20 transition-all">
+                        {pStatus === 'loading' ? <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Send size={12} />}
+                        {pStatus === 'loading' ? 'Sending…' : 'Send'}
+                      </button>
+                      <button type="button" onClick={() => navigate('/contact', { state: { from: location.pathname } })}
+                        className="px-3 py-2 rounded-xl text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 border border-black/10 dark:border-white/10 hover:border-purple-500/40 transition-all">
+                        Full form
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Trigger button */}
+        <motion.button
+          whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.94 }}
+          onClick={() => setPopupOpen(prev => !prev)}
+          title="Write for us / Contact"
+          className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30 text-white relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <AnimatePresence mode="wait">
+            {popupOpen
+              ? <motion.span key="x"   initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.18 }}><X size={20} /></motion.span>
+              : <motion.span key="pen" initial={{ rotate: 90,  opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.18 }}><PenLine size={20} /></motion.span>
+            }
+          </AnimatePresence>
+        </motion.button>
+      </div>
     </div>
   );
 };
