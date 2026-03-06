@@ -76,17 +76,17 @@ const App: React.FC = () => {
         <UIProvider>
           <BlogProvider>
             <AdminProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:permalink" element={<BlogPostPage />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
+              <Routes>
+                {/* Standalone full-screen routes — no navbar/footer */}
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/login" element={<Login />} />
+                {/* Portfolio routes — wrapped with Navbar & footer */}
+                <Route path="/" element={<Layout><Home /></Layout>} />
+                <Route path="/blog" element={<Layout><Blog /></Layout>} />
+                <Route path="/blog/:permalink" element={<Layout><BlogPostPage /></Layout>} />
+                <Route path="/contact" element={<Layout><Contact /></Layout>} />
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+              </Routes>
             </AdminProvider>
           </BlogProvider>
         </UIProvider>
