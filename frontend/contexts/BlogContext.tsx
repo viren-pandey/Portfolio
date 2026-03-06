@@ -1,5 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  collection, addDoc, deleteDoc, doc, onSnapshot,
+  query, orderBy, serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../firebase';
 
 export interface BlogPost {
   id: string;
@@ -27,48 +32,78 @@ export const slugify = (text: string): string =>
 
 interface BlogContextType {
   posts: BlogPost[];
-  addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => void;
-  deletePost: (id: string) => void;
+  loading: boolean;
+  error: string | null;
+  addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => Promise<void>;
+  deletePost: (id: string) => Promise<void>;
   getPostByPermalink: (permalink: string) => BlogPost | undefined;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 
+const POSTS_COLLECTION = 'blog_posts';
+
 export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [posts, setPosts] = useState<BlogPost[]>(() => {
-    const savedPosts = localStorage.getItem('blog_posts');
-    if (!savedPosts) return [];
-    const parsed: BlogPost[] = JSON.parse(savedPosts);
-    // Migrate old posts that have no permalink
-    return parsed.map(p => ({
-      ...p,
-      permalink: p.permalink || slugify(p.id + '-' + p.title),
-    }));
-  });
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Real-time listener — updates on every device instantly
   useEffect(() => {
-    localStorage.setItem('blog_posts', JSON.stringify(posts));
-  }, [posts]);
+    const q = query(collection(db, POSTS_COLLECTION), orderBy('_createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetched: BlogPost[] = snapshot.docs.map((d) => {
+          const data = d.data();
+          return {
+            id:              d.id,
+            title:           data.title        ?? '',
+            excerpt:         data.excerpt       ?? '',
+            content:         data.content       ?? '',
+            date:            data.date          ?? '',
+            readTime:        data.readTime      ?? '',
+            tags:            data.tags          ?? [],
+            image:           data.image         ?? '',
+            author:          data.author        ?? '',
+            permalink:       data.permalink     ?? slugify(d.id),
+            metaTitle:       data.metaTitle     ?? '',
+            metaDescription: data.metaDescription ?? '',
+            keywords:        data.keywords      ?? [],
+          } as BlogPost;
+        });
+        setPosts(fetched);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error('Firestore error:', err.code, err.message);
+        setError(err.code);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
-  const addPost = (newPostData: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => {
-    const newPost: BlogPost = {
+  const addPost = async (newPostData: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => {
+    const wordCount = newPostData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
+    await addDoc(collection(db, POSTS_COLLECTION), {
       ...newPostData,
-      id: Date.now().toString(),
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      readTime: `${Math.ceil(newPostData.content.split(' ').length / 200)} min read`,
-    };
-    setPosts(prev => [newPost, ...prev]);
+      date:      new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      readTime:  `${Math.max(1, Math.ceil(wordCount / 200))} min read`,
+      _createdAt: serverTimestamp(),
+    });
   };
 
-  const deletePost = (id: string) => {
-    setPosts(prev => prev.filter(post => post.id !== id));
+  const deletePost = async (id: string) => {
+    await deleteDoc(doc(db, POSTS_COLLECTION, id));
   };
 
   const getPostByPermalink = (permalink: string) =>
     posts.find(p => p.permalink === permalink);
 
   return (
-    <BlogContext.Provider value={{ posts, addPost, deletePost, getPostByPermalink }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, deletePost, getPostByPermalink }}>
       {children}
     </BlogContext.Provider>
   );

@@ -6,7 +6,14 @@ import { Link } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 
 const Blog: React.FC = () => {
-  const { posts, deletePost } = useBlog();
+  const { posts, loading, error, deletePost } = useBlog();
+
+  const errorMessages: Record<string, string> = {
+    'permission-denied':   'Firestore rules are blocking reads. Set: allow read: if true in Firebase Console → Firestore → Rules.',
+    'unavailable':         'Firestore is unavailable. Check your internet connection.',
+    'not-found':           'Firestore database not found. Go to Firebase Console and create a Firestore database.',
+    'failed-precondition': 'Firestore database not created yet. Go to Firebase Console and create a Firestore database.',
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-32">
@@ -23,7 +30,16 @@ const Blog: React.FC = () => {
         </p>
       </motion.div>
 
-      {posts.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center py-24">
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="max-w-xl mx-auto text-center py-16 px-6 rounded-2xl border border-red-500/30 bg-red-500/5">
+          <p className="text-red-400 font-semibold mb-2">Firebase Error: {error}</p>
+          <p className="text-gray-400 text-sm">{errorMessages[error] ?? 'Check browser console (F12) for details.'}</p>
+        </div>
+      ) : posts.length === 0 ? (
         <div className="text-center text-gray-600 dark:text-gray-400 py-12">
           No posts yet.
         </div>

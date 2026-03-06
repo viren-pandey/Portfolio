@@ -5,7 +5,82 @@ import { Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link, S
 import { useBlog } from '../contexts/BlogContext';
 import { slugify } from '../contexts/BlogContext';
 import { useNavigate } from 'react-router-dom';
-import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, Separator } from 'react-simple-wysiwyg';
+import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
+
+// ── Text Color Picker ──────────────────────────────────────────────────────
+const TEXT_COLORS = [
+  '#ffffff', '#e2e8f0', '#94a3b8', '#6b7280',
+  '#f87171', '#fb923c', '#fbbf24', '#4ade80',
+  '#34d399', '#60a5fa', '#818cf8', '#a78bfa',
+  '#f472b6', '#22d3ee', '#facc15', '#f59e0b',
+];
+
+const HIGHLIGHT_COLORS = [
+  '#fbbf24', '#4ade80', '#60a5fa', '#f472b6',
+  '#f87171', '#a78bfa', '#22d3ee', '#fb923c',
+  'transparent',
+];
+
+const ColorDropdown: React.FC<{
+  label: React.ReactNode;
+  colors: string[];
+  onPick: (c: string) => void;
+  activeColor: string;
+}> = ({ label, colors, onPick, activeColor }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        onMouseDown={(e) => { e.preventDefault(); setOpen((v) => !v); }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3px 7px', cursor: 'pointer', background: 'none', border: 'none', lineHeight: 1 }}
+      >
+        {label}
+        <span style={{ display: 'block', width: 14, height: 3, background: activeColor === 'transparent' ? 'repeating-linear-gradient(45deg,#888 0,#888 2px,transparent 2px,transparent 6px)' : activeColor, borderRadius: 2, marginTop: 2, border: '1px solid rgba(255,255,255,0.2)' }} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 9999, background: '#1e1830', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 8, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+          {colors.map((c) => (
+            <button
+              key={c}
+              type="button"
+              title={c}
+              onMouseDown={(e) => { e.preventDefault(); onPick(c); setOpen(false); }}
+              style={{
+                background: c === 'transparent' ? 'repeating-linear-gradient(45deg,#555 0,#555 2px,#222 2px,#222 6px)' : c,
+                width: 22, height: 22, borderRadius: 4,
+                border: activeColor === c ? '2px solid #a78bfa' : '1px solid rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </span>
+  );
+};
+
+const TextColorPicker: React.FC = () => {
+  const [color, setColor] = useState('#ffffff');
+  const apply = (c: string) => { setColor(c); document.execCommand('foreColor', false, c); };
+  return <ColorDropdown label={<span style={{ fontWeight: 700, fontSize: 13 }}>A</span>} colors={TEXT_COLORS} onPick={apply} activeColor={color} />;
+};
+
+const HighlightPicker: React.FC = () => {
+  const [color, setColor] = useState('transparent');
+  const apply = (c: string) => { setColor(c); document.execCommand('hiliteColor', false, c); };
+  return <ColorDropdown label={<span style={{ fontWeight: 700, fontSize: 12, padding: '0 3px', borderRadius: 2, background: color === 'transparent' ? 'none' : color, color: '#1a1a2e' }}>H</span>} colors={HIGHLIGHT_COLORS} onPick={apply} activeColor={color} />;
+};
 
 const Admin: React.FC = () => {
   const { addPost } = useBlog();
@@ -61,20 +136,20 @@ const Admin: React.FC = () => {
     setImagePreview(url);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    addPost({
+    await addPost({
       title,
       excerpt,
       content,
-      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
+      tags: tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag !== ''),
       image,
       author,
       permalink: permalink || slugify(title),
       metaTitle: metaTitle || title,
       metaDescription: metaDescription || excerpt,
-      keywords: keywords.split(',').map(k => k.trim()).filter(k => k !== ''),
+      keywords: keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k !== ''),
     });
 
     navigate('/blog');
@@ -276,18 +351,50 @@ const Admin: React.FC = () => {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <Layout size={16} /> Content
             </label>
-            <div className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden text-gray-900 dark:text-white">
+            <style>{`
+              #blog-editor-wrap .rsw-ce {
+                color: #e2e8f0;
+                min-height: 380px;
+                font-size: 15px;
+                line-height: 1.8;
+                padding: 16px 20px;
+              }
+              #blog-editor-wrap .rsw-ce a { color: #60a5fa; text-decoration: underline; }
+              #blog-editor-wrap .rsw-ce h1 { font-size: 1.8em; font-weight: 700; margin: .6em 0 .4em; }
+              #blog-editor-wrap .rsw-ce h2 { font-size: 1.4em; font-weight: 600; margin: .6em 0 .3em; }
+              #blog-editor-wrap .rsw-ce h3 { font-size: 1.15em; font-weight: 600; margin: .5em 0 .2em; }
+              #blog-editor-wrap .rsw-toolbar {
+                background: rgba(15, 10, 40, 0.95) !important;
+                border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+                flex-wrap: wrap;
+                gap: 2px;
+                padding: 4px 6px;
+              }
+              #blog-editor-wrap button.rsw-btn { color: #e2e8f0; border-radius: 4px; }
+              #blog-editor-wrap button.rsw-btn:hover { background: rgba(167,139,250,0.2); }
+              #blog-editor-wrap .rsw-separator { border-color: rgba(255,255,255,0.12); }
+            `}</style>
+            <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden">
               <EditorProvider>
                 <Editor
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  containerProps={{ style: { height: '400px', overflowY: 'auto' } }}
+                  containerProps={{ style: { minHeight: '400px', overflowY: 'auto' } }}
                 >
                   <Toolbar>
+                    <BtnUndo />
+                    <BtnRedo />
+                    <Separator />
                     <BtnBold />
                     <BtnItalic />
                     <BtnUnderline />
                     <BtnStrikeThrough />
+                    <Separator />
+                    <TextColorPicker />
+                    <HighlightPicker />
+                    <Separator />
+                    <BtnBulletList />
+                    <BtnNumberedList />
                     <Separator />
                     <BtnLink />
                     <BtnClearFormatting />
