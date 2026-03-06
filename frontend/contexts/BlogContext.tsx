@@ -6,7 +6,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
-export type PostStatus = 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived';
+export type PostStatus = 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived' | 'delete_requested';
 
 export interface BlogPost {
   id: string;
@@ -52,6 +52,8 @@ interface BlogContextType {
   archivePost: (id: string) => Promise<void>;
   confirmArchive: (id: string) => Promise<void>;
   unarchivePost: (id: string) => Promise<void>;
+  requestDeletePost: (id: string) => Promise<void>;
+  cancelDeleteRequest: (id: string) => Promise<void>;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -177,8 +179,22 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const requestDeletePost = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'delete_requested',
+      _deleteRequestedAt: serverTimestamp(),
+    });
+  };
+
+  const cancelDeleteRequest = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'rejected',
+      _deleteRequestCancelledAt: serverTimestamp(),
+    });
+  };
+
   return (
-    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions, approvePost, rejectPost, archivePost, confirmArchive, unarchivePost }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions, approvePost, rejectPost, archivePost, confirmArchive, unarchivePost, requestDeletePost, cancelDeleteRequest }}>
       {children}
     </BlogContext.Provider>
   );

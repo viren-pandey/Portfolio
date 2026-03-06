@@ -8,6 +8,7 @@ import {
   CheckCircle2, XCircle, GitMerge, Clock, Menu, ChevronLeft, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
+import logoSvg from '../components/img/logo.svg';
 import { useBlog } from '../contexts/BlogContext';
 import { slugify } from '../contexts/BlogContext';
 import type { PostStatus } from '../contexts/BlogContext';
@@ -291,7 +292,7 @@ const DashboardSection: React.FC = () => {
 // SECTION: POSTS
 // ---------------------------------------------------------------------------
 const PostsSection: React.FC = () => {
-  const { addPost, updatePost, deletePost, posts, approvePost, rejectPost, archivePost, confirmArchive, unarchivePost } = useBlog();
+  const { addPost, updatePost, deletePost, posts, approvePost, rejectPost, archivePost, confirmArchive, unarchivePost, requestDeletePost, cancelDeleteRequest } = useBlog();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -318,14 +319,15 @@ const PostsSection: React.FC = () => {
   const [htmlMode, setHtmlMode] = useState(false);
   const [view, setView] = useState<'list' | 'editor'>('list');
 
-  type PostTab = 'all' | 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived';
+  type PostTab = 'all' | 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived' | 'delete_requested';
   const [activeTab, setActiveTab] = useState<PostTab>(canApprove ? 'all' : 'all');
   const [approveOnSubmit, setApproveOnSubmit] = useState(false);
 
-  const pendingPosts          = posts.filter(p => (p.status ?? 'published') === 'pending');
-  const rejectedPosts         = posts.filter(p => p.status === 'rejected');
-  const archiveRequestedPosts = posts.filter(p => p.status === 'archive_requested');
-  const archivedPosts         = posts.filter(p => p.status === 'archived');
+  const pendingPosts            = posts.filter(p => (p.status ?? 'published') === 'pending');
+  const rejectedPosts           = posts.filter(p => p.status === 'rejected');
+  const archiveRequestedPosts   = posts.filter(p => p.status === 'archive_requested');
+  const archivedPosts           = posts.filter(p => p.status === 'archived');
+  const deleteRequestedPosts    = posts.filter(p => p.status === 'delete_requested');
   const displayPosts  = activeTab === 'pending'
     ? pendingPosts
     : activeTab === 'rejected'
@@ -336,7 +338,9 @@ const PostsSection: React.FC = () => {
           ? archiveRequestedPosts
           : activeTab === 'archived'
             ? archivedPosts
-            : posts;
+            : activeTab === 'delete_requested'
+              ? deleteRequestedPosts
+              : posts;
 
   useEffect(() => { if (!permalinkManual && title) setPermalink(slugify(title)); }, [title, permalinkManual]);
 
@@ -394,19 +398,20 @@ const PostsSection: React.FC = () => {
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 mb-6 border-b border-black/10 dark:border-white/10 overflow-x-auto scrollbar-none -mx-4 sm:mx-0 px-4 sm:px-0">
-        {(['all','published','pending','rejected', ...(canApprove ? ['archive_requested','archived'] : [])] as PostTab[]).map(tab => {
+        {(['all','published','pending','rejected', ...(canApprove ? ['archive_requested','archived'] : []), ...(isAdmin ? ['delete_requested'] : [])] as PostTab[]).map(tab => {
           const count = tab === 'all' ? posts.length
             : tab === 'pending' ? pendingPosts.length
             : tab === 'rejected' ? rejectedPosts.length
             : tab === 'archive_requested' ? archiveRequestedPosts.length
             : tab === 'archived' ? archivedPosts.length
+            : tab === 'delete_requested' ? deleteRequestedPosts.length
             : posts.filter(p => (p.status ?? 'published') === 'published').length;
-          const tabLabel = tab === 'archive_requested' ? 'Archive Req.' : tab;
+          const tabLabel = tab === 'archive_requested' ? 'Archive Req.' : tab === 'delete_requested' ? 'Delete Req.' : tab;
           return (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-all -mb-px whitespace-nowrap ${activeTab === tab ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
               {tabLabel}
-              {count > 0 && <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === 'pending' ? 'bg-amber-500/20 text-amber-500' : tab === 'rejected' ? 'bg-red-500/20 text-red-400' : tab === 'archive_requested' ? 'bg-orange-500/20 text-orange-400' : tab === 'archived' ? 'bg-gray-500/20 text-gray-400' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>{count}</span>}
+              {count > 0 && <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === 'pending' ? 'bg-amber-500/20 text-amber-500' : tab === 'rejected' ? 'bg-red-500/20 text-red-400' : tab === 'archive_requested' ? 'bg-orange-500/20 text-orange-400' : tab === 'archived' ? 'bg-gray-500/20 text-gray-400' : tab === 'delete_requested' ? 'bg-red-700/20 text-red-500' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>{count}</span>}
             </button>
           );
         })}
@@ -431,15 +436,16 @@ const PostsSection: React.FC = () => {
           displayPosts.map(post => {
             const status = post.status ?? 'published';
             const statusMeta: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-              published:         { label:'Live',              color:'text-emerald-500', bg:'bg-emerald-500/10 border-emerald-500/20', dot:'bg-emerald-400' },
-              pending:           { label:'Pending Review',    color:'text-amber-500',   bg:'bg-amber-500/10 border-amber-500/20',   dot:'bg-amber-400 animate-pulse' },
-              rejected:          { label:'Needs Revision',    color:'text-red-400',     bg:'bg-red-500/10 border-red-500/20',       dot:'bg-red-400' },
-              archive_requested: { label:'Archive Requested', color:'text-orange-400',  bg:'bg-orange-500/10 border-orange-500/20', dot:'bg-orange-400 animate-pulse' },
-              archived:          { label:'Archived',          color:'text-gray-400',    bg:'bg-gray-500/10 border-gray-500/20',     dot:'bg-gray-400' },
+              published:         { label:'Live',                color:'text-emerald-500', bg:'bg-emerald-500/10 border-emerald-500/20', dot:'bg-emerald-400' },
+              pending:           { label:'Pending Review',      color:'text-amber-500',   bg:'bg-amber-500/10 border-amber-500/20',   dot:'bg-amber-400 animate-pulse' },
+              rejected:          { label:'Needs Revision',      color:'text-red-400',     bg:'bg-red-500/10 border-red-500/20',       dot:'bg-red-400' },
+              archive_requested: { label:'Archive Requested',   color:'text-orange-400',  bg:'bg-orange-500/10 border-orange-500/20', dot:'bg-orange-400 animate-pulse' },
+              archived:          { label:'Archived',            color:'text-gray-400',    bg:'bg-gray-500/10 border-gray-500/20',     dot:'bg-gray-400' },
+              delete_requested:  { label:'Deletion Requested',  color:'text-red-500',     bg:'bg-red-700/10 border-red-700/20',       dot:'bg-red-500 animate-pulse' },
             };
             const sm = statusMeta[status] ?? statusMeta['published'];
             return (
-              <div key={post.id} onDoubleClick={() => { if (post.permalink) window.open(`/blog/${post.permalink}`, '_blank'); }} className={`flex flex-col sm:flex-row items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors cursor-pointer select-none ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : status === 'archive_requested' ? 'border-orange-500/30' : status === 'archived' ? 'border-gray-500/20 opacity-70' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
+              <div key={post.id} onDoubleClick={() => { if (post.permalink) window.open(`/blog/${post.permalink}`, '_blank'); }} className={`flex flex-col sm:flex-row items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors cursor-pointer select-none ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : status === 'archive_requested' ? 'border-orange-500/30' : status === 'archived' ? 'border-gray-500/20 opacity-70' : status === 'delete_requested' ? 'border-red-700/40' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
                 {post.image && <img src={post.image} alt={post.title} className="w-full sm:w-14 sm:h-14 h-32 object-cover rounded-xl shrink-0 sm:mt-0.5" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -487,6 +493,27 @@ const PostsSection: React.FC = () => {
                       <Pencil size={13} /> Revise & Re-submit
                     </button>
                   )}
+                  {/* Manager: request delete on rejected post */}
+                  {canApprove && !isAdmin && status === 'rejected' && (
+                    <button onClick={async () => { if (window.confirm(`Request deletion of "${post.title}"? Admin approval required.`)) await requestDeletePost(post.id); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-semibold">
+                      <Trash2 size={13} /> Request Delete
+                    </button>
+                  )}
+                  {/* Admin: direct delete on rejected post */}
+                  {isAdmin && status === 'rejected' && (
+                    <button onClick={e => { e.stopPropagation(); if (window.confirm(`Delete "${post.title}" permanently?`)) deletePost(post.id); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-semibold">
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  )}
+                  {/* Admin: confirm or cancel delete request */}
+                  {isAdmin && status === 'delete_requested' && (<>
+                    <button onClick={e => { e.stopPropagation(); if (window.confirm(`Permanently delete "${post.title}"? This cannot be undone.`)) deletePost(post.id); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700/10 text-red-500 hover:bg-red-700/20 transition-colors text-xs font-semibold">
+                      <Trash2 size={13} /> Confirm Delete
+                    </button>
+                    <button onClick={() => cancelDeleteRequest(post.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 transition-colors text-xs font-semibold">
+                      <XCircle size={13} /> Cancel Request
+                    </button>
+                  </>)}
                   {/* Standard actions */}
                   {status === 'published' && <a href={`/blog/${post.permalink}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors" title="View"><ExternalLink size={14} /></a>}
                   {(canApprove || status !== 'pending') && status !== 'archived' && status !== 'archive_requested' && <button onClick={() => startEdit(post)} className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors" title="Edit"><Pencil size={14} /></button>}
@@ -1181,9 +1208,7 @@ const AdminSidebar: React.FC<{
           </button>
           {/* Logo stacked above label */}
           <div className="flex flex-col items-start gap-1 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-              <Layout size={18} className="text-white" />
-            </div>
+            <img src={logoSvg} alt="CMS Logo" className="w-10 h-10 rounded-full object-cover border-2 border-purple-500/30" />
             <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight mt-1">CMS Panel</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -1237,6 +1262,7 @@ const Admin: React.FC = () => {
   const canSeeApprovals = adminRole === 'admin' || adminRole === 'manager';
   const pendingCount = posts.filter(p => (p.status ?? 'published') === 'pending').length;
   const archiveRequestCount = posts.filter(p => p.status === 'archive_requested').length;
+  const deleteRequestCount = posts.filter(p => p.status === 'delete_requested').length;
 
   useEffect(() => {
     if (localStorage.getItem('isAdminAuthenticated') !== 'true') navigate('/login');
@@ -1267,9 +1293,7 @@ const Admin: React.FC = () => {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">
-              <Layout size={12} className="text-white" />
-            </div>
+            <img src={logoSvg} alt="CMS Logo" className="w-7 h-7 rounded-full object-cover shrink-0 border border-purple-500/30" />
             <span className="font-bold text-gray-900 dark:text-white text-sm truncate">CMS Panel</span>
           </div>
           {canSeeApprovals && pendingCount > 0 && (
@@ -1319,6 +1343,26 @@ const Admin: React.FC = () => {
                 {archiveRequestCount} post{archiveRequestCount > 1 ? 's' : ''} pending archive confirmation
               </span>
               <span className="ml-auto text-xs text-orange-400 flex items-center gap-1 shrink-0">
+                Review now →
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+        {/* Delete request notification bar — admin only */}
+        <AnimatePresence>
+          {adminRole === 'admin' && deleteRequestCount > 0 && (
+            <motion.button
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              onClick={() => setActive('posts')}
+              className="hidden lg:flex w-full items-center gap-3 px-6 py-3 bg-red-700/10 border-b border-red-700/25 hover:bg-red-700/15 transition-colors text-left"
+            >
+              <Trash2 size={14} className="text-red-500 shrink-0" />
+              <span className="text-sm font-semibold text-red-500 dark:text-red-400">
+                {deleteRequestCount} post{deleteRequestCount > 1 ? 's' : ''} awaiting deletion approval
+              </span>
+              <span className="ml-auto text-xs text-red-400 flex items-center gap-1 shrink-0">
                 Review now →
               </span>
             </motion.button>
