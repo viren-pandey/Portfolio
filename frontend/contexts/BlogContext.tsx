@@ -6,6 +6,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
+export type PostStatus = 'pending' | 'published' | 'rejected';
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -22,6 +24,9 @@ export interface BlogPost {
   keywords?: string[];
   views: number;
   impressions: number;
+  status: PostStatus;
+  submittedBy?: string;
+  reviewNote?: string;
 }
 
 export const slugify = (text: string): string =>
@@ -42,6 +47,8 @@ interface BlogContextType {
   getPostByPermalink: (permalink: string) => BlogPost | undefined;
   incrementViews: (id: string) => Promise<void>;
   incrementImpressions: (id: string) => Promise<void>;
+  approvePost: (id: string) => Promise<void>;
+  rejectPost: (id: string, note: string) => Promise<void>;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -77,6 +84,9 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             keywords:        data.keywords      ?? [],
             views:           data.views         ?? 0,
             impressions:     data.impressions   ?? 0,
+            status:          (data.status       ?? 'published') as PostStatus,
+            submittedBy:     data.submittedBy   ?? '',
+            reviewNote:      data.reviewNote    ?? '',
           } as BlogPost;
         });
         setPosts(fetched);
@@ -126,8 +136,24 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await updateDoc(doc(db, POSTS_COLLECTION, id), { impressions: increment(1) });
   };
 
+  const approvePost = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'published',
+      reviewNote: '',
+      _approvedAt: serverTimestamp(),
+    });
+  };
+
+  const rejectPost = async (id: string, note: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'rejected',
+      reviewNote: note,
+      _rejectedAt: serverTimestamp(),
+    });
+  };
+
   return (
-    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions, approvePost, rejectPost }}>
       {children}
     </BlogContext.Provider>
   );

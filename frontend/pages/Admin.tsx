@@ -5,6 +5,7 @@ import {
   Search, Upload, Pencil, Trash2, FileText, PlusCircle, Code, Users, Megaphone,
   Settings, LayoutDashboard, Globe, X, Copy, Check, Eye, EyeOff, Bell, ChevronDown,
   TrendingUp, Radio, ExternalLink, Shield, UserCheck, AlertTriangle, ToggleLeft, ToggleRight, BarChart2,
+  CheckCircle2, XCircle, GitMerge, Clock,
 } from 'lucide-react';
 import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
 import { useBlog } from '../contexts/BlogContext';
@@ -289,9 +290,13 @@ const DashboardSection: React.FC = () => {
 // SECTION: POSTS
 // ═══════════════════════════════════════════════════════════════════════════
 const PostsSection: React.FC = () => {
-  const { addPost, updatePost, deletePost, posts } = useBlog();
+  const { addPost, updatePost, deletePost, posts, approvePost, rejectPost } = useBlog();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const role = localStorage.getItem('adminRole') || 'writer';
+  const adminName = localStorage.getItem('adminName') || 'Unknown';
+  const canApprove = role === 'admin' || role === 'manager';
 
   const [title, setTitle] = useState('');
   const [permalink, setPermalink] = useState('');
@@ -311,6 +316,20 @@ const PostsSection: React.FC = () => {
   const [htmlMode, setHtmlMode] = useState(false);
   const [view, setView] = useState<'list' | 'editor'>('list');
 
+  type PostTab = 'all' | 'pending' | 'published' | 'rejected';
+  const [activeTab, setActiveTab] = useState<PostTab>(canApprove ? 'all' : 'all');
+  const [approveOnSubmit, setApproveOnSubmit] = useState(false);
+
+  const pendingPosts  = posts.filter(p => (p.status ?? 'published') === 'pending');
+  const rejectedPosts = posts.filter(p => p.status === 'rejected');
+  const displayPosts  = activeTab === 'pending'
+    ? pendingPosts
+    : activeTab === 'rejected'
+      ? rejectedPosts
+      : activeTab === 'published'
+        ? posts.filter(p => (p.status ?? 'published') === 'published')
+        : posts;
+
   useEffect(() => { if (!permalinkManual && title) setPermalink(slugify(title)); }, [title, permalinkManual]);
 
   const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,67 +343,141 @@ const PostsSection: React.FC = () => {
     setEditingPost(null); setTitle(''); setPermalink(''); setPermalinkManual(false);
     setExcerpt(''); setContent(''); setTags(''); setImage(''); setImagePreview('');
     setMetaTitle(''); setMetaDescription(''); setKeywords(''); setEditorKey(k => k + 1); setHtmlMode(false); setView('list');
+    setApproveOnSubmit(false);
   };
 
-  const startEdit = (post: BlogPost) => {
+  const startEdit = (post: BlogPost, andApprove = false) => {
     setEditingPost(post); setTitle(post.title); setPermalink(post.permalink); setPermalinkManual(true);
     setExcerpt(post.excerpt); setContent(post.content); setTags(post.tags.join(', '));
     setImage(post.image ?? ''); setImagePreview(post.image ?? '');
     setMetaTitle(post.metaTitle ?? ''); setMetaDescription(post.metaDescription ?? '');
     setKeywords(post.keywords?.join(', ') ?? ''); setEditorKey(k => k + 1); setHtmlMode(false); setView('editor');
+    setApproveOnSubmit(andApprove);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const willPublish = canApprove || approveOnSubmit;
     const postData = {
       title, excerpt, content, tags: tags.split(',').map(t => t.trim()).filter(Boolean),
       image, author, permalink: permalink || slugify(title),
       metaTitle: metaTitle || title, metaDescription: metaDescription || excerpt,
       keywords: keywords.split(',').map(k => k.trim()).filter(Boolean),
+      status: (willPublish ? 'published' : 'pending') as 'pending' | 'published' | 'rejected',
+      submittedBy: adminName,
+      reviewNote: '',
     };
     if (editingPost) { await updatePost(editingPost.id, postData); } else { await addPost(postData); }
     resetForm();
-    navigate('/blog');
+    if (willPublish) navigate('/blog');
   };
 
   if (view === 'list') return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <FileText size={22} className="text-purple-500" /> Blog Posts
         </h2>
         <button onClick={() => setView('editor')}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all">
-          <PlusCircle size={15} /> New Post
+          <PlusCircle size={15} /> {canApprove ? 'New Post' : 'Write Post'}
         </button>
       </div>
+
+      {/* Tab bar */}
+      <div className="flex items-center gap-1 mb-6 border-b border-black/10 dark:border-white/10">
+        {(['all','published','pending','rejected'] as PostTab[]).map(tab => {
+          const count = tab === 'all' ? posts.length : tab === 'pending' ? pendingPosts.length : tab === 'rejected' ? rejectedPosts.length : posts.filter(p => (p.status ?? 'published') === 'published').length;
+          return (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-all -mb-px ${activeTab === tab ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
+              {tab}
+              {count > 0 && <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === 'pending' ? 'bg-amber-500/20 text-amber-500' : tab === 'rejected' ? 'bg-red-500/20 text-red-400' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Pending notice for writers */}
+      {!canApprove && pendingPosts.length > 0 && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+          <Clock size={14} />
+          {pendingPosts.length} post{pendingPosts.length > 1 ? 's' : ''} awaiting approval by a manager.
+        </div>
+      )}
+      {!canApprove && rejectedPosts.length > 0 && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-sm text-red-500">
+          <XCircle size={14} />
+          {rejectedPosts.length} post{rejectedPosts.length > 1 ? 's' : ''} were rejected — open them to see feedback and re-submit.
+        </div>
+      )}
+
       <div className="space-y-3">
-        {posts.length === 0 ? <p className="text-center text-gray-400 py-12 text-sm">No posts yet. Create one!</p> :
-          posts.map(post => (
-            <div key={post.id} className="flex items-center gap-4 p-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0a20] hover:border-purple-500/30 transition-colors">
-              {post.image && <img src={post.image} alt={post.title} className="w-14 h-14 object-cover rounded-xl shrink-0" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 dark:text-white truncate">{post.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime} · by {post.author}</p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <div className="flex gap-1.5">
-                    {post.tags.slice(0,3).map(t => <span key={t} className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[10px] font-medium">{t}</span>)}
+        {displayPosts.length === 0 ? <p className="text-center text-gray-400 py-12 text-sm">No posts here.</p> :
+          displayPosts.map(post => {
+            const status = post.status ?? 'published';
+            const statusMeta = {
+              published: { label:'Live', color:'text-emerald-500', bg:'bg-emerald-500/10 border-emerald-500/20', dot:'bg-emerald-400' },
+              pending:   { label:'Pending Review', color:'text-amber-500', bg:'bg-amber-500/10 border-amber-500/20', dot:'bg-amber-400 animate-pulse' },
+              rejected:  { label:'Needs Revision', color:'text-red-400', bg:'bg-red-500/10 border-red-500/20', dot:'bg-red-400' },
+            }[status];
+            return (
+              <div key={post.id} className={`flex items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
+                {post.image && <img src={post.image} alt={post.title} className="w-14 h-14 object-cover rounded-xl shrink-0 mt-0.5" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${statusMeta.bg} ${statusMeta.color}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${statusMeta.dot}`} />
+                      {statusMeta.label}
+                    </span>
+                    {post.submittedBy && <span className="text-[10px] text-gray-400">by {post.submittedBy}</span>}
                   </div>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    <Eye size={10} className="inline" /> {(post.views ?? 0).toLocaleString()} views
-                  </span>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    <BarChart2 size={10} className="inline" /> {(post.impressions ?? 0).toLocaleString()} impressions
-                  </span>
+                  <p className="font-semibold text-gray-900 dark:text-white truncate">{post.title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime}</p>
+                  {status === 'rejected' && post.reviewNote && (
+                    <p className="text-xs text-red-400 mt-1 bg-red-500/5 rounded-lg px-2 py-1 border border-red-500/10">
+                      <span className="font-semibold">Feedback:</span> {post.reviewNote}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex gap-1.5">{post.tags.slice(0,3).map(t => <span key={t} className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[10px] font-medium">{t}</span>)}</div>
+                    <span className="text-[10px] text-gray-500 flex items-center gap-1"><Eye size={10} /> {(post.views ?? 0).toLocaleString()}</span>
+                    <span className="text-[10px] text-gray-500 flex items-center gap-1"><BarChart2 size={10} /> {(post.impressions ?? 0).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  {/* Manager/Admin: approve/edit-merge/reject on pending posts */}
+                  {canApprove && status === 'pending' && (<>
+                    <button onClick={() => approvePost(post.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors text-xs font-semibold" title="Approve & Publish">
+                      <CheckCircle2 size={13} /> Approve
+                    </button>
+                    <button onClick={() => startEdit(post, true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors text-xs font-semibold" title="Edit then Merge to Live">
+                      <GitMerge size={13} /> Edit & Merge
+                    </button>
+                    <button onClick={async () => { const note = window.prompt('Rejection feedback for the writer (required):'); if (note === null) return; await rejectPost(post.id, note || 'No feedback provided.'); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-semibold" title="Reject">
+                      <XCircle size={13} /> Reject
+                    </button>
+                  </>)}
+                  {/* Manager/Admin: re-publish rejected posts */}
+                  {canApprove && status === 'rejected' && (
+                    <button onClick={() => approvePost(post.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors text-xs font-semibold">
+                      <CheckCircle2 size={13} /> Publish Anyway
+                    </button>
+                  )}
+                  {/* Writer: re-submit rejected post */}
+                  {!canApprove && status === 'rejected' && (
+                    <button onClick={() => startEdit(post)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors text-xs font-semibold">
+                      <Pencil size={13} /> Revise & Re-submit
+                    </button>
+                  )}
+                  {/* Standard actions */}
+                  {status === 'published' && <a href={`/blog/${post.permalink}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors" title="View"><ExternalLink size={14} /></a>}
+                  {(canApprove || status !== 'pending') && <button onClick={() => startEdit(post)} className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors" title="Edit"><Pencil size={14} /></button>}
+                  {canApprove && <button onClick={() => { if (window.confirm(`Delete "${post.title}"?`)) deletePost(post.id); }} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Delete"><Trash2 size={14} /></button>}
                 </div>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <a href={`/blog/${post.permalink}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors" title="View"><ExternalLink size={14} /></a>
-                <button onClick={() => startEdit(post)} className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors" title="Edit"><Pencil size={14} /></button>
-                <button onClick={() => { if (window.confirm(`Delete "${post.title}"?`)) deletePost(post.id); }} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Delete"><Trash2 size={14} /></button>
-              </div>
-            </div>
-          ))
+            );
+          })
         }
       </div>
     </div>
@@ -517,8 +610,12 @@ const PostsSection: React.FC = () => {
         <div className="flex justify-between items-center pt-4">
           <button type="button" onClick={resetForm} className="px-5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">Cancel</button>
           <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} type="submit"
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 shadow-lg shadow-purple-500/20">
-            <Save size={18} /> {editingPost ? 'Update Post' : 'Publish Post'}
+            className={`font-bold py-3 px-8 rounded-xl flex items-center gap-2 shadow-lg text-white ${approveOnSubmit ? 'bg-gradient-to-r from-emerald-600 to-teal-600 shadow-emerald-500/20' : canApprove ? 'bg-gradient-to-r from-purple-600 to-blue-600 shadow-purple-500/20' : 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/20'}`}>
+            {approveOnSubmit
+              ? <><GitMerge size={18} /> {editingPost ? 'Save & Merge to Live' : 'Publish'}</>
+              : canApprove
+                ? <><Save size={18} /> {editingPost ? 'Update Post' : 'Publish Post'}</>
+                : <><Clock size={18} /> {editingPost ? 'Re-submit for Review' : 'Submit for Review'}</>}
           </motion.button>
         </div>
       </form>
@@ -974,7 +1071,7 @@ const NAV_ITEMS: { id: Section; label: string; Icon: React.FC<{size?:number;clas
   { id:'settings', label:'Settings', Icon: Settings },
 ];
 
-const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void }> = ({ active, setActive }) => {
+const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void; pendingCount: number }> = ({ active, setActive, pendingCount }) => {
   const navigate = useNavigate();
   const adminName = localStorage.getItem('adminName') || 'Admin';
   const adminRole = localStorage.getItem('adminRole') || 'admin';
@@ -1023,6 +1120,11 @@ const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void 
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${active === item.id ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}>
             <item.Icon size={17} />
             {item.label}
+            {item.id === 'posts' && pendingCount > 0 && (
+              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-white">
+                {pendingCount}
+              </span>
+            )}
           </button>
         ))}
       </nav>
@@ -1047,6 +1149,10 @@ const AdminSidebar: React.FC<{ active: Section; setActive: (s: Section) => void 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState<Section>('posts');
+  const { posts } = useBlog();
+  const adminRole = localStorage.getItem('adminRole') || 'writer';
+  const canSeeApprovals = adminRole === 'admin' || adminRole === 'manager';
+  const pendingCount = posts.filter(p => (p.status ?? 'published') === 'pending').length;
 
   useEffect(() => {
     if (localStorage.getItem('isAdminAuthenticated') !== 'true') navigate('/login');
@@ -1063,8 +1169,31 @@ const Admin: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-[#030014]">
-      <AdminSidebar active={active} setActive={setActive} />
+      <AdminSidebar active={active} setActive={setActive} pendingCount={canSeeApprovals ? pendingCount : 0} />
       <main className="flex-1 ml-64 min-h-screen overflow-y-auto">
+        {/* Pending approval notification bar */}
+        <AnimatePresence>
+          {canSeeApprovals && pendingCount > 0 && (
+            <motion.button
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              onClick={() => setActive('posts')}
+              className="w-full flex items-center gap-3 px-6 py-3 bg-amber-500/10 border-b border-amber-500/25 hover:bg-amber-500/15 transition-colors text-left"
+            >
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+              </span>
+              <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                {pendingCount} post{pendingCount > 1 ? 's' : ''} awaiting your approval
+              </span>
+              <span className="ml-auto text-xs text-amber-500 flex items-center gap-1 shrink-0">
+                Review now →
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
         <AnimatePresence mode="wait">
           <motion.div key={active} initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} transition={{ duration:0.2 }}>
             {SECTIONS[active]}

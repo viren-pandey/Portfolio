@@ -98,16 +98,21 @@ const Blog: React.FC = () => {
     } catch { setPStatus('error'); }
   };
 
+  // Only published posts for public view
+  const publishedPosts = useMemo(() => posts.filter(p => (p.status ?? 'published') === 'published'), [posts]);
+
   // Unique tags with post counts, sorted by frequency
   const tagCounts = useMemo(() => {
     const map = new Map<string, number>();
-    posts.forEach(p => p.tags.forEach(t => map.set(t, (map.get(t) ?? 0) + 1)));
+    publishedPosts.forEach(p => p.tags.forEach(t => map.set(t, (map.get(t) ?? 0) + 1)));
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-  }, [posts]);
+  }, [publishedPosts]);
 
   const filteredPosts = useMemo(
-    () => activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts,
-    [posts, activeTag]
+    () => {
+      return activeTag ? publishedPosts.filter(p => p.tags.includes(activeTag)) : publishedPosts;
+    },
+    [publishedPosts, activeTag]
   );
 
   const errorMessages: Record<string, string> = {
@@ -155,7 +160,7 @@ const Blog: React.FC = () => {
               'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
               activeTag === null ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400',
             ].join(' ')}>
-              {posts.length}
+              {publishedPosts.length}
             </span>
           </button>
 
@@ -192,7 +197,7 @@ const Blog: React.FC = () => {
           <p className="text-red-400 font-semibold mb-2">Firebase Error: {error}</p>
           <p className="text-gray-400 text-sm">{errorMessages[error] ?? 'Check browser console (F12) for details.'}</p>
         </div>
-      ) : posts.length === 0 ? (
+      ) : posts.length === 0 && publishedPosts.length === 0 ? (
         <div className="text-center text-gray-600 dark:text-gray-400 py-12">
           No posts yet.
         </div>
