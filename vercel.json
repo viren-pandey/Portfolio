@@ -2,14 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "routes": [
-    {
-      "src": "/sitemap.xml",
-      "headers": {
-        "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600"
-      },
-      "dest": "/sitemap.xml"
-    },
+    { "src": "/sitemap.xml", "dest": "/api/sitemap" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
