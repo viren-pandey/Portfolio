@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link as LinkIcon,
@@ -680,11 +680,35 @@ const PostsSection: React.FC = () => {
             className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white h-20 resize-none" />
         </div>
         {/* Tags */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><Tag size={15} /> Tags (comma separated)</label>
-          <input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="AI, React, Design�"
-            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white" />
-        </div>
+        {(() => {
+          const allTags = Array.from(new Set(posts.flatMap(p => p.tags ?? []))).sort();
+          const activeTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+          const toggle = (t: string) => {
+            const cur = tags.split(',').map(s => s.trim()).filter(Boolean);
+            const next = cur.includes(t) ? cur.filter(s => s !== t) : [...cur, t];
+            setTags(next.join(', '));
+          };
+          return (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><Tag size={15} /> Tags</label>
+              <input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="AI, React, Design..."
+                className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white" />
+              {allTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {allTags.map(t => {
+                    const active = activeTags.includes(t);
+                    return (
+                      <button key={t} type="button" onClick={() => toggle(t)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${active ? 'bg-purple-600 border-purple-600 text-white' : 'bg-purple-500/10 border-purple-500/20 text-purple-400 hover:bg-purple-500/20'}`}>
+                        {active ? '\u2713 ' : '+ '}{t}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
         {/* SEO */}
         <div className="border border-purple-500/20 rounded-2xl p-5 space-y-4 bg-purple-500/5">
           <h3 className="text-sm font-semibold text-purple-500 flex items-center gap-2 uppercase tracking-wider"><Search size={14} /> SEO & Meta</h3>
