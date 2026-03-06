@@ -65,10 +65,10 @@ const Blog: React.FC = () => {
         className="flex flex-col items-center mb-16"
       >
         <h2 className="text-5xl font-display font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-500">
-          Engineering Blog
+          Engineering Blogs
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl text-lg">
-          Thoughts on AI, Software Architecture, and the future of tech.
+          Thoughts on AI, Software Architecture, the future of tech and Coding.
         </p>
       </motion.div>
 
