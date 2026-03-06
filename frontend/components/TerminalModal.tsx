@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Terminal as TerminalIcon, Briefcase } from 'lucide-react';
 import { PROJECTS } from '../constants';
+import { useNavigate } from 'react-router-dom';
 
 interface TerminalModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface TerminalModalProps {
 
 const TerminalModal: React.FC<TerminalModalProps> = ({ isOpen, onClose }) => {
   const [input, setInput] = useState('');
+  const navigate = useNavigate();
   const [history, setHistory] = useState<string[]>([
     'Welcome to Viren Shell v1.0.0',
     'Type "help" to see available commands.',
@@ -53,8 +55,14 @@ const TerminalModal: React.FC<TerminalModalProps> = ({ isOpen, onClose }) => {
       newHistory.push('Navigating to education...');
       document.getElementById('education')?.scrollIntoView({ behavior: 'smooth' });
       setTimeout(onClose, 800);
+    } else if (cmd === '/blog' || cmd === 'blog') {
+      newHistory.push('Opening blogs...');
+      setHistory([...newHistory]);
+      setInput('');
+      setTimeout(() => { onClose(); navigate('/blog'); }, 500);
+      return;
     } else if (cmd === 'help') {
-      newHistory.push('Available commands:', '  /projects - List projects and scroll', '  /skills   - View technical skills', '  /education- View education history', '  clear     - Clear terminal', '  exit      - Close terminal');
+      newHistory.push('Available commands:', '  /projects - List projects and scroll', '  /skills   - View technical skills', '  /education- View education history', '  /blog      - Go to the blog page', '  clear     - Clear terminal', '  exit      - Close terminal');
     } else if (cmd === 'clear') {
       setHistory(['Terminal cleared.']);
       setInput('');
