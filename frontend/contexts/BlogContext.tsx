@@ -6,7 +6,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
-export type PostStatus = 'pending' | 'published' | 'rejected';
+export type PostStatus = 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived';
 
 export interface BlogPost {
   id: string;
@@ -49,6 +49,9 @@ interface BlogContextType {
   incrementImpressions: (id: string) => Promise<void>;
   approvePost: (id: string) => Promise<void>;
   rejectPost: (id: string, note: string) => Promise<void>;
+  archivePost: (id: string) => Promise<void>;
+  confirmArchive: (id: string) => Promise<void>;
+  unarchivePost: (id: string) => Promise<void>;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -152,8 +155,30 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  // Archive flow: manager requests → admin confirms
+  const archivePost = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'archive_requested',
+      _archiveRequestedAt: serverTimestamp(),
+    });
+  };
+
+  const confirmArchive = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'archived',
+      _archivedAt: serverTimestamp(),
+    });
+  };
+
+  const unarchivePost = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      status: 'published',
+      _unarchivedAt: serverTimestamp(),
+    });
+  };
+
   return (
-    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions, approvePost, rejectPost }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions, approvePost, rejectPost, archivePost, confirmArchive, unarchivePost }}>
       {children}
     </BlogContext.Provider>
   );
