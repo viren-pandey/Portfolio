@@ -150,10 +150,15 @@ const BlogPostPage: React.FC = () => {
         {/* Post content */}
         <style>{`
           .blog-content figure { text-align: center; margin: 1.5em auto; }
-          .blog-content figure img { max-width: 100%; height: auto; display: inline-block; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
-          .blog-content figcaption { font-size: 0.85em; color: #9ca3af; margin-top: 8px; font-style: italic; }
+          .blog-content figure img { max-width: 100%; height: auto; display: inline-block; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+          .blog-content figcaption { font-size: 0.85em; color: #6b7280; margin-top: 8px; font-style: italic; }
           .blog-content pre { border-radius: 10px; overflow-x: auto; }
           .blog-content pre code { font-family: 'Fira Code', Consolas, monospace; font-size: inherit; }
+          /* Light mode: override inline dark code-block styles from editor */
+          html:not(.dark) .blog-content pre { background: #f1f5f9 !important; border: 1px solid rgba(0,0,0,0.08) !important; }
+          html:not(.dark) .blog-content pre code { color: #6d28d9 !important; }
+          /* Dark mode figcaption */
+          html.dark .blog-content figcaption { color: #9ca3af; }
         `}</style>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -414,7 +414,7 @@ const Admin: React.FC = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-4 py-2 text-sm rounded-xl border border-white/10 text-gray-300 hover:border-purple-500 hover:text-purple-400 transition-colors flex items-center gap-2"
+                className="px-4 py-2 text-sm rounded-xl border border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-500 hover:text-purple-400 transition-colors flex items-center gap-2"
               >
                 <PlusCircle size={15} /> New Post
               </button>
@@ -433,24 +433,24 @@ const Admin: React.FC = () => {
         </div>
 
         {/* All Posts manager */}
-        <div className="mb-8 border border-white/10 rounded-2xl overflow-hidden">
+        <div className="mb-8 border border-black/10 dark:border-white/10 rounded-2xl overflow-hidden">
           <button
             type="button"
             onClick={() => setShowPosts(v => !v)}
-            className="w-full flex items-center justify-between px-6 py-4 bg-white/5 hover:bg-white/8 transition-colors text-left"
+            className="w-full flex items-center justify-between px-6 py-4 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-left"
           >
-            <span className="font-semibold text-white flex items-center gap-2">
+            <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <FileText size={15} className="text-purple-400" />
               All Posts ({posts.length})
             </span>
-            <span className="text-gray-400 text-xs">{showPosts ? '▲ Collapse' : '▼ Expand'}</span>
+            <span className="text-gray-500 dark:text-gray-400 text-xs">{showPosts ? '▲ Collapse' : '▼ Expand'}</span>
           </button>
           {showPosts && (
-            <div className="divide-y divide-white/5">
+              <div className="divide-y divide-black/10 dark:divide-white/5">
               {posts.length === 0 ? (
                 <p className="text-center text-gray-500 py-8 text-sm">No posts yet.</p>
               ) : posts.map(post => (
-                <div key={post.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors">
+                <div key={post.id} className="flex items-center gap-4 px-6 py-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                   {post.image && (
                     <img
                       src={post.image} alt={post.title}
@@ -459,7 +459,7 @@ const Admin: React.FC = () => {
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">{post.title}</p>
+                    <p className="font-medium text-gray-900 dark:text-white truncate">{post.title}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime}</p>
                     <p className="text-xs text-purple-400/60 font-mono mt-0.5 truncate">/blog/{post.permalink}</p>
                   </div>
@@ -489,10 +489,10 @@ const Admin: React.FC = () => {
 
         {editingPost && (
           <div className="mb-6 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between">
-            <p className="text-sm text-blue-300 flex items-center gap-2">
-              <Pencil size={14} /> Editing: <span className="font-semibold text-white">{editingPost.title}</span>
+            <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+              <Pencil size={14} /> Editing: <span className="font-semibold text-gray-900 dark:text-white">{editingPost.title}</span>
             </p>
-            <button type="button" onClick={resetForm} className="text-xs text-gray-400 hover:text-white transition-colors">Cancel</button>
+            <button type="button" onClick={resetForm} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
           </div>
         )}
 
@@ -528,7 +528,7 @@ const Admin: React.FC = () => {
                   setPermalink(slugify(e.target.value));
                 }}
                 readOnly={!!editingPost}
-                className={`flex-1 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white font-mono text-sm${editingPost ? ' opacity-60 cursor-not-allowed' : ''}`}
+                className={`flex-1 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 font-mono text-sm${editingPost ? ' opacity-60 cursor-not-allowed' : ''}`}
                 placeholder="auto-generated-from-title"
               />
               {permalinkManual && (
@@ -669,32 +669,44 @@ const Admin: React.FC = () => {
               <Layout size={16} /> Content
             </label>
             <style>{`
+              /* ── Editor base (both modes) ───────────────────── */
               #blog-editor-wrap .rsw-ce {
-                color: #e2e8f0;
                 min-height: 380px;
                 font-size: 15px;
                 line-height: 1.8;
                 padding: 16px 20px;
+                color: #111827;
               }
-              #blog-editor-wrap .rsw-ce a { color: #60a5fa; text-decoration: underline; }
               #blog-editor-wrap .rsw-ce h1 { font-size: 1.8em; font-weight: 700; margin: .6em 0 .4em; }
               #blog-editor-wrap .rsw-ce h2 { font-size: 1.4em; font-weight: 600; margin: .6em 0 .3em; }
               #blog-editor-wrap .rsw-ce h3 { font-size: 1.15em; font-weight: 600; margin: .5em 0 .2em; }
               #blog-editor-wrap .rsw-toolbar {
+                flex-wrap: wrap; gap: 2px; padding: 4px 6px;
+                background: rgba(245, 245, 255, 0.98) !important;
+                border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+              }
+              #blog-editor-wrap button.rsw-btn { color: #374151; border-radius: 4px; }
+              #blog-editor-wrap button.rsw-btn:hover { background: rgba(124,58,237,0.12); }
+              #blog-editor-wrap .rsw-separator { border-color: rgba(0,0,0,0.12); }
+              #blog-editor-wrap .rsw-ce a { color: #7c3aed; text-decoration: underline; }
+              #blog-editor-wrap .rsw-ce figure { text-align: center; margin: 1.2em 0; }
+              #blog-editor-wrap .rsw-ce figure img { display: inline-block; border-radius: 10px; max-width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+              #blog-editor-wrap .rsw-ce figure figcaption { font-size: 0.85em; color: #6b7280; margin-top: 5px; font-style: italic; }
+              #blog-editor-wrap .rsw-ce pre { background: #f1f5f9; border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 14px 18px; overflow-x: auto; margin: 1em 0; line-height: 1.6; }
+              #blog-editor-wrap .rsw-ce pre code { font-family: 'Fira Code', Consolas, monospace; color: #6d28d9; }
+              /* ── Dark mode overrides ────────────────────────── */
+              html.dark #blog-editor-wrap .rsw-ce { color: #e2e8f0; }
+              html.dark #blog-editor-wrap .rsw-ce a { color: #60a5fa; }
+              html.dark #blog-editor-wrap .rsw-toolbar {
                 background: rgba(15, 10, 40, 0.95) !important;
                 border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-                flex-wrap: wrap;
-                gap: 2px;
-                padding: 4px 6px;
               }
-              #blog-editor-wrap button.rsw-btn { color: #e2e8f0; border-radius: 4px; }
-              #blog-editor-wrap button.rsw-btn:hover { background: rgba(167,139,250,0.2); }
-              #blog-editor-wrap .rsw-separator { border-color: rgba(255,255,255,0.12); }
-              #blog-editor-wrap .rsw-ce figure { text-align: center; margin: 1.2em 0; }
-              #blog-editor-wrap .rsw-ce figure img { display: inline-block; border-radius: 10px; max-width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-              #blog-editor-wrap .rsw-ce figure figcaption { font-size: 0.85em; color: #9ca3af; margin-top: 5px; font-style: italic; }
-              #blog-editor-wrap .rsw-ce pre { background: #0d0a1e; border: 1px solid rgba(167,139,250,0.25); border-radius: 10px; padding: 14px 18px; overflow-x: auto; margin: 1em 0; line-height: 1.6; }
-              #blog-editor-wrap .rsw-ce pre code { font-family: 'Fira Code', Consolas, monospace; color: #c4b5fd; }
+              html.dark #blog-editor-wrap button.rsw-btn { color: #e2e8f0; }
+              html.dark #blog-editor-wrap button.rsw-btn:hover { background: rgba(167,139,250,0.2); }
+              html.dark #blog-editor-wrap .rsw-separator { border-color: rgba(255,255,255,0.12); }
+              html.dark #blog-editor-wrap .rsw-ce figure figcaption { color: #9ca3af; }
+              html.dark #blog-editor-wrap .rsw-ce pre { background: #0d0a1e; border: 1px solid rgba(167,139,250,0.25); }
+              html.dark #blog-editor-wrap .rsw-ce pre code { color: #c4b5fd; }
             `}</style>
             <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden">
               <EditorProvider key={editorKey}>
@@ -736,7 +748,7 @@ const Admin: React.FC = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-6 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-colors"
+                className="px-6 py-3 rounded-xl border border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 transition-colors"
               >
                 Cancel
               </button>
