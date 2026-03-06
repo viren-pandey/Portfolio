@@ -194,7 +194,7 @@ const InlineImageButton: React.FC = () => {
     const wStyle = widthPx ? `width:${widthPx}px;` : 'max-width:100%;';
     const hStyle = heightPx ? `height:${heightPx}px;` : '';
     const alignStyle = align === 'left' ? 'text-align:left' : align === 'right' ? 'text-align:right' : 'text-align:center';
-    const imgTag = `<img src="${src}" alt="${alt}" style="${wStyle}${hStyle}border-radius:12px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.4);object-fit:cover" />`;
+    const imgTag = `<img src="${src}" alt="${alt}" style="${wStyle}${hStyle}border-radius:12px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.4);vertical-align:middle" />`;
     const linked = backlink.trim() ? `<a href="${backlink.trim()}" target="_blank" rel="noopener noreferrer">${imgTag}</a>` : imgTag;
     const caption = alt ? `<figcaption style="font-size:0.85em;color:#9ca3af;margin-top:6px;font-style:italic">${alt}</figcaption>` : '';
     const html = `<figure style="${alignStyle};margin:1.5em 0">${linked}${caption}</figure><p><br></p>`;
@@ -614,14 +614,14 @@ const PostsSection: React.FC = () => {
   );
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="p-4 sm:p-6 xl:p-10">
+      <div className="flex items-center gap-4 mb-8 max-w-5xl mx-auto">
         <button onClick={resetForm} className="p-2 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"><X size={16} /></button>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Pencil size={20} className="text-purple-500" /> {editingPost ? 'Edit Post' : 'New Post'}
         </h2>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
         {/* Author */}
         <div className="flex items-center gap-3 px-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl">
           <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-bold shrink-0">{author ? author.charAt(0).toUpperCase() : '?'}</div>
@@ -699,17 +699,18 @@ const PostsSection: React.FC = () => {
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"><Layout size={15} /> Content</label>
           <style>{`
-            #blog-editor-wrap .rsw-ce { min-height:360px; font-size:18px; line-height:1.8; padding:16px 20px; color:#111827; }
+            #blog-editor-wrap .rsw-ce { min-height:520px; font-size:17px; line-height:1.9; padding:24px 32px; color:#111827; }
             #blog-editor-wrap .rsw-ce h1 { font-size:2.25em; font-weight:700; margin:.6em 0 .4em; }
             #blog-editor-wrap .rsw-ce h2 { font-size:1.875em; font-weight:600; margin:.6em 0 .3em; }
             #blog-editor-wrap .rsw-ce h3 { font-size:1.5em; font-weight:600; margin:.5em 0 .2em; }
-            #blog-editor-wrap .rsw-toolbar { flex-wrap:wrap; gap:2px; padding:4px 6px; background:rgba(245,245,255,0.98) !important; border-bottom:1px solid rgba(0,0,0,0.08) !important; }
+            #blog-editor-wrap .rsw-toolbar { flex-wrap:wrap; gap:2px; padding:6px 8px; background:rgba(245,245,255,0.98) !important; border-bottom:1px solid rgba(0,0,0,0.08) !important; }
             #blog-editor-wrap button.rsw-btn { color:#374151; border-radius:4px; }
             #blog-editor-wrap button.rsw-btn:hover { background:rgba(124,58,237,0.12); }
             #blog-editor-wrap .rsw-separator { border-color:rgba(0,0,0,0.12); }
             #blog-editor-wrap .rsw-ce a { color:#7c3aed; text-decoration:underline; }
-            #blog-editor-wrap .rsw-ce figure { text-align:center; margin:1.2em 0; }
-            #blog-editor-wrap .rsw-ce figure img { display:inline-block; border-radius:10px; max-width:100%; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+            #blog-editor-wrap .rsw-ce figure { margin:1.4em 0; }
+            #blog-editor-wrap .rsw-ce figure img { display:inline-block; border-radius:10px; max-width:100%; height:auto; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+            #blog-editor-wrap .rsw-ce img { display:inline-block; max-width:100%; height:auto; border-radius:10px; }
             #blog-editor-wrap .rsw-ce pre { background:#f1f5f9; border:1px solid rgba(0,0,0,0.1); border-radius:10px; padding:14px 18px; overflow-x:auto; margin:1em 0; line-height:1.6; }
             #blog-editor-wrap .rsw-ce pre code { font-family:'Fira Code',Consolas,monospace; color:#6d28d9; }
             html.dark #blog-editor-wrap .rsw-ce { color:#e2e8f0; }
@@ -719,7 +720,7 @@ const PostsSection: React.FC = () => {
             html.dark #blog-editor-wrap .rsw-separator { border-color:rgba(255,255,255,0.12); }
             html.dark #blog-editor-wrap .rsw-ce pre { background:#0d0a1e; border:1px solid rgba(167,139,250,0.25); }
             html.dark #blog-editor-wrap .rsw-ce pre code { color:#c4b5fd; }
-            #blog-html-textarea { display:block; width:100%; min-height:400px; font-family:'Fira Code',Consolas,monospace; font-size:13px; line-height:1.7; padding:18px 20px; resize:vertical; outline:none; border:none; background:#0d0a1e; color:#c4b5fd; box-sizing:border-box; tab-size:2; }
+            #blog-html-textarea { display:block; width:100%; min-height:520px; font-family:'Fira Code',Consolas,monospace; font-size:13px; line-height:1.7; padding:24px 28px; resize:vertical; outline:none; border:none; background:#0d0a1e; color:#c4b5fd; box-sizing:border-box; tab-size:2; }
             html:not(.dark) #blog-html-textarea { background:#f8f7ff; color:#4c1d95; }
           `}</style>
           <div style={{ display:'flex' }}>
@@ -737,7 +738,7 @@ const PostsSection: React.FC = () => {
               <textarea id="blog-html-textarea" value={content} onChange={e => setContent(e.target.value)} spellCheck={false} autoCorrect="off" autoCapitalize="off" />
             ) : (
               <EditorProvider key={editorKey}>
-                <Editor value={content} onChange={e => setContent(e.target.value)} containerProps={{ style:{ minHeight:'380px', overflowY:'auto' } }}>
+                <Editor value={content} onChange={e => setContent(e.target.value)} containerProps={{ style:{ minHeight:'520px', overflowY:'auto' } }}>
                   <Toolbar>
                     <BtnUndo /><BtnRedo /><Separator />
                     <BtnBold /><BtnItalic /><BtnUnderline /><BtnStrikeThrough /><Separator />
