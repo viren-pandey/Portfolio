@@ -3,6 +3,7 @@
   "outputDirectory": "dist",
   "routes": [
     { "src": "/sitemap.xml", "dest": "/api/sitemap" },
+    { "src": "/sitemap",     "dest": "/api/sitemap" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
