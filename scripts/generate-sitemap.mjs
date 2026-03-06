@@ -73,9 +73,17 @@ ${allPages.map(toUrl).join('\n')}
 
   const outDir = join(__dirname, '..', 'public');
   mkdirSync(outDir, { recursive: true });
+
+  // sitemap.xml — canonical URL
   const outPath = join(outDir, 'sitemap.xml');
   writeFileSync(outPath, xml, 'utf8');
   console.log(`[sitemap] Written to ${outPath} (${allPages.length} URL(s)).`);
+
+  // bare 'sitemap' file (no extension) so Vercel serves it as a true
+  // static asset at /sitemap — Google Search Console can read it directly.
+  const outPathNoExt = join(outDir, 'sitemap');
+  writeFileSync(outPathNoExt, xml, 'utf8');
+  console.log(`[sitemap] Also written to ${outPathNoExt} (for /sitemap URL).`);
 }
 
 main();

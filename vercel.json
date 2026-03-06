@@ -23,11 +23,10 @@
       ]
     }
   ],
-  "routes": [
-    { "src": "/sitemap",     "dest": "/sitemap.xml" },
-    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
-    { "src": "/robots.txt",  "dest": "/robots.txt"  },
-    { "handle": "filesystem" },
-    { "src": "/(.*)",        "dest": "/index.html"  }
+  "rewrites": [
+    {
+      "source": "/((?!sitemap\.xml|sitemap|robots\.txt|assets/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
