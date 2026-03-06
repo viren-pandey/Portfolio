@@ -5,6 +5,7 @@ import {
   query, orderBy, serverTimestamp, updateDoc, increment,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { notifyIndexNow } from '../lib/indexnow';
 
 export type PostStatus = 'pending' | 'published' | 'rejected' | 'archive_requested' | 'archived' | 'delete_requested';
 
@@ -147,6 +148,8 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       reviewNote: '',
       _approvedAt: serverTimestamp(),
     });
+    const post = posts.find(p => p.id === id);
+    if (post?.permalink) notifyIndexNow(post.permalink);
   };
 
   const rejectPost = async (id: string, note: string) => {
@@ -177,6 +180,8 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       status: 'published',
       _unarchivedAt: serverTimestamp(),
     });
+    const post = posts.find(p => p.id === id);
+    if (post?.permalink) notifyIndexNow(post.permalink);
   };
 
   const requestDeletePost = async (id: string) => {
