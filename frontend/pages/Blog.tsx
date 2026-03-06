@@ -1,7 +1,7 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, Eye, BarChart2 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
@@ -12,7 +12,7 @@ const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
 type PopupStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const Blog: React.FC = () => {
-  const { posts, loading, error, deletePost } = useBlog();
+  const { posts, loading, error, deletePost, incrementImpressions } = useBlog();
   const { ads } = useAdmin();
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const navigate  = useNavigate();
@@ -46,6 +46,33 @@ const Blog: React.FC = () => {
   }, []);
 
   const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
+
+  // Track impressions: fire once per session when a card enters the viewport
+  const impressionObserver = useRef<IntersectionObserver | null>(null);
+  const observeCard = useCallback((el: HTMLElement | null, postId: string) => {
+    if (!el) return;
+    const key = `impression_${postId}`;
+    if (sessionStorage.getItem(key)) return;
+    if (!impressionObserver.current) {
+      impressionObserver.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const id = (entry.target as HTMLElement).dataset.postId;
+            if (!id) return;
+            const k = `impression_${id}`;
+            if (sessionStorage.getItem(k)) return;
+            sessionStorage.setItem(k, '1');
+            incrementImpressions(id);
+            impressionObserver.current?.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.4 }
+      );
+    }
+    el.dataset.postId = postId;
+    impressionObserver.current.observe(el);
+  }, [incrementImpressions]);
 
   // ── Floating contact popup state ──
   const [popupOpen, setPopupOpen]   = useState(false);
@@ -178,6 +205,7 @@ const Blog: React.FC = () => {
             return (<React.Fragment key={post.id}>
             <motion.article
               key={post.id}
+              ref={(el) => observeCard(el, post.id)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
@@ -207,6 +235,10 @@ const Blog: React.FC = () => {
                     <div className="flex items-center space-x-1">
                       <Clock size={12} />
                       <span>{post.readTime}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Eye size={12} />
+                      <span>{(post.views ?? 0).toLocaleString()}</span>
                     </div>
                   </div>
                   <button 

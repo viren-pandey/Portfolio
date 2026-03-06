@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { Calendar, Clock, Tag, ArrowLeft, User, List } from 'lucide-react';
+import { Calendar, Clock, Tag, ArrowLeft, User, List, Eye } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
 
@@ -97,7 +97,7 @@ const BlogPostPage: React.FC = () => {
   const { ads } = useAdmin();
   const cornerAd = ads.find(a => a.active && a.position === 'corner') ?? null;
   const { permalink } = useParams<{ permalink: string }>();
-  const { getPostByPermalink } = useBlog();
+  const { getPostByPermalink, incrementViews } = useBlog();
   const navigate = useNavigate();
 
   const post = permalink ? getPostByPermalink(permalink) : undefined;
@@ -146,6 +146,15 @@ const BlogPostPage: React.FC = () => {
       return () => clearTimeout(t);
     }
   }, [post, permalink, navigate]);
+
+  // Increment view count once per session per post
+  useEffect(() => {
+    if (!post) return;
+    const key = `viewed_${post.id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    incrementViews(post.id);
+  }, [post?.id]);
 
   if (!post) {
     return (
@@ -279,6 +288,10 @@ const BlogPostPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Clock size={15} />
               <span>{post.readTime}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Eye size={15} />
+              <span>{(post.views ?? 0).toLocaleString()} {post.views === 1 ? 'view' : 'views'}</span>
             </div>
           </div>
         </motion.header>

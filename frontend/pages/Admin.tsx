@@ -4,7 +4,7 @@ import {
   Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link as LinkIcon,
   Search, Upload, Pencil, Trash2, FileText, PlusCircle, Code, Users, Megaphone,
   Settings, LayoutDashboard, Globe, X, Copy, Check, Eye, EyeOff, Bell, ChevronDown,
-  TrendingUp, Radio, ExternalLink, Shield, UserCheck, AlertTriangle, ToggleLeft, ToggleRight,
+  TrendingUp, Radio, ExternalLink, Shield, UserCheck, AlertTriangle, ToggleLeft, ToggleRight, BarChart2,
 } from 'lucide-react';
 import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
 import { useBlog } from '../contexts/BlogContext';
@@ -239,8 +239,10 @@ const CodeBlockButton: React.FC = () => {
 const DashboardSection: React.FC = () => {
   const { posts } = useBlog();
   const { team, ads, notifications } = useAdmin();
+  const totalViews = posts.reduce((sum, p) => sum + (p.views ?? 0), 0);
   const stats = [
     { label:'Total Posts', value: posts.length, icon: FileText, color:'#a78bfa', bg:'rgba(167,139,250,0.1)' },
+    { label:'Total Views', value: totalViews.toLocaleString(), icon: Eye, color:'#34d399', bg:'rgba(52,211,153,0.1)' },
     { label:'Team Members', value: team.filter(m => m.active).length, icon: Users, color:'#60a5fa', bg:'rgba(96,165,250,0.1)' },
     { label:'Active Ads', value: ads.filter(a => a.active).length, icon: Megaphone, color:'#4ade80', bg:'rgba(74,222,128,0.1)' },
     { label:'Notifications Sent', value: notifications.length, icon: Bell, color:'#fb923c', bg:'rgba(251,146,60,0.1)' },
@@ -250,7 +252,7 @@ const DashboardSection: React.FC = () => {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
         <LayoutDashboard size={22} className="text-purple-500" /> Dashboard
       </h2>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
         {stats.map(s => (
           <div key={s.label} className="rounded-2xl border border-black/10 dark:border-white/10 p-6 bg-white dark:bg-[#0c0a20]">
             <div className="flex items-center justify-between mb-4">
@@ -364,8 +366,16 @@ const PostsSection: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 dark:text-white truncate">{post.title}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime} · by {post.author}</p>
-                <div className="flex gap-1.5 mt-1.5">
-                  {post.tags.slice(0,3).map(t => <span key={t} className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[10px] font-medium">{t}</span>)}
+                <div className="flex items-center gap-3 mt-1.5">
+                  <div className="flex gap-1.5">
+                    {post.tags.slice(0,3).map(t => <span key={t} className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[10px] font-medium">{t}</span>)}
+                  </div>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <Eye size={10} className="inline" /> {(post.views ?? 0).toLocaleString()} views
+                  </span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <BarChart2 size={10} className="inline" /> {(post.impressions ?? 0).toLocaleString()} impressions
+                  </span>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">

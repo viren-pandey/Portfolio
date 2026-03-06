@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   collection, addDoc, deleteDoc, doc, onSnapshot,
-  query, orderBy, serverTimestamp, updateDoc,
+  query, orderBy, serverTimestamp, updateDoc, increment,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -20,6 +20,8 @@ export interface BlogPost {
   metaTitle?: string;
   metaDescription?: string;
   keywords?: string[];
+  views: number;
+  impressions: number;
 }
 
 export const slugify = (text: string): string =>
@@ -34,10 +36,12 @@ interface BlogContextType {
   posts: BlogPost[];
   loading: boolean;
   error: string | null;
-  addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => Promise<void>;
-  updatePost: (id: string, post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => Promise<void>;
+  addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime' | 'views' | 'impressions'>) => Promise<void>;
+  updatePost: (id: string, post: Omit<BlogPost, 'id' | 'date' | 'readTime' | 'views' | 'impressions'>) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
   getPostByPermalink: (permalink: string) => BlogPost | undefined;
+  incrementViews: (id: string) => Promise<void>;
+  incrementImpressions: (id: string) => Promise<void>;
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -71,6 +75,8 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             metaTitle:       data.metaTitle     ?? '',
             metaDescription: data.metaDescription ?? '',
             keywords:        data.keywords      ?? [],
+            views:           data.views         ?? 0,
+            impressions:     data.impressions   ?? 0,
           } as BlogPost;
         });
         setPosts(fetched);
@@ -112,8 +118,16 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const getPostByPermalink = (permalink: string) =>
     posts.find(p => p.permalink === permalink);
 
+  const incrementViews = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), { views: increment(1) });
+  };
+
+  const incrementImpressions = async (id: string) => {
+    await updateDoc(doc(db, POSTS_COLLECTION, id), { impressions: increment(1) });
+  };
+
   return (
-    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink, incrementViews, incrementImpressions }}>
       {children}
     </BlogContext.Provider>
   );
