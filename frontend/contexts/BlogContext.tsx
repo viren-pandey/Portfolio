@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   collection, addDoc, deleteDoc, doc, onSnapshot,
-  query, orderBy, serverTimestamp,
+  query, orderBy, serverTimestamp, updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -35,6 +35,7 @@ interface BlogContextType {
   loading: boolean;
   error: string | null;
   addPost: (post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => Promise<void>;
+  updatePost: (id: string, post: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
   getPostByPermalink: (permalink: string) => BlogPost | undefined;
 }
@@ -95,6 +96,15 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const updatePost = async (id: string, updatedData: Omit<BlogPost, 'id' | 'date' | 'readTime'>) => {
+    const wordCount = updatedData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
+    await updateDoc(doc(db, POSTS_COLLECTION, id), {
+      ...updatedData,
+      readTime: `${Math.max(1, Math.ceil(wordCount / 200))} min read`,
+      _updatedAt: serverTimestamp(),
+    });
+  };
+
   const deletePost = async (id: string) => {
     await deleteDoc(doc(db, POSTS_COLLECTION, id));
   };
@@ -103,7 +113,7 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     posts.find(p => p.permalink === permalink);
 
   return (
-    <BlogContext.Provider value={{ posts, loading, error, addPost, deletePost, getPostByPermalink }}>
+    <BlogContext.Provider value={{ posts, loading, error, addPost, updatePost, deletePost, getPostByPermalink }}>
       {children}
     </BlogContext.Provider>
   );

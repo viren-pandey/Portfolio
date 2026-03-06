@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link, Search, Upload } from 'lucide-react';
+import { Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link, Search, Upload, Pencil, Trash2, FileText, PlusCircle } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
 import { slugify } from '../contexts/BlogContext';
+import type { BlogPost } from '../contexts/BlogContext';
 import { useNavigate } from 'react-router-dom';
 import { Editor, EditorProvider, Toolbar, BtnBold, BtnItalic, BtnUnderline, BtnStrikeThrough, BtnLink, BtnClearFormatting, BtnBulletList, BtnNumberedList, BtnRedo, BtnUndo, Separator } from 'react-simple-wysiwyg';
 
@@ -281,7 +282,7 @@ const CodeBlockButton: React.FC = () => {
 };
 
 const Admin: React.FC = () => {
-  const { addPost } = useBlog();
+  const { addPost, updatePost, deletePost, posts } = useBlog();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -297,6 +298,9 @@ const Admin: React.FC = () => {
   const [metaDescription, setMetaDescription] = useState('');
   const [keywords, setKeywords] = useState('');
   const [author] = useState('Viren Pandey');
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [showPosts, setShowPosts] = useState(false);
+  const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAdminAuthenticated');
@@ -334,10 +338,44 @@ const Admin: React.FC = () => {
     setImagePreview(url);
   };
 
+  const resetForm = () => {
+    setEditingPost(null);
+    setTitle('');
+    setPermalink('');
+    setPermalinkManual(false);
+    setExcerpt('');
+    setContent('');
+    setTags('');
+    setImage('');
+    setImagePreview('');
+    setMetaTitle('');
+    setMetaDescription('');
+    setKeywords('');
+    setEditorKey(k => k + 1);
+  };
+
+  const startEdit = (post: BlogPost) => {
+    setEditingPost(post);
+    setTitle(post.title);
+    setPermalink(post.permalink);
+    setPermalinkManual(true);
+    setExcerpt(post.excerpt);
+    setContent(post.content);
+    setTags(post.tags.join(', '));
+    setImage(post.image ?? '');
+    setImagePreview(post.image ?? '');
+    setMetaTitle(post.metaTitle ?? '');
+    setMetaDescription(post.metaDescription ?? '');
+    setKeywords(post.keywords?.join(', ') ?? '');
+    setEditorKey(k => k + 1);
+    setShowPosts(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await addPost({
+    const postData = {
       title,
       excerpt,
       content,
@@ -348,7 +386,13 @@ const Admin: React.FC = () => {
       metaTitle: metaTitle || title,
       metaDescription: metaDescription || excerpt,
       keywords: keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k !== ''),
-    });
+    };
+
+    if (editingPost) {
+      await updatePost(editingPost.id, postData);
+    } else {
+      await addPost(postData);
+    }
 
     navigate('/blog');
   };
@@ -363,9 +407,18 @@ const Admin: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Layout className="text-purple-500" />
-            Blog CMS Panel
+            {editingPost ? 'Edit Post' : 'Blog CMS Panel'}
           </h1>
           <div className="flex items-center gap-4">
+            {editingPost && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-4 py-2 text-sm rounded-xl border border-white/10 text-gray-300 hover:border-purple-500 hover:text-purple-400 transition-colors flex items-center gap-2"
+              >
+                <PlusCircle size={15} /> New Post
+              </button>
+            )}
             <div className="text-sm text-gray-500">
               Author: <span className="text-purple-500 font-medium">{author}</span>
             </div>
@@ -378,6 +431,70 @@ const Admin: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* All Posts manager */}
+        <div className="mb-8 border border-white/10 rounded-2xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowPosts(v => !v)}
+            className="w-full flex items-center justify-between px-6 py-4 bg-white/5 hover:bg-white/8 transition-colors text-left"
+          >
+            <span className="font-semibold text-white flex items-center gap-2">
+              <FileText size={15} className="text-purple-400" />
+              All Posts ({posts.length})
+            </span>
+            <span className="text-gray-400 text-xs">{showPosts ? '▲ Collapse' : '▼ Expand'}</span>
+          </button>
+          {showPosts && (
+            <div className="divide-y divide-white/5">
+              {posts.length === 0 ? (
+                <p className="text-center text-gray-500 py-8 text-sm">No posts yet.</p>
+              ) : posts.map(post => (
+                <div key={post.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors">
+                  {post.image && (
+                    <img
+                      src={post.image} alt={post.title}
+                      className="w-14 h-14 object-cover rounded-xl shrink-0"
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-white truncate">{post.title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{post.date} · {post.readTime}</p>
+                    <p className="text-xs text-purple-400/60 font-mono mt-0.5 truncate">/blog/{post.permalink}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEdit(post)}
+                      className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                      title="Edit post"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (window.confirm(`Delete "${post.title}"?`)) deletePost(post.id); }}
+                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                      title="Delete post"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {editingPost && (
+          <div className="mb-6 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between">
+            <p className="text-sm text-blue-300 flex items-center gap-2">
+              <Pencil size={14} /> Editing: <span className="font-semibold text-white">{editingPost.title}</span>
+            </p>
+            <button type="button" onClick={resetForm} className="text-xs text-gray-400 hover:text-white transition-colors">Cancel</button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
@@ -406,10 +523,12 @@ const Admin: React.FC = () => {
                 type="text"
                 value={permalink}
                 onChange={(e) => {
+                  if (editingPost) return;
                   setPermalinkManual(true);
                   setPermalink(slugify(e.target.value));
                 }}
-                className="flex-1 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white font-mono text-sm"
+                readOnly={!!editingPost}
+                className={`flex-1 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-white font-mono text-sm${editingPost ? ' opacity-60 cursor-not-allowed' : ''}`}
                 placeholder="auto-generated-from-title"
               />
               {permalinkManual && (
@@ -578,7 +697,7 @@ const Admin: React.FC = () => {
               #blog-editor-wrap .rsw-ce pre code { font-family: 'Fira Code', Consolas, monospace; color: #c4b5fd; }
             `}</style>
             <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden">
-              <EditorProvider>
+              <EditorProvider key={editorKey}>
                 <Editor
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -612,15 +731,24 @@ const Admin: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end pt-6">
+          <div className="flex justify-between items-center pt-6">
+            {editingPost && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-6 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-8 rounded-xl flex items-center space-x-2 shadow-lg shadow-purple-500/20"
+              className="ml-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-8 rounded-xl flex items-center space-x-2 shadow-lg shadow-purple-500/20"
             >
               <Save size={20} />
-              <span>Publish Post</span>
+              <span>{editingPost ? 'Update Post' : 'Publish Post'}</span>
             </motion.button>
           </div>
         </form>
