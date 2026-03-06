@@ -27,3 +27,9 @@ dist-ssr
 *.sw?
 *.migrated_promt_history
 
+# Sensitive admin/auth files — keep off public repo
+frontend/pages/Login.tsx
+frontend/pages/Admin.tsx
+frontend/contexts/AdminContext.tsx
+frontend/firebase.ts
+
