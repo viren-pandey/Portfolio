@@ -74,6 +74,14 @@ const Navbar: React.FC = () => {
             Blog
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
           </Link>
+          <a href="https://virenp.vercel.app/blog/about-me-btech-cse-aiml-student-developer-and-doomscroller" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
+            About
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
+          </a>
+          <Link to="/contact" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
+            Contact
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
+          </Link>
           
           <div className="w-px h-4 bg-black/10 dark:bg-white/20" />
           
@@ -132,6 +140,8 @@ const Navbar: React.FC = () => {
             <div className="px-6 py-4 flex flex-col space-y-4">
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Home</Link>
               <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Blog</Link>
+              <a href="https://virenp.vercel.app/blog/about-me-btech-cse-aiml-student-developer-and-doomscroller" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">About</a>
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Contact</Link>
               <div className="flex space-x-4 py-2">
                 <a href="https://github.com/viren-pandey" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
                     <Github size={20} />
