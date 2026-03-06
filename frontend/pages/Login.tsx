@@ -18,9 +18,9 @@ const Login: React.FC = () => {
     setLoading(true);
 
     // Main admin check
-    const ADMIN_USER = import.meta.env.VITE_ADMIN_USERNAME ?? 'pandeyviren68@gmail.com';
-    const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD ?? 'asdfA1234@99';
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
+    const ADMIN_USER = import.meta.env.VITE_ADMIN_USERNAME ?? '';
+    const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
+    if (ADMIN_USER && ADMIN_PASS && username === ADMIN_USER && password === ADMIN_PASS) {
       localStorage.setItem('isAdminAuthenticated', 'true');
       localStorage.setItem('adminRole', 'admin');
       localStorage.setItem('adminName', 'Viren Pandey');
