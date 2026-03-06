@@ -4,11 +4,11 @@ import { Project, SkillCategory } from './types';
 export const SKILLS: SkillCategory[] = [
   {
     category: "Core Technologies",
-    skills: ["TypeScript", "React.js", "Java", "Python", "JavaScript"]
+    skills: ["TypeScript", "MERN STACK", "Java", "Python", "JavaScript", "C/C++"]
   },
   {
-    category: "AI/ML Frameworks",
-    skills: ["YOLOv8", "PyTorch", "OpenCV", "TensorFlow", "Generative AI"]
+    category: "ML Frameworks",
+    skills: ["YOLOv8", "PyTorch", "OpenCV", "TensorFlow", "Pandas","Numpy"]
   },
   {
     category: "Web & Backend",
@@ -31,7 +31,7 @@ export const PROJECTS: Project[] = [
       "Integrated continuous webcam streaming with YOLO inference pipeline."
     ],
     tags: ["YOLOv8", "FastAPI", "React.js", "TailwindCSS"],
-    github: "https://github.com/viren-pandey",
+    github: "https://github.com/viren-pandey/Smartcrowd",
     link: "https://smartcrowd.netlify.app"
   },
   {
@@ -52,7 +52,7 @@ export const EDUCATION = [
   {
     institution: "Dr. A.P.J. Abdul Kalam Technical University",
     period: "August 2024 – August 2028",
-    degree: "Bachelor of Technology - BTech, Computer Science And Engineering",
+    degree: "Bachelor of Technology - BTech, Computer Science And Engineering with Specialisation in Artificial Intelligence and Machine Learning",
     specialization: "Artificial Intelligence And Machine learning"
   },
   {
