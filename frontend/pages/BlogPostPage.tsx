@@ -283,10 +283,12 @@ const BlogPostPage: React.FC = () => {
         {/* Post content */}
         <style>{`
           /* ── Base prose typography ───────────────────────────────── */
-          .blog-content p {
+          /* react-simple-wysiwyg outputs <div> for new lines, not <p> */
+          .blog-content p,
+          .blog-content > div {
             font-size: 1.125rem;
             line-height: 1.8;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
           }
           .blog-content h1 {
             font-size: 2.25rem;
@@ -370,7 +372,7 @@ const BlogPostPage: React.FC = () => {
           .blog-content blockquote p { margin-bottom: 0.25rem; }
           /* ── Mobile ─────────────────────────────────────────────── */
           @media (max-width: 640px) {
-            .blog-content p, .blog-content li { font-size: 1rem; line-height: 1.75; }
+            .blog-content p, .blog-content > div, .blog-content li { font-size: 1rem; line-height: 1.75; }
             .blog-content h1 { font-size: 1.75rem; }
             .blog-content h2 { font-size: 1.375rem; }
             .blog-content h3 { font-size: 1.125rem; }
@@ -422,11 +424,11 @@ const BlogPostPage: React.FC = () => {
           /* ── Light mode overrides ────────────────────────────────── */
           html:not(.dark) .blog-content span[style],
           html:not(.dark) .blog-content font { color: inherit !important; }
-          html:not(.dark) .blog-content { color: #111827; }
+          html:not(.dark) .blog-content { color: #111827; font-size: 1.125rem; line-height: 1.8; }
           html:not(.dark) .blog-content pre { background: #f8f7ff !important; border-color: rgba(108,99,255,0.2) !important; }
           html:not(.dark) .blog-content pre code { color: #4c1d95 !important; }
           /* ── Dark mode ───────────────────────────────────────────── */
-          html.dark .blog-content { color: #e2e8f0; }
+          html.dark .blog-content { color: #e2e8f0; font-size: 1.125rem; line-height: 1.8; }
           html.dark .blog-content pre { background: #0d0b1f !important; }
           html.dark .blog-content pre code { color: #c4b5fd !important; }
           html.dark .blog-content figcaption { color: #9ca3af; }

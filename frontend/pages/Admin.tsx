@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link, Search, Upload, Pencil, Trash2, FileText, PlusCircle } from 'lucide-react';
+import { Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link, Search, Upload, Pencil, Trash2, FileText, PlusCircle, Code } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
 import { slugify } from '../contexts/BlogContext';
 import type { BlogPost } from '../contexts/BlogContext';
@@ -400,6 +400,7 @@ const Admin: React.FC = () => {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [showPosts, setShowPosts] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
+  const [htmlMode, setHtmlMode] = useState(false);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAdminAuthenticated');
@@ -451,6 +452,7 @@ const Admin: React.FC = () => {
     setMetaDescription('');
     setKeywords('');
     setEditorKey(k => k + 1);
+    setHtmlMode(false);
   };
 
   const startEdit = (post: BlogPost) => {
@@ -467,6 +469,7 @@ const Admin: React.FC = () => {
     setMetaDescription(post.metaDescription ?? '');
     setKeywords(post.keywords?.join(', ') ?? '');
     setEditorKey(k => k + 1);
+    setHtmlMode(false);
     setShowPosts(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -808,40 +811,105 @@ const Admin: React.FC = () => {
               html.dark #blog-editor-wrap .rsw-ce figure figcaption { color: #9ca3af; }
               html.dark #blog-editor-wrap .rsw-ce pre { background: #0d0a1e; border: 1px solid rgba(167,139,250,0.25); }
               html.dark #blog-editor-wrap .rsw-ce pre code { color: #c4b5fd; }
+              /* ── HTML source textarea ─────────────────────────── */
+              #blog-html-textarea {
+                display: block;
+                width: 100%;
+                min-height: 420px;
+                font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+                font-size: 13px;
+                line-height: 1.7;
+                padding: 18px 20px;
+                resize: vertical;
+                outline: none;
+                border: none;
+                background: #0d0a1e;
+                color: #c4b5fd;
+                box-sizing: border-box;
+                tab-size: 2;
+              }
+              html:not(.dark) #blog-html-textarea {
+                background: #f8f7ff;
+                color: #4c1d95;
+              }
             `}</style>
-            <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden">
-              <EditorProvider key={editorKey}>
-                <Editor
+            {/* ── Compose / HTML source tab bar ── */}
+            <div style={{ display: 'flex' }}>
+              <button
+                type="button"
+                onClick={() => { if (htmlMode) { setHtmlMode(false); setEditorKey(k => k + 1); } }}
+                style={{
+                  padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  border: '1px solid rgba(167,139,250,0.3)', borderBottom: 'none', borderRight: 'none',
+                  borderRadius: '10px 0 0 0',
+                  background: !htmlMode ? '#7c3aed' : 'rgba(124,58,237,0.06)',
+                  color: !htmlMode ? '#ffffff' : '#9ca3af',
+                  display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Compose
+              </button>
+              <button
+                type="button"
+                onClick={() => setHtmlMode(true)}
+                style={{
+                  padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  border: '1px solid rgba(167,139,250,0.3)', borderBottom: 'none',
+                  borderLeft: '1px solid rgba(167,139,250,0.15)', borderRadius: '0 10px 0 0',
+                  background: htmlMode ? '#7c3aed' : 'rgba(124,58,237,0.06)',
+                  color: htmlMode ? '#ffffff' : '#9ca3af',
+                  display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
+                }}
+              >
+                <Code size={12} />
+                HTML
+              </button>
+            </div>
+            <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 overflow-hidden" style={{ borderRadius: '0 10px 10px 10px' }}>
+              {htmlMode ? (
+                <textarea
+                  id="blog-html-textarea"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  containerProps={{ style: { minHeight: '400px', overflowY: 'auto' } }}
-                >
-                  <Toolbar>
-                    <BtnUndo />
-                    <BtnRedo />
-                    <Separator />
-                    <BtnBold />
-                    <BtnItalic />
-                    <BtnUnderline />
-                    <BtnStrikeThrough />
-                    <Separator />
-                    <TextColorPicker />
-                    <HighlightPicker />
-                    <Separator />
-                    <BtnBulletList />
-                    <BtnNumberedList />
-                    <Separator />
-                    <BtnLink />
-                    <BtnClearFormatting />
-                    <Separator />
-                    <HeadingPicker />
-                    <FontSizePicker />
-                    <Separator />
-                    <InlineImageButton />
-                    <CodeBlockButton />
-                  </Toolbar>
-                </Editor>
-              </EditorProvider>
+                  onChange={e => setContent(e.target.value)}
+                  spellCheck={false}
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
+              ) : (
+                <EditorProvider key={editorKey}>
+                  <Editor
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    containerProps={{ style: { minHeight: '400px', overflowY: 'auto' } }}
+                  >
+                    <Toolbar>
+                      <BtnUndo />
+                      <BtnRedo />
+                      <Separator />
+                      <BtnBold />
+                      <BtnItalic />
+                      <BtnUnderline />
+                      <BtnStrikeThrough />
+                      <Separator />
+                      <TextColorPicker />
+                      <HighlightPicker />
+                      <Separator />
+                      <BtnBulletList />
+                      <BtnNumberedList />
+                      <Separator />
+                      <BtnLink />
+                      <BtnClearFormatting />
+                      <Separator />
+                      <HeadingPicker />
+                      <FontSizePicker />
+                      <Separator />
+                      <InlineImageButton />
+                      <CodeBlockButton />
+                    </Toolbar>
+                  </Editor>
+                </EditorProvider>
+              )}
             </div>
           </div>
 
