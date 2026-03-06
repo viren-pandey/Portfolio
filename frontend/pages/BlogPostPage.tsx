@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -98,12 +98,43 @@ const BlogPostPage: React.FC = () => {
   const navigate = useNavigate();
 
   const post = permalink ? getPostByPermalink(permalink) : undefined;
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Extract headings & inject IDs once per post
   const { processedHtml, headings } = useMemo(() => {
     if (!post?.content) return { processedHtml: '', headings: [] };
     return extractAndInjectHeadings(post.content);
   }, [post?.content]);
+
+  // Inject copy buttons into every <pre> block after content renders
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const pres = el.querySelectorAll<HTMLPreElement>('pre:not([data-copy-injected])');
+    pres.forEach((pre) => {
+      pre.setAttribute('data-copy-injected', '1');
+      pre.style.position = 'relative';
+
+      const btn = document.createElement('button');
+      btn.setAttribute('class', 'code-copy-btn');
+      btn.setAttribute('title', 'Copy code');
+      btn.innerHTML = `<span class="copy-icon">⧉</span><span class="copy-label">Copy</span>`;
+
+      btn.onclick = async () => {
+        const text = (pre.querySelector('code') ?? pre).innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.innerHTML = `<span class="copy-icon">✓</span><span class="copy-label">Copied!</span>`;
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = `<span class="copy-icon">⧉</span><span class="copy-label">Copy</span>`;
+            btn.classList.remove('copied');
+          }, 2000);
+        } catch {/* clipboard denied */}
+      };
+      pre.appendChild(btn);
+    });
+  }, [processedHtml]);
 
   useEffect(() => {
     if (permalink && !post) {
@@ -176,11 +207,14 @@ const BlogPostPage: React.FC = () => {
           </Link>
         </motion.div>
 
-        {/* Two-column: article + TOC sidebar */}
+        {/* Two-column: invisible left spacer + article (centered) + TOC sidebar */}
         <div className="flex gap-10 items-start">
 
-        {/* ── Article ── */}
-        <article className="flex-1 min-w-0 max-w-3xl">
+          {/* Left spacer — mirrors TOC width so article stays centered */}
+          <div className="hidden xl:block w-64 flex-shrink-0" />
+
+          {/* ── Article ── */}
+          <article className="flex-1 min-w-0 max-w-3xl mx-auto">
 
         {/* Hero image */}
         {post.image && (
@@ -248,23 +282,60 @@ const BlogPostPage: React.FC = () => {
 
         {/* Post content */}
         <style>{`
+          /* ── Code block box ─────────────────────────────────────── */
+          .blog-content pre {
+            position: relative;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.5em 0;
+            padding: 20px 20px 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            border: 1.5px solid rgba(108,99,255,0.25);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+          }
+          .blog-content pre code {
+            font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+            font-size: inherit;
+            background: none;
+            padding: 0;
+          }
+          /* ── Copy button ─────────────────────────────────────────── */
+          .code-copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            background: rgba(108,99,255,0.15);
+            border: 1px solid rgba(108,99,255,0.3);
+            color: #a78bfa;
+            transition: all 0.15s;
+            z-index: 10;
+          }
+          .code-copy-btn:hover { background: rgba(108,99,255,0.3); color: #c4baff; }
+          .code-copy-btn.copied { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.4); color: #4ade80; }
+          /* ── Figures ─────────────────────────────────────────────── */
           .blog-content figure { text-align: center; margin: 1.5em auto; }
           .blog-content figure img { max-width: 100%; height: auto; display: inline-block; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
           .blog-content figcaption { font-size: 0.85em; color: #6b7280; margin-top: 8px; font-style: italic; }
-          .blog-content pre { border-radius: 10px; overflow-x: auto; }
-          .blog-content pre code { font-family: 'Fira Code', Consolas, monospace; font-size: inherit; }
-          /* ── Light mode fixes ───────────────────────────────────── */
-          /* Override inline white/light text colors saved by the editor color picker.
-             Inline styles have highest CSS specificity, so !important is required. */
+          /* ── Light mode overrides ────────────────────────────────── */
           html:not(.dark) .blog-content span[style],
           html:not(.dark) .blog-content font { color: inherit !important; }
-          /* Keep the content div itself dark so inherited color is readable */
           html:not(.dark) .blog-content { color: #111827; }
-          /* Override inline dark code-block backgrounds from editor */
-          html:not(.dark) .blog-content pre { background: #f1f5f9 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
-          html:not(.dark) .blog-content pre code { color: #6d28d9 !important; }
-          /* ── Dark mode ──────────────────────────────────────────── */
+          html:not(.dark) .blog-content pre { background: #f8f7ff !important; border-color: rgba(108,99,255,0.2) !important; }
+          html:not(.dark) .blog-content pre code { color: #4c1d95 !important; }
+          /* ── Dark mode ───────────────────────────────────────────── */
           html.dark .blog-content { color: #e2e8f0; }
+          html.dark .blog-content pre { background: #0d0b1f !important; }
+          html.dark .blog-content pre code { color: #c4b5fd !important; }
           html.dark .blog-content figcaption { color: #9ca3af; }
         `}</style>
         <motion.div
@@ -277,18 +348,19 @@ const BlogPostPage: React.FC = () => {
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
             prose-strong:text-gray-900 dark:prose-strong:text-white
             prose-code:text-purple-600 dark:prose-code:text-purple-400
-            prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10
+            prose-pre:!p-0 prose-pre:!bg-transparent prose-pre:!border-0 prose-pre:!shadow-none
             prose-img:rounded-2xl prose-img:shadow-xl
             prose-blockquote:border-purple-500 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
           "
+          ref={contentRef}
           dangerouslySetInnerHTML={{ __html: processedHtml }}
         />
-        </article>
+          </article>
 
-        {/* ── Sticky TOC sidebar (xl+) ── */}
-        <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-28 self-start">
-          <TableOfContents headings={headings} />
-        </aside>
+          {/* ── Sticky TOC sidebar (xl+) ── */}
+          <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-28 self-start">
+            <TableOfContents headings={headings} />
+          </aside>
 
         </div>{/* end two-column */}
       </div>
