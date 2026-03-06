@@ -161,7 +161,7 @@ const Contact: React.FC = () => {
                     type="text"
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
-                    placeholder="Wanna become editor , sugestion (JOB)"
+                    placeholder="Wanna become editor , sugestion ( giving me JOB?)"
                     className="w-full px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   />
                 </div>

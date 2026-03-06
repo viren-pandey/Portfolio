@@ -63,7 +63,7 @@ const SkillTag = function(props: { skill: string; accent: string }) {
   }, skill);
 };
 
-const DetailPanel = function(props) {
+const DetailPanel = function(props: { category: string; cfg: { accent: string; Icon: React.ElementType; [key: string]: unknown }; onClose: () => void; isDark: boolean }) {
   var category = props.category; var cfg = props.cfg; var onClose = props.onClose; var isDark = props.isDark;
   var projects = getProjectsForCategory(category);
   var accent = cfg.accent;
@@ -166,7 +166,7 @@ const Skills = function() {
   var isDark = useDark();
   var _hov = React.useState(null); var hoveredIdx = _hov[0]; var setHoveredIdx = _hov[1];
   var _sel = React.useState(null); var selectedIdx = _sel[0]; var setSelectedIdx = _sel[1];
-  var handleClick = function(idx) { setSelectedIdx(function(prev) { return prev === idx ? null : idx; }); };
+  var handleClick = function(idx: number) { setSelectedIdx(function(prev: number | null) { return prev === idx ? null : idx; }); };
   var t = T(isDark);
 
   return React.createElement('div', { className: 'relative max-w-6xl mx-auto px-6', style: { fontFamily: FONT } },
