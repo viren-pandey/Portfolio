@@ -16,7 +16,7 @@ const CARD_CONFIG = [
 
 const CATEGORY_CONTEXT = {};
 
-function getProjectsForCategory(category) {
+function getProjectsForCategory(category: string) {
   const cat = SKILLS.find(s => s.category === category);
   if (!cat) return [];
   const skillSet = new Set(cat.skills.map(s => s.toLowerCase()));
@@ -40,7 +40,7 @@ function useDark() {
 }
 
 // Theme tokens - all colors in one place
-function T(dark) {
+function T(dark: boolean) {
   return {
     panelBg:   dark ? '#111827' : '#ffffff',
     cardBg:    dark ? '#1f2937' : '#f9fafb',
@@ -55,7 +55,7 @@ function T(dark) {
   };
 }
 
-const SkillTag = function(props) {
+const SkillTag = function(props: { skill: string; accent: string }) {
   var skill = props.skill; var accent = props.accent;
   return React.createElement('span', {
     className: 'inline-block text-xs font-semibold px-3 py-1 rounded-full transition-all duration-200',
