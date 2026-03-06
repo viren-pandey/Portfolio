@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link as LinkIcon,
@@ -1122,20 +1122,19 @@ const AdminSidebar: React.FC<{
         open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       ].join(' ')}>
         {/* Brand */}
-        <div className="px-6 pt-8 pb-6 border-b border-black/10 dark:border-white/8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                <Layout size={16} className="text-white" />
-              </div>
-              <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight">CMS Panel</span>
+        <div className="px-5 pt-6 pb-5 border-b border-black/10 dark:border-white/8 relative">
+          {/* Close button - mobile only, absolute top-right */}
+          <button onClick={() => setOpen(false)} className="lg:hidden absolute top-3 right-3 p-1.5 rounded-lg text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+            <ChevronLeft size={18} />
+          </button>
+          {/* Logo stacked above label */}
+          <div className="flex flex-col items-start gap-1 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <Layout size={18} className="text-white" />
             </div>
-            {/* Close button � mobile only */}
-            <button onClick={() => setOpen(false)} className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-              <ChevronLeft size={18} />
-            </button>
+            <span className="font-black text-gray-900 dark:text-white text-sm tracking-tight mt-1">CMS Panel</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-4">
+          <div className="flex items-center gap-1.5">
             <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">{adminName.charAt(0).toUpperCase()}</div>
             <div>
               <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{adminName}</p>
@@ -1143,7 +1142,7 @@ const AdminSidebar: React.FC<{
             </div>
           </div>
         </div>
-        {/* Nav */}
+                {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {visibleItems.map(item => (
             <button key={item.id} onClick={() => handleNav(item.id)}
