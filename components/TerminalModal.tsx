@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Terminal as TerminalIcon, ChevronRight, Briefcase } from 'lucide-react';
 import { PROJECTS } from '../constants';
