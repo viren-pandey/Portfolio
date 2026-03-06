@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Calendar, ChevronRight, Tag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,6 +7,19 @@ import { useBlog } from '../contexts/BlogContext';
 
 const Blog: React.FC = () => {
   const { posts, loading, error, deletePost } = useBlog();
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // Unique tags with post counts, sorted by frequency
+  const tagCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    posts.forEach(p => p.tags.forEach(t => map.set(t, (map.get(t) ?? 0) + 1)));
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [posts]);
+
+  const filteredPosts = useMemo(
+    () => activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts,
+    [posts, activeTag]
+  );
 
   const errorMessages: Record<string, string> = {
     'permission-denied':   'Firestore rules are blocking reads. Set: allow read: if true in Firebase Console → Firestore → Rules.',
@@ -30,6 +43,57 @@ const Blog: React.FC = () => {
         </p>
       </motion.div>
 
+      {/* Tag filter pills */}
+      {!loading && !error && tagCounts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-wrap justify-center gap-2 mb-14"
+        >
+          {/* "All" pill */}
+          <button
+            onClick={() => setActiveTag(null)}
+            className={[
+              'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200',
+              activeTag === null
+                ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
+                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-400',
+            ].join(' ')}
+          >
+            All
+            <span className={[
+              'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+              activeTag === null ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400',
+            ].join(' ')}>
+              {posts.length}
+            </span>
+          </button>
+
+          {tagCounts.map(([tag, count]) => (
+            <button
+              key={tag}
+              onClick={() => setActiveTag(prev => prev === tag ? null : tag)}
+              className={[
+                'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200',
+                activeTag === tag
+                  ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
+                  : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-400',
+              ].join(' ')}
+            >
+              <Tag size={11} />
+              {tag}
+              <span className={[
+                'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                activeTag === tag ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400',
+              ].join(' ')}>
+                {count}
+              </span>
+            </button>
+          ))}
+        </motion.div>
+      )}
+
       {loading ? (
         <div className="flex justify-center items-center py-24">
           <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -45,7 +109,7 @@ const Blog: React.FC = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post, idx) => (
+          {filteredPosts.map((post, idx) => (
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 20 }}

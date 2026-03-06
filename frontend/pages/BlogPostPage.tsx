@@ -1,9 +1,96 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { Calendar, Clock, Tag, ArrowLeft, User } from 'lucide-react';
+import { Calendar, Clock, Tag, ArrowLeft, User, List } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
+
+// ── Types ──────────────────────────────────────────────────────────────────
+interface Heading { level: number; text: string; id: string; }
+
+// ── Inject anchor IDs into heading tags, return processed HTML + heading list
+function extractAndInjectHeadings(html: string): { processedHtml: string; headings: Heading[] } {
+  const headings: Heading[] = [];
+  const usedSlugs = new Map<string, number>();
+
+  const processedHtml = html.replace(/<h([1-3])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, lvl, attrs, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    let slug = text.toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 72) || `heading-${headings.length}`;
+    const n = usedSlugs.get(slug) ?? 0;
+    usedSlugs.set(slug, n + 1);
+    const finalId = n > 0 ? `${slug}-${n}` : slug;
+    headings.push({ level: Number(lvl), text, id: finalId });
+    return `<h${lvl}${attrs} id="${finalId}">${inner}</h${lvl}>`;
+  });
+
+  return { processedHtml, headings };
+}
+
+// ── Table of Contents ──────────────────────────────────────────────────────
+const TableOfContents: React.FC<{ headings: Heading[] }> = ({ headings }) => {
+  const [activeId, setActiveId] = useState('');
+
+  useEffect(() => {
+    if (!headings.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length > 0) setActiveId(visible[0].target.id);
+      },
+      { rootMargin: '-80px 0px -55% 0px', threshold: 0 }
+    );
+    headings.forEach(h => {
+      const el = document.getElementById(h.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [headings]);
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+  };
+
+  if (!headings.length) return null;
+
+  return (
+    <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-black/10 dark:border-white/10 flex items-center gap-2">
+        <List size={13} className="text-purple-500" />
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+          On this page
+        </span>
+      </div>
+
+      {/* Nav items */}
+      <nav className="p-2.5 space-y-0.5 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        {headings.map((h) => (
+          <button
+            key={h.id}
+            onClick={() => scrollTo(h.id)}
+            title={h.text}
+            className={[
+              'w-full text-left rounded-lg py-1.5 leading-snug transition-all duration-150',
+              h.level === 1 ? 'px-3 text-[13px] font-semibold' : '',
+              h.level === 2 ? 'pl-6 pr-3 text-[12px] font-medium' : '',
+              h.level === 3 ? 'pl-9 pr-3 text-[11px]' : '',
+              activeId === h.id
+                ? 'text-purple-600 dark:text-purple-400 bg-purple-500/10 border-l-2 border-purple-500 pl-[10px]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5',
+            ].join(' ')}
+          >
+            <span className="line-clamp-2">{h.text}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+};
 
 const BlogPostPage: React.FC = () => {
   const { permalink } = useParams<{ permalink: string }>();
@@ -11,6 +98,12 @@ const BlogPostPage: React.FC = () => {
   const navigate = useNavigate();
 
   const post = permalink ? getPostByPermalink(permalink) : undefined;
+
+  // Extract headings & inject IDs once per post
+  const { processedHtml, headings } = useMemo(() => {
+    if (!post?.content) return { processedHtml: '', headings: [] };
+    return extractAndInjectHeadings(post.content);
+  }, [post?.content]);
 
   useEffect(() => {
     if (permalink && !post) {
@@ -67,8 +160,8 @@ const BlogPostPage: React.FC = () => {
         ))}
       </Helmet>
 
-      <article className="max-w-4xl mx-auto px-6 py-32">
-        {/* Back link */}
+      <div className="max-w-7xl mx-auto px-6 py-32">
+        {/* Back link — full width */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -82,6 +175,12 @@ const BlogPostPage: React.FC = () => {
             Back to Blog
           </Link>
         </motion.div>
+
+        {/* Two-column: article + TOC sidebar */}
+        <div className="flex gap-10 items-start">
+
+        {/* ── Article ── */}
+        <article className="flex-1 min-w-0 max-w-3xl">
 
         {/* Hero image */}
         {post.image && (
@@ -182,9 +281,17 @@ const BlogPostPage: React.FC = () => {
             prose-img:rounded-2xl prose-img:shadow-xl
             prose-blockquote:border-purple-500 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
           "
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: processedHtml }}
         />
-      </article>
+        </article>
+
+        {/* ── Sticky TOC sidebar (xl+) ── */}
+        <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-28 self-start">
+          <TableOfContents headings={headings} />
+        </aside>
+
+        </div>{/* end two-column */}
+      </div>
     </>
   );
 };
