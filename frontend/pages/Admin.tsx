@@ -439,7 +439,7 @@ const PostsSection: React.FC = () => {
             };
             const sm = statusMeta[status] ?? statusMeta['published'];
             return (
-              <div key={post.id} className={`flex flex-col sm:flex-row items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : status === 'archive_requested' ? 'border-orange-500/30' : status === 'archived' ? 'border-gray-500/20 opacity-70' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
+              <div key={post.id} onDoubleClick={() => { if (post.permalink) window.open(`/blog/${post.permalink}`, '_blank'); }} className={`flex flex-col sm:flex-row items-start gap-4 p-4 rounded-2xl border bg-white dark:bg-[#0c0a20] transition-colors cursor-pointer select-none ${status === 'pending' ? 'border-amber-500/30 dark:border-amber-500/30' : status === 'rejected' ? 'border-red-500/30' : status === 'archive_requested' ? 'border-orange-500/30' : status === 'archived' ? 'border-gray-500/20 opacity-70' : 'border-black/10 dark:border-white/10 hover:border-purple-500/30'}`}>
                 {post.image && <img src={post.image} alt={post.title} className="w-full sm:w-14 sm:h-14 h-32 object-cover rounded-xl shrink-0 sm:mt-0.5" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -509,7 +509,8 @@ const PostsSection: React.FC = () => {
                       <ArchiveRestore size={13} /> Unarchive
                     </button>
                   )}
-                  {canApprove && status !== 'archived' && status !== 'archive_requested' && <button onClick={() => { if (window.confirm(`Delete "${post.title}"?`)) deletePost(post.id); }} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Delete"><Trash2 size={14} /></button>}
+                  {/* Delete — only on archived posts, admin only */}
+                  {isAdmin && status === 'archived' && <button onClick={e => { e.stopPropagation(); if (window.confirm(`Permanently delete "${post.title}"? This cannot be undone.`)) deletePost(post.id); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-semibold" title="Delete permanently"><Trash2 size={13} /> Delete</button>}
                 </div>
               </div>
             );
