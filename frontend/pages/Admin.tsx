@@ -82,6 +82,204 @@ const HighlightPicker: React.FC = () => {
   return <ColorDropdown label={<span style={{ fontWeight: 700, fontSize: 12, padding: '0 3px', borderRadius: 2, background: color === 'transparent' ? 'none' : color, color: '#1a1a2e' }}>H</span>} colors={HIGHLIGHT_COLORS} onPick={apply} activeColor={color} />;
 };
 
+// ── Heading / Text-size Picker ─────────────────────────────────────────────
+const HEADING_OPTIONS = [
+  { label: 'Normal',          tag: 'p',  fs: 13, fw: 400 },
+  { label: 'H1 – Title',      tag: 'h1', fs: 20, fw: 700 },
+  { label: 'H2 – Heading',    tag: 'h2', fs: 16, fw: 600 },
+  { label: 'H3 – Subheading', tag: 'h3', fs: 13, fw: 600 },
+];
+
+const HeadingPicker: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        title="Text size / heading"
+        onMouseDown={(e) => { e.preventDefault(); setOpen(v => !v); }}
+        style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '3px 8px', cursor: 'pointer', background: 'none', border: 'none', color: '#e2e8f0', fontSize: 13, fontWeight: 700 }}
+      >
+        T<span style={{ fontSize: 8, lineHeight: 1 }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 9999, background: '#1e1830', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 4, minWidth: 170, boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+          {HEADING_OPTIONS.map(opt => (
+            <button
+              key={opt.tag}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, opt.tag); setOpen(false); }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 12px', background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', borderRadius: 5, fontSize: opt.fs, fontWeight: opt.fw }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(167,139,250,0.2)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+};
+
+// ── Inline Image Inserter ──────────────────────────────────────────────────
+const InlineImageButton: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const [url, setUrl] = useState('');
+  const [alt, setAlt] = useState('');
+  const [width, setWidth] = useState('75');
+  const savedRange = useRef<Range | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const saveRange = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) savedRange.current = sel.getRangeAt(0).cloneRange();
+  };
+
+  const insert = () => {
+    if (!url) return;
+    const caption = alt
+      ? `<figcaption style="font-size:0.85em;color:#9ca3af;margin-top:6px;font-style:italic">${alt}</figcaption>`
+      : '';
+    const html = `<figure style="text-align:center;margin:1.5em 0"><img src="${url}" alt="${alt}" style="width:${width}%;max-width:100%;border-radius:12px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.4)" />${caption}</figure><p><br></p>`;
+    if (savedRange.current) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(savedRange.current);
+    }
+    document.execCommand('insertHTML', false, html);
+    setOpen(false); setUrl(''); setAlt(''); setWidth('75');
+  };
+
+  const inp: React.CSSProperties = {
+    width: '100%', padding: '5px 8px', borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)',
+    color: '#e2e8f0', fontSize: 12, boxSizing: 'border-box', outline: 'none', marginBottom: 6,
+  };
+
+  const widthOptions = [['25', 'S'], ['50', 'M'], ['75', 'L'], ['100', 'Full']];
+
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        title="Insert image into post body"
+        onMouseDown={(e) => { e.preventDefault(); saveRange(); setOpen(v => !v); }}
+        style={{ display: 'flex', alignItems: 'center', padding: '3px 7px', cursor: 'pointer', background: 'none', border: 'none', color: '#e2e8f0' }}
+      >
+        <ImageIcon size={14} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 9999, background: '#1e1830', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: 14, width: 280, boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+          <p style={{ color: '#a78bfa', fontSize: 11, fontWeight: 600, marginBottom: 10, marginTop: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Insert Image</p>
+          <input type="url" placeholder="Image URL" value={url} onChange={e => setUrl(e.target.value)} style={inp} />
+          <input type="text" placeholder="Alt text / caption" value={alt} onChange={e => setAlt(e.target.value)} style={inp} />
+          <p style={{ color: '#9ca3af', fontSize: 11, margin: '0 0 5px' }}>Width</p>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+            {widthOptions.map(item => (
+              <button
+                key={item[0]}
+                type="button"
+                onMouseDown={e => { e.preventDefault(); setWidth(item[0]); }}
+                style={{ flex: 1, padding: '4px 2px', borderRadius: 5, fontSize: 11, border: '1px solid', borderColor: width === item[0] ? '#7c3aed' : 'rgba(255,255,255,0.15)', background: width === item[0] ? 'rgba(124,58,237,0.3)' : 'none', color: '#e2e8f0', cursor: 'pointer' }}
+              >
+                {item[1]}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); insert(); }}
+              disabled={!url}
+              style={{ flex: 1, padding: '6px 0', borderRadius: 6, background: url ? '#7c3aed' : 'rgba(124,58,237,0.3)', color: '#fff', border: 'none', cursor: url ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 600 }}
+            >
+              Insert
+            </button>
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); setOpen(false); }}
+              style={{ flex: 1, padding: '6px 0', borderRadius: 6, background: 'rgba(255,255,255,0.08)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: 12 }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </span>
+  );
+};
+
+// ── Code Block Inserter ────────────────────────────────────────────────────
+const CodeBlockButton: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const insert = (fontSize: string) => {
+    const html = `<pre style="background:#0d0a1e;border:1px solid rgba(167,139,250,0.25);border-radius:10px;padding:16px 20px;font-size:${fontSize};overflow-x:auto;margin:1em 0;line-height:1.6"><code style="font-family:'Fira Code',Consolas,monospace;color:#c4b5fd">// paste your code here</code></pre><p><br></p>`;
+    document.execCommand('insertHTML', false, html);
+    setOpen(false);
+  };
+
+  const sizes = [['13px', 'Small'], ['15px', 'Normal'], ['17px', 'Large']];
+
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        title="Insert code block"
+        onMouseDown={(e) => { e.preventDefault(); setOpen(v => !v); }}
+        style={{ display: 'flex', alignItems: 'center', padding: '3px 8px', cursor: 'pointer', background: 'none', border: 'none', color: '#a78bfa', fontFamily: 'monospace', fontSize: 13, fontWeight: 700 }}
+      >
+        {'</>'}
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 9999, background: '#1e1830', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+          <p style={{ color: '#9ca3af', fontSize: 11, padding: '2px 8px 5px', margin: 0 }}>Code block size</p>
+          {sizes.map(item => (
+            <button
+              key={item[0]}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); insert(item[0]); }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 12px', background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', borderRadius: 5, fontFamily: 'monospace', fontSize: item[0] }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(167,139,250,0.2)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+            >
+              {item[1]}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+};
+
 const Admin: React.FC = () => {
   const { addPost } = useBlog();
   const navigate = useNavigate();
@@ -373,6 +571,11 @@ const Admin: React.FC = () => {
               #blog-editor-wrap button.rsw-btn { color: #e2e8f0; border-radius: 4px; }
               #blog-editor-wrap button.rsw-btn:hover { background: rgba(167,139,250,0.2); }
               #blog-editor-wrap .rsw-separator { border-color: rgba(255,255,255,0.12); }
+              #blog-editor-wrap .rsw-ce figure { text-align: center; margin: 1.2em 0; }
+              #blog-editor-wrap .rsw-ce figure img { display: inline-block; border-radius: 10px; max-width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+              #blog-editor-wrap .rsw-ce figure figcaption { font-size: 0.85em; color: #9ca3af; margin-top: 5px; font-style: italic; }
+              #blog-editor-wrap .rsw-ce pre { background: #0d0a1e; border: 1px solid rgba(167,139,250,0.25); border-radius: 10px; padding: 14px 18px; overflow-x: auto; margin: 1em 0; line-height: 1.6; }
+              #blog-editor-wrap .rsw-ce pre code { font-family: 'Fira Code', Consolas, monospace; color: #c4b5fd; }
             `}</style>
             <div id="blog-editor-wrap" className="dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden">
               <EditorProvider>
@@ -398,6 +601,11 @@ const Admin: React.FC = () => {
                     <Separator />
                     <BtnLink />
                     <BtnClearFormatting />
+                    <Separator />
+                    <HeadingPicker />
+                    <Separator />
+                    <InlineImageButton />
+                    <CodeBlockButton />
                   </Toolbar>
                 </Editor>
               </EditorProvider>

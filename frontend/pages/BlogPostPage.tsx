@@ -148,11 +148,18 @@ const BlogPostPage: React.FC = () => {
         </motion.header>
 
         {/* Post content */}
+        <style>{`
+          .blog-content figure { text-align: center; margin: 1.5em auto; }
+          .blog-content figure img { max-width: 100%; height: auto; display: inline-block; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+          .blog-content figcaption { font-size: 0.85em; color: #9ca3af; margin-top: 8px; font-style: italic; }
+          .blog-content pre { border-radius: 10px; overflow-x: auto; }
+          .blog-content pre code { font-family: 'Fira Code', Consolas, monospace; font-size: inherit; }
+        `}</style>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="prose prose-lg prose-gray dark:prose-invert max-w-none
+          className="blog-content prose prose-lg prose-gray dark:prose-invert max-w-none
             prose-headings:font-display prose-headings:text-gray-900 dark:prose-headings:text-white
             prose-p:text-gray-700 dark:prose-p:text-gray-300
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
