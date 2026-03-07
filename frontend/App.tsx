@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
-import { Bell, Mail, MessageCircle, Terminal } from 'lucide-react';
+import { Mail, MessageCircle, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import AIChat from './components/AIChat';
 import Home from './pages/Home';
@@ -32,20 +32,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const cachedNotifications = useRef<Array<{ id: string; data: { title?: string; body?: string; url?: string } }>>([]);
   const flushLatestUnseenRef = useRef<() => void>(() => {});
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('unsupported');
-  const [requestingPermission, setRequestingPermission] = useState(false);
-
-  const requestNotificationPermission = async () => {
-    if (!('Notification' in window) || requestingPermission) return;
-    setRequestingPermission(true);
-    try {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
-    } catch {
-      setNotificationPermission(Notification.permission);
-    } finally {
-      setRequestingPermission(false);
-    }
-  };
 
   useEffect(() => {
     if (!('Notification' in window)) {
@@ -170,19 +156,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </footer>
 
       <div className="fixed bottom-8 right-8 z-[60] flex flex-col gap-3">
-        {notificationPermission !== 'unsupported' && notificationPermission !== 'granted' && (
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={requestNotificationPermission}
-            disabled={requestingPermission}
-            className="w-12 h-12 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-400/40 rounded-full flex items-center justify-center backdrop-blur-xl transition-colors shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            title={requestingPermission ? 'Enabling alerts...' : 'Enable Alerts'}
-          >
-            <Bell size={20} className="text-orange-500" />
-          </motion.button>
-        )}
-
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
