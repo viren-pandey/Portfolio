@@ -1355,7 +1355,7 @@ const NotificationsSection: React.FC = () => {
         <div>
           <div className="mb-4 p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-start gap-3">
             <Radio size={16} className="text-blue-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-gray-400">Notifications are sent to blog visitors who have granted browser permission. They appear instantly on open tabs and on the next visit for others.</p>
+            <p className="text-xs text-gray-400">Visitors must allow alerts once (tap the orange bell on site). On mobile, notifications are shown while the site is open in browser/PWA.</p>
           </div>
           <form onSubmit={handleSend} className="space-y-4">
             <div>

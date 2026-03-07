@@ -1,9 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
-import { Mail, MessageCircle, Terminal } from 'lucide-react';
+import { Bell, Mail, MessageCircle, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import AIChat from './components/AIChat';
 import Home from './pages/Home';
@@ -29,41 +29,88 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isTerminalOpen, openTerminal, closeTerminal, isChatOpen, toggleChat, setChatOpen } = useUI();
   const initialized = useRef(false);
   const knownIds = useRef<Set<string>>(new Set());
+  const cachedNotifications = useRef<Array<{ id: string; data: { title?: string; body?: string; url?: string } }>>([]);
+  const flushLatestUnseenRef = useRef<() => void>(() => {});
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('unsupported');
+  const [requestingPermission, setRequestingPermission] = useState(false);
+
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window) || requestingPermission) return;
+    setRequestingPermission(true);
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+    } catch {
+      setNotificationPermission(Notification.permission);
+    } finally {
+      setRequestingPermission(false);
+    }
+  };
 
   useEffect(() => {
-    if (!('Notification' in window)) return;
+    if (!('Notification' in window)) {
+      setNotificationPermission('unsupported');
+      return;
+    }
+    setNotificationPermission(Notification.permission);
 
     const seenKey = (id: string) => `portfolio_notif_seen_${id}`;
     const hasSeen = (id: string) => localStorage.getItem(seenKey(id)) === '1';
     const markSeen = (id: string) => localStorage.setItem(seenKey(id), '1');
 
-    if (Notification.permission === 'default') {
-      Notification.requestPermission().catch(() => {});
-    }
-
-    const showNotification = (id: string, data: { title?: string; body?: string; url?: string }) => {
+    const showNotification = async (id: string, data: { title?: string; body?: string; url?: string }) => {
       if (hasSeen(id)) return;
-      markSeen(id);
       if (Notification.permission !== 'granted') return;
 
-      const notif = new Notification(data.title?.trim() || 'Portfolio update', {
+      const title = data.title?.trim() || 'Portfolio update';
+      const options: NotificationOptions = {
         body: data.body?.trim() || '',
         icon: '/favicon.ico',
-      });
-      if (data.url) notif.onclick = () => window.open(data.url, '_blank');
+        data: { url: data.url || '' },
+      };
+
+      try {
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          await reg.showNotification(title, options);
+          markSeen(id);
+          return;
+        }
+      } catch {
+        // Fall back to Notification constructor for browsers where SW showNotification fails.
+      }
+
+      try {
+        const notif = new Notification(title, options);
+        if (data.url) notif.onclick = () => window.open(data.url, '_blank');
+        markSeen(id);
+      } catch {
+        // Ignore notification display errors.
+      }
     };
+
+    const flushLatestUnseen = () => {
+      const latestUnseen = cachedNotifications.current.find((d) => !hasSeen(d.id));
+      if (!latestUnseen) return;
+      void showNotification(latestUnseen.id, latestUnseen.data);
+    };
+    flushLatestUnseenRef.current = flushLatestUnseen;
+
+    const syncPermission = () => setNotificationPermission(Notification.permission);
+    document.addEventListener('visibilitychange', syncPermission);
 
     try {
       const q = query(collection(db, 'notifications'), orderBy('_sentAt', 'desc'));
       const unsub = onSnapshot(
         q,
         (snap) => {
+          cachedNotifications.current = snap.docs.map((d) => ({
+            id: d.id,
+            data: d.data() as { title?: string; body?: string; url?: string },
+          }));
+
           if (!initialized.current) {
-            const latestUnseen = snap.docs.find((d) => !hasSeen(d.id));
-            if (latestUnseen) {
-              const data = latestUnseen.data() as { title?: string; body?: string; url?: string };
-              showNotification(latestUnseen.id, data);
-            }
+            flushLatestUnseen();
             knownIds.current = new Set(snap.docs.map((d) => d.id));
             initialized.current = true;
             return;
@@ -75,7 +122,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             if (knownIds.current.has(d.id)) continue;
             knownIds.current.add(d.id);
             const data = d.data() as { title?: string; body?: string; url?: string };
-            showNotification(d.id, data);
+            void showNotification(d.id, data);
           }
 
           for (const d of snap.docs) {
@@ -84,11 +131,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         },
         (err) => console.warn('notifications listener:', err.code)
       );
-      return () => unsub();
+      return () => {
+        document.removeEventListener('visibilitychange', syncPermission);
+        unsub();
+      };
     } catch {
+      document.removeEventListener('visibilitychange', syncPermission);
       return;
     }
   }, []);
+
+  useEffect(() => {
+    if (notificationPermission !== 'granted') return;
+    flushLatestUnseenRef.current();
+  }, [notificationPermission]);
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-[#030014] text-gray-900 dark:text-white selection:bg-purple-500/30 transition-colors duration-300">
@@ -102,7 +158,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <footer className="relative z-10 py-12 border-t border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#030014] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           <div className="text-gray-500 text-sm">
-            © March 2026 Viren Pandey. Built with React & Love.
+            Â© March 2026 Viren Pandey. Built with React & Love.
           </div>
           <div className="flex space-x-6">
             <a href="mailto:pandeyviren78@gmail.com" className="text-gray-400 hover:text-purple-400 flex items-center space-x-2 transition-colors">
@@ -114,6 +170,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </footer>
 
       <div className="fixed bottom-8 right-8 z-[60] flex flex-col gap-3">
+        {notificationPermission !== 'unsupported' && notificationPermission !== 'granted' && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={requestNotificationPermission}
+            disabled={requestingPermission}
+            className="w-12 h-12 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-400/40 rounded-full flex items-center justify-center backdrop-blur-xl transition-colors shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+            title={requestingPermission ? 'Enabling alerts...' : 'Enable Alerts'}
+          >
+            <Bell size={20} className="text-orange-500" />
+          </motion.button>
+        )}
+
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
