@@ -24,6 +24,7 @@ export interface SiteAd {
   imageUrl: string;
   linkUrl: string;
   position: 'between_posts' | 'top_banner' | 'left_sidebar' | 'corner' | 'sidebar';
+  adCode?: string;
   active: boolean;
   createdAt: string;
 }

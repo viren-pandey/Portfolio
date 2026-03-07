@@ -1009,6 +1009,12 @@ const AdsSection: React.FC = () => {
   const { ads, addAd, updateAd, deleteAd, settings, saveSettings } = useAdmin();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title:'', imageUrl:'', linkUrl:'', position:'between_posts' as SiteAd['position'], active:true });
+  const [codeForm, setCodeForm] = useState({
+    title: '',
+    position: 'between_posts' as SiteAd['position'],
+    adCode: '',
+    active: true,
+  });
   const [adsenseForm, setAdsenseForm] = useState({
     adsenseEnabled: false,
     adsenseClient: '',
@@ -1019,6 +1025,8 @@ const AdsSection: React.FC = () => {
   });
   const [savingAdSense, setSavingAdSense] = useState(false);
   const [adSenseSaved, setAdSenseSaved] = useState(false);
+  const [publishingCode, setPublishingCode] = useState(false);
+  const [codePublished, setCodePublished] = useState(false);
 
   const POS_META: Record<string, { label:string; color:string }> = {
     between_posts: { label:'Between Posts', color:'#60a5fa' },
@@ -1032,6 +1040,26 @@ const AdsSection: React.FC = () => {
     e.preventDefault();
     await addAd(form);
     setForm({ title:'', imageUrl:'', linkUrl:'', position:'between_posts', active:true }); setShowForm(false);
+  };
+
+  const handlePublishCodeAd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedCode = codeForm.adCode.trim();
+    if (!trimmedCode) return;
+
+    setPublishingCode(true);
+    await addAd({
+      title: codeForm.title.trim() || `${POS_META[codeForm.position].label} Code Ad`,
+      imageUrl: '',
+      linkUrl: '',
+      position: codeForm.position,
+      adCode: trimmedCode,
+      active: codeForm.active,
+    });
+    setPublishingCode(false);
+    setCodePublished(true);
+    setTimeout(() => setCodePublished(false), 2200);
+    setCodeForm((prev) => ({ ...prev, title: '', adCode: '' }));
   };
 
   useEffect(() => {
@@ -1171,6 +1199,75 @@ const AdsSection: React.FC = () => {
         </div>
       </form>
 
+      <form onSubmit={handlePublishCodeAd} className="mb-6 p-6 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Publish Ad Code</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Choose placement, paste ad snippet, and publish.
+            </p>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+            HTML/JS
+          </span>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Ad Name (optional)</label>
+            <input
+              type="text"
+              placeholder="My network placement"
+              value={codeForm.title}
+              onChange={(e) => setCodeForm((prev) => ({ ...prev, title: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Placement</label>
+            <select
+              value={codeForm.position}
+              onChange={(e) => setCodeForm((prev) => ({ ...prev, position: e.target.value as SiteAd['position'] }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors text-gray-900 dark:text-white text-sm"
+            >
+              {Object.entries(POS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Ad Code</label>
+            <textarea
+              required
+              rows={7}
+              placeholder="<script>...</script> or iframe markup"
+              value={codeForm.adCode}
+              onChange={(e) => setCodeForm((prev) => ({ ...prev, adCode: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-colors text-gray-900 dark:text-white text-sm font-mono resize-y"
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <label className="inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              checked={codeForm.active}
+              onChange={(e) => setCodeForm((prev) => ({ ...prev, active: e.target.checked }))}
+              className="accent-cyan-500"
+            />
+            Publish as active
+          </label>
+          <button
+            type="submit"
+            disabled={publishingCode}
+            className={`px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all ${
+              codePublished
+                ? 'bg-cyan-600'
+                : 'bg-gradient-to-r from-cyan-600 to-blue-600'
+            }`}
+          >
+            {publishingCode ? 'Publishing...' : codePublished ? 'Published!' : 'Publish Code Ad'}
+          </button>
+        </div>
+      </form>
+
       <AnimatePresence>
         {showForm && (
           <motion.form initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}
@@ -1202,14 +1299,24 @@ const AdsSection: React.FC = () => {
         {ads.length === 0 && <p className="text-center text-gray-400 text-sm py-12">No ads yet.</p>}
         {ads.map(ad => (
           <div key={ad.id} className="flex items-center gap-4 p-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0a20]">
-            {ad.imageUrl && <img src={ad.imageUrl} alt={ad.title} className="w-20 h-12 object-cover rounded-xl shrink-0 border border-black/10 dark:border-white/10" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />}
+            {ad.adCode?.trim()
+              ? (
+                <div className="w-20 h-12 rounded-xl shrink-0 border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-center text-[10px] text-cyan-400 font-semibold">
+                  CODE
+                </div>
+              ) : (
+                ad.imageUrl && <img src={ad.imageUrl} alt={ad.title} className="w-20 h-12 object-cover rounded-xl shrink-0 border border-black/10 dark:border-white/10" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
+              )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{ad.title}</p>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background:`${POS_META[ad.position].color}20`, color:POS_META[ad.position].color }}>{POS_META[ad.position].label}</span>
+                {ad.adCode?.trim() && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400">Code Snippet</span>}
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${ad.active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>{ad.active ? 'Active' : 'Paused'}</span>
               </div>
-              <a href={ad.linkUrl} target="_blank" rel="noreferrer" className="text-xs text-purple-400 hover:underline truncate block max-w-xs">{ad.linkUrl}</a>
+              {ad.adCode?.trim()
+                ? <p className="text-xs text-cyan-400 truncate">Custom ad code published for this placement.</p>
+                : <a href={ad.linkUrl} target="_blank" rel="noreferrer" className="text-xs text-purple-400 hover:underline truncate block max-w-xs">{ad.linkUrl}</a>}
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={() => updateAd(ad.id, { active: !ad.active })} className={`p-2 rounded-lg transition-colors ${ad.active ? 'bg-green-500/10 text-green-400 hover:bg-red-500/10 hover:text-red-400':'bg-red-500/10 text-red-400 hover:bg-green-500/10 hover:text-green-400'}`} title={ad.active?'Pause':'Activate'}>{ad.active ? <ToggleRight size={15}/> : <ToggleLeft size={15}/>}</button>

@@ -6,6 +6,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
 import AdSenseUnit from '../components/ads/AdSenseUnit';
+import AdCodeSlot from '../components/ads/AdCodeSlot';
 
 const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
 type PopupStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -17,10 +18,30 @@ const Blog: React.FC = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
 
-  const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
-  const topBannerAd = useMemo(() => ads.find(a => a.active && a.position === 'top_banner') ?? null, [ads]);
-  const leftRailAd = useMemo(
-    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar')) ?? null,
+  const betweenCodeAds = useMemo(
+    () => ads.filter(a => a.active && a.position === 'between_posts' && !!a.adCode?.trim()),
+    [ads]
+  );
+  const betweenImageAds = useMemo(
+    () => ads.filter(a => a.active && a.position === 'between_posts' && !a.adCode?.trim()),
+    [ads]
+  );
+
+  const topCodeAd = useMemo(
+    () => ads.find(a => a.active && a.position === 'top_banner' && !!a.adCode?.trim()) ?? null,
+    [ads]
+  );
+  const topImageAd = useMemo(
+    () => ads.find(a => a.active && a.position === 'top_banner' && !a.adCode?.trim()) ?? null,
+    [ads]
+  );
+
+  const leftCodeAd = useMemo(
+    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar') && !!a.adCode?.trim()) ?? null,
+    [ads]
+  );
+  const leftImageAd = useMemo(
+    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar') && !a.adCode?.trim()) ?? null,
     [ads]
   );
 
@@ -123,7 +144,7 @@ const Blog: React.FC = () => {
         </p>
       </motion.div>
 
-      {(useAdSenseTopBlog || topBannerAd) && (
+      {(topCodeAd || useAdSenseTopBlog || topImageAd) && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,17 +153,19 @@ const Blog: React.FC = () => {
           <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
             Sponsored
           </p>
-          {useAdSenseTopBlog ? (
+          {topCodeAd ? (
+            <AdCodeSlot code={topCodeAd.adCode ?? ''} />
+          ) : useAdSenseTopBlog ? (
             <AdSenseUnit
               enabled={useAdSenseTopBlog}
               client={adsenseClient}
               slot={adsenseTopBlogSlot}
             />
           ) : (
-            <a href={topBannerAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+            <a href={topImageAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
               className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
-              {topBannerAd?.imageUrl && (
-                <img src={topBannerAd.imageUrl} alt={topBannerAd.title}
+              {topImageAd?.imageUrl && (
+                <img src={topImageAd.imageUrl} alt={topImageAd.title}
                   className="w-full max-h-40 object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
               )}
@@ -219,8 +242,11 @@ const Blog: React.FC = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post, idx) => {
             const shouldShowBetweenAd = (idx + 1) % 3 === 0;
-            const adAfterThis = !useAdSenseBetweenPosts && shouldShowBetweenAd && betweenAds.length > 0
-              ? betweenAds[Math.floor(idx / 3) % betweenAds.length]
+            const codeAdAfterThis = shouldShowBetweenAd && betweenCodeAds.length > 0
+              ? betweenCodeAds[Math.floor(idx / 3) % betweenCodeAds.length]
+              : null;
+            const adAfterThis = !codeAdAfterThis && !useAdSenseBetweenPosts && shouldShowBetweenAd && betweenImageAds.length > 0
+              ? betweenImageAds[Math.floor(idx / 3) % betweenImageAds.length]
               : null;
             return (<React.Fragment key={post.id}>
             <motion.article
@@ -298,7 +324,21 @@ const Blog: React.FC = () => {
                 </div>
               </div>
             </motion.article>
-              {shouldShowBetweenAd && useAdSenseBetweenPosts && (
+              {shouldShowBetweenAd && codeAdAfterThis && (
+                <motion.div
+                  key={`code-ad-after-${idx}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 + 0.2 }}
+                  className="md:col-span-2 lg:col-span-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
+                >
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                    Sponsored
+                  </p>
+                  <AdCodeSlot code={codeAdAfterThis.adCode ?? ''} />
+                </motion.div>
+              )}
+              {shouldShowBetweenAd && !codeAdAfterThis && useAdSenseBetweenPosts && (
                 <motion.div
                   key={`adsense-after-${idx}`}
                   initial={{ opacity: 0, y: 10 }}
@@ -337,23 +377,25 @@ const Blog: React.FC = () => {
           })}
         </div>
       )}
-      {(useAdSenseLeftSidebar || leftRailAd) && (
+      {(leftCodeAd || useAdSenseLeftSidebar || leftImageAd) && (
         <div className="hidden 2xl:block fixed left-6 top-1/2 -translate-y-1/2 z-40 w-52">
           <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/95 dark:bg-[#0d0b22]/95 backdrop-blur-md p-3 shadow-2xl">
             <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
               Sponsored
             </p>
-            {useAdSenseLeftSidebar ? (
+            {leftCodeAd ? (
+              <AdCodeSlot code={leftCodeAd.adCode ?? ''} />
+            ) : useAdSenseLeftSidebar ? (
               <AdSenseUnit
                 enabled={useAdSenseLeftSidebar}
                 client={adsenseClient}
                 slot={adsenseLeftSidebarSlot}
               />
             ) : (
-              <a href={leftRailAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+              <a href={leftImageAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
                 className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group">
-                {leftRailAd?.imageUrl && (
-                  <img src={leftRailAd.imageUrl} alt={leftRailAd.title}
+                {leftImageAd?.imageUrl && (
+                  <img src={leftImageAd.imageUrl} alt={leftImageAd.title}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
                 )}

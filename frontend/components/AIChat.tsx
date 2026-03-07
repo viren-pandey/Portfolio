@@ -187,6 +187,7 @@ const AIChat: React.FC<AIChatProps> = ({ onClose }) => {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Online</span>
             </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Powered by Groq</p>
           </div>
         </div>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors" aria-label="Close AI chat">
