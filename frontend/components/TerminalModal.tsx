@@ -42,11 +42,11 @@ const TerminalModal: React.FC<TerminalModalProps> = ({ isOpen, onClose }) => {
     const newHistory = [...history, `viren@portfolio:~$ ${input}`];
 
     if (cmd === '/projects' || cmd === 'projects') {
-      newHistory.push('Fetching projects summary data...');
-      setShowProjectsBox(true);
-      setTimeout(() => {
-        document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
-      }, 1500);
+      newHistory.push('Navigating to projects page...');
+      setHistory([...newHistory]);
+      setInput('');
+      setTimeout(() => { onClose(); navigate('/projects'); }, 500);
+      return;
     } else if (cmd === '/skills' || cmd === 'skills') {
       newHistory.push('Navigating to skills...');
       document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' });
@@ -56,13 +56,40 @@ const TerminalModal: React.FC<TerminalModalProps> = ({ isOpen, onClose }) => {
       document.getElementById('education')?.scrollIntoView({ behavior: 'smooth' });
       setTimeout(onClose, 800);
     } else if (cmd === '/blog' || cmd === 'blog') {
-      newHistory.push('Opening blogs...');
+      newHistory.push('Opening blog...');
       setHistory([...newHistory]);
       setInput('');
       setTimeout(() => { onClose(); navigate('/blog'); }, 500);
       return;
+    } else if (cmd === '/contact' || cmd === 'contact') {
+      newHistory.push('Opening contact page...');
+      setHistory([...newHistory]);
+      setInput('');
+      setTimeout(() => { onClose(); navigate('/contact'); }, 500);
+      return;
+    } else if (cmd === '/theme' || cmd === 'theme') {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        newHistory.push('Switched to light mode.');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        newHistory.push('Switched to dark mode.');
+      }
     } else if (cmd === 'help') {
-      newHistory.push('Available commands:', '  /projects - List projects and scroll', '  /skills   - View technical skills', '  /education- View education history', '  /blog      - Go to the blog page', '  clear     - Clear terminal', '  exit      - Close terminal');
+      newHistory.push(
+        'Available commands:',
+        '  /projects  → Go to projects page',
+        '  /blog      → Go to blog page',
+        '  /contact   → Go to contact page',
+        '  /skills    → Scroll to skills section',
+        '  /education → Scroll to education section',
+        '  /theme     → Toggle dark / light mode',
+        '  clear      → Clear terminal',
+        '  exit       → Close terminal',
+      );
     } else if (cmd === 'clear') {
       setHistory(['Terminal cleared.']);
       setInput('');
