@@ -184,6 +184,15 @@ const DualityAIPage: React.FC = () => {
                 <Github size={16} />
                 <span>View on GitHub</span>
               </a>
+              <a
+                href="https://duality-ai-safety-detection-model.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl border border-purple-500/40 text-purple-500 dark:text-purple-400 text-sm font-medium hover:bg-purple-500/10 transition-colors"
+              >
+                <ExternalLink size={16} />
+                <span>Live Demo</span>
+              </a>
             </div>
           </motion.div>
         </div>
@@ -410,6 +419,15 @@ if f:
               <Github size={16} />
               <span>GitHub Repository</span>
             </a>
+            <a
+              href="https://duality-ai-safety-detection-model.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl border border-purple-500/40 text-purple-500 dark:text-purple-400 text-sm font-medium hover:bg-purple-500/10 transition-colors"
+            >
+              <ExternalLink size={16} />
+              <span>Live Demo</span>
+            </a>
           </div>
         </motion.section>
 
@@ -417,6 +435,15 @@ if f:
 
       {/* ── Floating corner buttons ── */}
       <div className="fixed bottom-24 right-8 z-[70] flex flex-col gap-3">
+        <a
+          href="https://duality-ai-safety-detection-model.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Live Demo"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg backdrop-blur-sm transition-colors text-gray-700 dark:text-gray-300 hover:text-purple-500 dark:hover:text-purple-400"
+        >
+          <ExternalLink size={18} />
+        </a>
         <a
           href="https://github.com/viren-pandey/DualityAI-Safety-Detection-Model"
           target="_blank"
