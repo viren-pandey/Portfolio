@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Image as ImageIcon, Tag, Type, AlignLeft, Layout, LogOut, Link as LinkIcon,
@@ -318,7 +318,7 @@ const DashboardSection: React.FC = () => {
   ];
   return (
     <div className="p-4 sm:p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8 flex items-center gap-3">
         <LayoutDashboard size={22} className="text-purple-500" /> Dashboard
       </h2>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
@@ -330,7 +330,7 @@ const DashboardSection: React.FC = () => {
               </div>
               <TrendingUp size={14} className="text-gray-300 dark:text-gray-600" />
             </div>
-            <div className="text-3xl font-black text-gray-900 dark:text-white mb-1">{s.value}</div>
+            <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1">{s.value}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">{s.label}</div>
           </div>
         ))}
@@ -452,12 +452,12 @@ const PostsSection: React.FC = () => {
 
   if (view === 'list') return (
     <div className="p-4 sm:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <FileText size={22} className="text-purple-500" /> Blog Posts
         </h2>
         <button onClick={() => setView('editor')}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all">
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all shrink-0">
           <PlusCircle size={15} /> {canApprove ? 'New Post' : 'Write Post'}
         </button>
       </div>
@@ -615,10 +615,10 @@ const PostsSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 xl:p-10">
-      <div className="flex items-center gap-4 mb-8 max-w-5xl mx-auto">
-        <button onClick={resetForm} className="p-2 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"><X size={16} /></button>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-          <Pencil size={20} className="text-purple-500" /> {editingPost ? 'Edit Post' : 'New Post'}
+      <div className="flex items-center gap-3 mb-6 sm:mb-8 max-w-5xl mx-auto">
+        <button onClick={resetForm} className="p-2 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors shrink-0"><X size={16} /></button>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3 min-w-0">
+          <Pencil size={20} className="text-purple-500 shrink-0" /> {editingPost ? 'Edit Post' : 'New Post'}
         </h2>
       </div>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
@@ -837,11 +837,11 @@ const TeamSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Users size={22} className="text-purple-500" /> Team Management
         </h2>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all">
+        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all shrink-0">
           <PlusCircle size={15} /> Add Member
         </button>
       </div>
@@ -899,19 +899,21 @@ const TeamSection: React.FC = () => {
       <div className="space-y-3">
         {team.length === 0 && <p className="text-center text-gray-400 text-sm py-12">No team members yet.</p>}
         {team.map(m => (
-          <div key={m.id} className="flex items-center gap-4 p-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0a20] transition-colors">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: ROLE_META[m.role].bg, color: ROLE_META[m.role].color }}>
-              {m.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-gray-900 dark:text-white text-sm">{m.name}</p>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: ROLE_META[m.role].bg, color: ROLE_META[m.role].color }}>{ROLE_META[m.role].label}</span>
-                {!m.active && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400">Inactive</span>}
+          <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0a20] transition-colors">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0" style={{ background: ROLE_META[m.role].bg, color: ROLE_META[m.role].color }}>
+                {m.name.charAt(0).toUpperCase()}
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">{m.email} � @{m.username} � Since {m.createdAt}</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{m.name}</p>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: ROLE_META[m.role].bg, color: ROLE_META[m.role].color }}>{ROLE_META[m.role].label}</span>
+                  {!m.active && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400">Inactive</span>}
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5 truncate">{m.email} � @{m.username} � Since {m.createdAt}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
               {/* Role promote/demote */}
               <div className="relative">
                 <button onClick={() => setPromoteId(promoteId === m.id ? null : m.id)} className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors" title="Change role">
@@ -1022,11 +1024,11 @@ const AdsSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Megaphone size={22} className="text-purple-500" /> Ads Management
         </h2>
-        <button onClick={() => setShowForm(v => !v)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all">
+        <button onClick={() => setShowForm(v => !v)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20 hover:-translate-y-0.5 transition-all shrink-0">
           <PlusCircle size={15} /> Add Ad
         </button>
       </div>
@@ -1103,7 +1105,7 @@ const NotificationsSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8 flex items-center gap-3">
         <Bell size={22} className="text-purple-500" /> Push Notifications
       </h2>
       <div className="grid lg:grid-cols-2 gap-8">
@@ -1190,7 +1192,7 @@ const SettingsSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8 flex items-center gap-3">
         <Settings size={22} className="text-purple-500" /> Settings
       </h2>
       <form onSubmit={handleSave} className="max-w-2xl space-y-8">
@@ -1382,7 +1384,7 @@ const Admin: React.FC = () => {
         open={sidebarOpen}
         setOpen={setSidebarOpen}
       />
-      <main className="flex-1 lg:ml-64 min-h-screen overflow-y-auto">
+      <main className="flex-1 min-w-0 lg:ml-64 min-h-screen overflow-y-auto overflow-x-hidden">
         {/* Mobile top bar */}
         <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#07051a] border-b border-black/10 dark:border-white/10 shadow-sm">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
