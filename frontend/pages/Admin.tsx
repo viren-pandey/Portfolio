@@ -521,7 +521,7 @@ const PostsSection: React.FC = () => {
                     </span>
                     {post.submittedBy && <span className="text-[10px] text-gray-400">by {post.submittedBy}</span>}
                   </div>
-                  <p className="font-semibold text-gray-900 dark:text-white truncate">{post.title}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white line-clamp-2 break-words">{post.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{post.date} � {post.readTime}</p>
                   {status === 'rejected' && post.reviewNote && (
                     <p className="text-xs text-red-400 mt-1 bg-red-500/5 rounded-lg px-2 py-1 border border-red-500/10">
