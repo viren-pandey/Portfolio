@@ -1,9 +1,7 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run sitemap && npm run build",
   "outputDirectory": "dist",
   "routes": [
-    { "src": "/sitemap.xml", "dest": "/api/sitemap" },
-    { "src": "/sitemap",     "dest": "/api/sitemap" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
