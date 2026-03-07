@@ -1,11 +1,11 @@
-
 import React, { useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
-import { Mail, Terminal } from 'lucide-react';
+import { Mail, MessageCircle, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
+import AIChat from './components/AIChat';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
 import BlogPostPage from './pages/BlogPostPage';
@@ -26,37 +26,68 @@ import DualityAIPage from './pages/DualityAI';
 import ProjectsPage from './pages/ProjectsPage';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isTerminalOpen, openTerminal, closeTerminal } = useUI();
-  const seenIds = useRef<Set<string> | null>(null);
+  const { isTerminalOpen, openTerminal, closeTerminal, isChatOpen, toggleChat, setChatOpen } = useUI();
+  const initialized = useRef(false);
+  const knownIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // Request browser notification permission from blog visitors
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
+    if (!('Notification' in window)) return;
+
+    const seenKey = (id: string) => `portfolio_notif_seen_${id}`;
+    const hasSeen = (id: string) => localStorage.getItem(seenKey(id)) === '1';
+    const markSeen = (id: string) => localStorage.setItem(seenKey(id), '1');
+
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
     }
-    // Listen for new notifications pushed by admin via Firestore
+
+    const showNotification = (id: string, data: { title?: string; body?: string; url?: string }) => {
+      if (hasSeen(id)) return;
+      markSeen(id);
+      if (Notification.permission !== 'granted') return;
+
+      const notif = new Notification(data.title?.trim() || 'Portfolio update', {
+        body: data.body?.trim() || '',
+        icon: '/favicon.ico',
+      });
+      if (data.url) notif.onclick = () => window.open(data.url, '_blank');
+    };
+
     try {
       const q = query(collection(db, 'notifications'), orderBy('_sentAt', 'desc'));
-      const unsub = onSnapshot(q, snap => {
-        const ids = snap.docs.map(d => d.id);
-        if (seenIds.current === null) {
-          // First snapshot — record existing IDs, don't show them
-          seenIds.current = new Set(ids);
-          return;
-        }
-        for (const d of snap.docs) {
-          if (!seenIds.current.has(d.id)) {
-            seenIds.current.add(d.id);
-            const data = d.data() as { title: string; body: string; url?: string };
-            if (Notification.permission === 'granted') {
-              const notif = new Notification(data.title, { body: data.body, icon: '/favicon.ico' });
-              if (data.url) notif.onclick = () => window.open(data.url, '_blank');
+      const unsub = onSnapshot(
+        q,
+        (snap) => {
+          if (!initialized.current) {
+            const latestUnseen = snap.docs.find((d) => !hasSeen(d.id));
+            if (latestUnseen) {
+              const data = latestUnseen.data() as { title?: string; body?: string; url?: string };
+              showNotification(latestUnseen.id, data);
             }
+            knownIds.current = new Set(snap.docs.map((d) => d.id));
+            initialized.current = true;
+            return;
           }
-        }
-      }, err => console.warn('notifications listener:', err.code));
+
+          for (const change of snap.docChanges()) {
+            if (change.type !== 'added') continue;
+            const d = change.doc;
+            if (knownIds.current.has(d.id)) continue;
+            knownIds.current.add(d.id);
+            const data = d.data() as { title?: string; body?: string; url?: string };
+            showNotification(d.id, data);
+          }
+
+          for (const d of snap.docs) {
+            if (!knownIds.current.has(d.id)) knownIds.current.add(d.id);
+          }
+        },
+        (err) => console.warn('notifications listener:', err.code)
+      );
       return () => unsub();
-    } catch { return; }
+    } catch {
+      return;
+    }
   }, []);
 
   return (
@@ -68,11 +99,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
 
-      {/* Footer */}
       <footer className="relative z-10 py-12 border-t border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#030014] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           <div className="text-gray-500 text-sm">
-            © March 2026 Viren Pandey. Built with React & Love.
+            � March 2026 Viren Pandey. Built with React & Love.
           </div>
           <div className="flex space-x-6">
             <a href="mailto:pandeyviren78@gmail.com" className="text-gray-400 hover:text-purple-400 flex items-center space-x-2 transition-colors">
@@ -83,8 +113,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </footer>
 
-      {/* Floating Buttons */}
-      <div className="fixed bottom-8 right-8 z-[60]">
+      <div className="fixed bottom-8 right-8 z-[60] flex flex-col gap-3">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleChat}
+          className="w-12 h-12 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 rounded-full flex items-center justify-center backdrop-blur-xl transition-colors shadow-xl"
+          title={isChatOpen ? 'Close AI Chat' : 'Open AI Chat'}
+        >
+          <MessageCircle size={20} className="text-gray-600 dark:text-gray-400" />
+        </motion.button>
+
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -96,7 +135,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </motion.button>
       </div>
 
-      {/* Terminal Overlay */}
+      <AnimatePresence>
+        {isChatOpen && (
+          <AIChat onClose={() => setChatOpen(false)} />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isTerminalOpen && (
           <TerminalModal isOpen={isTerminalOpen} onClose={closeTerminal} />
@@ -114,10 +158,8 @@ const App: React.FC = () => {
           <BlogProvider>
             <AdminProvider>
               <Routes>
-                {/* Standalone full-screen routes — no navbar/footer */}
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/login" element={<Login />} />
-                {/* Portfolio routes — wrapped with Navbar & footer */}
                 <Route path="/" element={<Layout><Home /></Layout>} />
                 <Route path="/blog" element={<Layout><Blog /></Layout>} />
                 <Route path="/blog/:permalink" element={<Layout><BlogPostPage /></Layout>} />

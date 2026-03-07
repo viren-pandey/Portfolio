@@ -1,12 +1,10 @@
 
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, Eye, BarChart2 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import AdSenseUnit from '../components/ads/AdSenseUnit';
 
 const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
@@ -18,33 +16,6 @@ const Blog: React.FC = () => {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const navigate  = useNavigate();
   const location  = useLocation();
-  const initialLoad = useRef(true);
-
-  // Push notification subscription
-  useEffect(() => {
-    if (!('Notification' in window)) return;
-    Notification.requestPermission();
-    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      if (initialLoad.current) {
-        snap.docs.forEach(doc => sessionStorage.setItem(`notif_seen_${doc.id}`, '1'));
-        initialLoad.current = false;
-        return;
-      }
-      snap.docChanges().forEach(change => {
-        if (change.type !== 'added') return;
-        const key = `notif_seen_${change.doc.id}`;
-        if (sessionStorage.getItem(key)) return;
-        sessionStorage.setItem(key, '1');
-        if (Notification.permission === 'granted') {
-          const n = change.doc.data();
-          const notif = new Notification(n.title, { body: n.body, icon: '/favicon.ico' });
-          if (n.url) notif.onclick = () => window.open(n.url, '_blank');
-        }
-      });
-    }, () => {});
-    return unsub;
-  }, []);
 
   const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
   const topBannerAd = useMemo(() => ads.find(a => a.active && a.position === 'top_banner') ?? null, [ads]);
