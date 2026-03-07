@@ -203,7 +203,7 @@ const BlogPostPage: React.FC = () => {
         ))}
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-6 py-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
         {/* Back link — full width */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -267,7 +267,7 @@ const BlogPostPage: React.FC = () => {
             ))}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white leading-tight mb-6">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white leading-tight sm:leading-tight mb-6 break-words">
             {post.title}
           </h1>
 

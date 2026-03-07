@@ -123,13 +123,13 @@ const Blog: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-32">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center mb-16"
       >
-        <h2 className="text-5xl font-display font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-500">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-500 leading-tight">
           Engineering Blogs
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl text-lg">
@@ -230,7 +230,7 @@ const Blog: React.FC = () => {
                 </Link>
               )}
 
-              <div className="p-8 relative z-10 flex flex-col flex-grow">
+              <div className="p-5 sm:p-8 relative z-10 flex flex-col flex-grow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-4 text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wider">
                     <div className="flex items-center space-x-1">
@@ -256,7 +256,7 @@ const Blog: React.FC = () => {
                 </div>
 
                 <Link to={`/blog/${post.permalink}`} className="block flex-grow">
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-tight">
+                  <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-snug break-words">
                     {post.title}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3">
