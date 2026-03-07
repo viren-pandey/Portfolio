@@ -20,6 +20,8 @@ import { AdminProvider } from './contexts/AdminContext';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 import NotFound from './pages/NotFound';
+import SpaceDebrisAIPage from './pages/SpaceDebrisAI';
+import ProjectsPage from './pages/ProjectsPage';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isTerminalOpen, openTerminal, closeTerminal } = useUI();
@@ -118,6 +120,8 @@ const App: React.FC = () => {
                 <Route path="/blog" element={<Layout><Blog /></Layout>} />
                 <Route path="/blog/:permalink" element={<Layout><BlogPostPage /></Layout>} />
                 <Route path="/contact" element={<Layout><Contact /></Layout>} />
+                <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
+                <Route path="/project/space-debris-ai" element={<Layout><SpaceDebrisAIPage /></Layout>} />
                 <Route path="*" element={<Layout><NotFound /></Layout>} />
               </Routes>
             </AdminProvider>

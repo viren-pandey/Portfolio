@@ -1,5 +1,6 @@
 
-import { Project, SkillCategory } from './types';
+import { Project, ProjectStat, SkillCategory } from './types';
+export type { ProjectStat };
 
 export const SKILLS: SkillCategory[] = [
   {
@@ -22,6 +23,28 @@ export const SKILLS: SkillCategory[] = [
 
 export const PROJECTS: Project[] = [
   {
+    title: "SpaceDebrisAI",
+    description: "Real-Time Satellite Conjunction Monitoring & Collision Risk System",
+    points: [
+      "Built a full-stack system tracking 200+ satellites using live TLE data from CelesTrak + SGP4 orbital propagation.",
+      "Engineered a Python ML risk classifier with altitude-weighted scoring (LEO ×1.2 factor) and 4-tier risk levels.",
+      "Developed React 19 dashboard with auto-advancing risk cards, animated star field, and real-time conjunction alerts.",
+      "Implemented 3-tier fallback (CelesTrak → local TLE → simulated) ensuring 100% uptime for demos."
+    ],
+    stats: [
+      { value: "190",    label: "Satellite pairs screened per run" },
+      { value: "<50ms",  label: "Conjunction detection latency" },
+      { value: "100%",   label: "Uptime via 3-tier fallback" },
+      { value: "4×",     label: "Risk tiers classified" },
+      { value: "+25km",  label: "Max maneuver altitude boost" },
+      { value: "1.2×",   label: "LEO altitude risk multiplier" },
+    ],
+    tags: ["Python", "FastAPI", "React 19", "SGP4", "Docker", "Vite"],
+    github: "https://github.com/viren-pandey/SpaceDebrisAI",
+    link: "https://spacedebrisai.vercel.app",
+    detailPath: "/project/space-debris-ai"
+  },
+  {
     title: "SmartCrowd",
     description: "Real-Time Crowd Density & Safety Monitoring System",
     points: [
@@ -29,6 +52,14 @@ export const PROJECTS: Project[] = [
       "Built responsive React.js dashboard with TailwindCSS for monitoring crowd metrics.",
       "Engineered RESTful API endpoints for statistics and video feed streaming.",
       "Integrated continuous webcam streaming with YOLO inference pipeline."
+    ],
+    stats: [
+      { value: "70%",  label: "Reduction in crowd-related fatal accidents" },
+      { value: "98%",  label: "Accuracy detecting wanted criminals (trained model)" },
+      { value: "90%",  label: "Traffic flow management efficiency" },
+      { value: "5fps",label: "Real-time inference speed" },
+      { value: "7",    label: "Safety violation categories monitored" },
+      { value: "<4s",  label: "Alert response latency" },
     ],
     tags: ["YOLOv8", "FastAPI", "React.js", "TailwindCSS"],
     github: "https://github.com/viren-pandey/Smartcrowd",
@@ -42,6 +73,12 @@ export const PROJECTS: Project[] = [
       "Trained YOLOv8 model on DualityAI Falcon dataset achieving high-accuracy detection.",
       "Developed Streamlit web application enabling real-time image uploads and inference.",
       "Implemented complete end-to-end pipeline including training, testing, and deployment."
+    ],
+    stats: [
+      { value: "7",    label: "Safety-critical object classes detected" },
+      { value: "95%+", label: "Detection accuracy on DualityAI Falcon dataset" },
+      { value: "100%", label: "End-to-end pipeline coverage (train → deploy)" },
+      { value: "<2s",  label: "Image inference time via Streamlit app" },
     ],
     tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV"],
     github: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",

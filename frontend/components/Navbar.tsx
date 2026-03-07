@@ -70,6 +70,10 @@ const Navbar: React.FC = () => {
             Home
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
           </Link>
+          <Link to="/projects" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
+            Projects
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
+          </Link>
           <Link to="/blog" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
             Blog
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
@@ -139,6 +143,7 @@ const Navbar: React.FC = () => {
           >
             <div className="px-6 py-4 flex flex-col space-y-4">
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Home</Link>
+              <Link to="/projects" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Projects</Link>
               <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Blog</Link>
               <a href="https://virenp.vercel.app/blog/about-me-btech-cse-aiml-student-developer-and-doomscroller" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">About</a>
               <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Contact</Link>
