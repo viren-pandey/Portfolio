@@ -1,24 +1,23 @@
 /**
- * Vercel Serverless Function — serves the sitemap at /api/sitemap
+ * Vercel Serverless Function - serves the sitemap at /api/sitemap.
  * Fetches blog posts live from Firestore REST API and returns valid XML.
  */
 
-const SITE_URL    = 'https://virenp.vercel.app';
-const PROJECT_ID  = 'studio-730019720-30cd3';
-const COLLECTION  = 'blog_posts';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  getStaticPagesFromApp,
+  FALLBACK_STATIC_PAGES,
+  today,
+  toUrl,
+} from '../scripts/sitemap-routes.mjs';
 
-function today() {
-  return new Date().toISOString().split('T')[0];
-}
+const SITE_URL = 'https://virenp.vercel.app';
+const PROJECT_ID = 'studio-730019720-30cd3';
+const COLLECTION = 'blog_posts';
 
-function toUrl({ loc, changefreq, priority, lastmod }) {
-  return `  <url>
-    <loc>${SITE_URL}${loc}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-  </url>`;
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const APP_ROUTES_FILE = join(__dirname, '..', 'frontend', 'App.tsx');
 
 async function fetchBlogPosts() {
   const url =
@@ -33,31 +32,40 @@ async function fetchBlogPosts() {
 
   return docs
     .map((doc) => {
-      const fields    = doc.fields ?? {};
+      const fields = doc.fields ?? {};
       const permalink = fields.permalink?.stringValue ?? '';
-      const status    = fields.status?.stringValue ?? 'published';
-      const lastmod   = doc.updateTime?.split('T')[0] ?? today();
-      return { loc: `/blog/${permalink}`, changefreq: 'monthly', priority: '0.6', lastmod, status };
+      const status = fields.status?.stringValue ?? 'published';
+      const lastmod = doc.updateTime?.split('T')[0] ?? today();
+      return {
+        loc: `/blog/${permalink}`,
+        changefreq: 'monthly',
+        priority: '0.6',
+        lastmod,
+        status,
+      };
     })
-    .filter((p) => p.loc !== '/blog/' && p.status === 'published');
+    .filter((p) => p.loc !== '/blog/' && p.status === 'published')
+    .map(({ status, ...page }) => page);
 }
 
 export default async function handler(req, res) {
-  const staticPages = [
-    { loc: '/',     changefreq: 'weekly', priority: '1.0', lastmod: today() },
-    { loc: '/blog', changefreq: 'weekly', priority: '0.8', lastmod: today() },
-  ];
+  let staticPages = FALLBACK_STATIC_PAGES;
+  try {
+    staticPages = getStaticPagesFromApp(APP_ROUTES_FILE);
+  } catch (err) {
+    console.warn(`[sitemap] Could not parse frontend routes (${err.message}). Using fallback static routes.`);
+  }
 
   let blogPages = [];
   try {
     blogPages = await fetchBlogPosts();
   } catch (_) {
-    // fall back to static pages only
+    // Fall back to static pages only.
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticPages, ...blogPages].map(toUrl).join('\n')}
+${[...staticPages, ...blogPages].map((page) => toUrl(SITE_URL, page)).join('\n')}
 </urlset>`;
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
