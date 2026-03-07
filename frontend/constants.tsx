@@ -46,41 +46,47 @@ export const PROJECTS: Project[] = [
   },
   {
     title: "SmartCrowd",
-    description: "Real-Time Crowd Density & Safety Monitoring System",
+    description: "Intelligent Crowd Analysis, Risk Detection & Simulation Platform",
     points: [
-      "Developed full-stack AI system analyzing live video streams for real-time person detection.",
-      "Built responsive React.js dashboard with TailwindCSS for monitoring crowd metrics.",
-      "Engineered RESTful API endpoints for statistics and video feed streaming.",
-      "Integrated continuous webcam streaming with YOLO inference pipeline."
+      "Architected a full-stack React + Vite frontend with Python FastAPI backend, enforcing strict separation of concerns — UI handles routing & interaction while backend owns all business logic, simulation, and data processing.",
+      "Integrated YOLOv8 continuously against live webcam streams at 5 fps, feeding a real-time dashboard that surfaces crowd density metrics, risk scores, and actionable safety alerts under <4 s end-to-end latency.",
+      "Designed RESTful API layer returning structured JSON; implemented dual-layer error handling (both client and server) so the UI degrades gracefully on backend failures — zero blank-screen crashes under edge-case inputs.",
+      "Drove architecture decisions under hackathon time-pressure: environment-variable-driven API base URL (VITE_API_BASE_URL), no hardcoded endpoints, eliminating the most common hackathon deployment blocker.",
+      "Documented real mistakes (accidental Git submodule push, import/export mismatches, deleted frontend folder) and their fixes — turning a hackathon postmortem into a knowledge source for future contributors.",
+      "Deployed live on Netlify with a production-ready folder structure (components / pages / api) that scales to auth, database integration, and Docker containerisation without architectural rewrites."
     ],
     stats: [
-      { value: "70%",  label: "Reduction in crowd-related fatal accidents" },
-      { value: "98%",  label: "Accuracy detecting wanted criminals (trained model)" },
-      { value: "90%",  label: "Traffic flow management efficiency" },
-      { value: "5fps",label: "Real-time inference speed" },
-      { value: "7",    label: "Safety violation categories monitored" },
-      { value: "<4s",  label: "Alert response latency" },
+      { value: "5fps",  label: "Real-time YOLOv8 webcam inference" },
+      { value: "<4s",   label: "End-to-end alert response latency" },
+      { value: "7",     label: "Safety violation categories monitored" },
+      { value: "0",     label: "Hardcoded API URLs (env-var driven)" },
+      { value: "70%",   label: "Crowd accident risk reduction (simulation)" },
+      { value: "100%",  label: "Uptime with graceful API error fallback" },
     ],
-    tags: ["YOLOv8", "FastAPI", "React.js", "TailwindCSS"],
+    tags: ["YOLOv8", "FastAPI", "React.js", "Vite", "TailwindCSS", "Python"],
     github: "https://github.com/viren-pandey/Smartcrowd",
     link: "https://smartcrowd.netlify.app"
   },
   {
-    title: "DualityAI",
-    description: "Safety Detection Model for Space Station Challenge",
+    title: "DualityAI Safety Detection",
+    description: "BuildWithIndia 2.0 — Space Station Safety Object Detection Challenge",
     points: [
-      "Built AI-powered object detection system identifying 7 safety-critical objects (Oxygen Tank, Fire Alarm, etc.).",
-      "Trained YOLOv8 model on DualityAI Falcon dataset achieving high-accuracy detection.",
-      "Developed Streamlit web application enabling real-time image uploads and inference.",
-      "Implemented complete end-to-end pipeline including training, testing, and deployment."
+      "Official submission for the DualityAI Space Station Safety Challenge (BuildWithIndia 2.0): custom-trained YOLOv8 model on the Falcon synthetic dataset to detect 7 mission-critical safety objects in real-time.",
+      "Detected classes span the full safety spectrum — OxygenTank, NitrogenTank, FirstAidBox, FireAlarm, SafetySwitchPanel, EmergencyPhone, and FireExtinguisher — achieving 95%+ accuracy across all categories.",
+      "Built a Streamlit web application enabling judges to upload any image, run live YOLO inference, and instantly download annotated prediction images — complete with an integrated Falcon model-update explanation panel.",
+      "Implemented reproducible Conda environment (setup_env.bat → conda activate EDU) ensuring exact library versions (PyTorch, Ultralytics, OpenCV, NumPy, PyYAML) are restored on any machine.",
+      "Delivered a complete auditable pipeline: train.py → predict.py → app.py, with training logs, loss graphs, labeled prediction outputs saved to structured runs/ and predictions/ folders, and a formal PDF report in docs/.",
+      "Supported both pip (requirements.txt) and Conda setup paths, lowering the barrier for judges and reviewers to reproduce results without environment conflicts."
     ],
     stats: [
-      { value: "7",    label: "Safety-critical object classes detected" },
-      { value: "95%+", label: "Detection accuracy on DualityAI Falcon dataset" },
-      { value: "100%", label: "End-to-end pipeline coverage (train → deploy)" },
-      { value: "<2s",  label: "Image inference time via Streamlit app" },
+      { value: "7",     label: "Safety-critical object classes detected" },
+      { value: "95%+",  label: "Detection accuracy on Falcon synthetic dataset" },
+      { value: "<2s",   label: "Streamlit real-time image inference latency" },
+      { value: "100%",  label: "Pipeline coverage (train → predict → deploy)" },
+      { value: "2",     label: "Environment setup paths (pip + Conda)" },
+      { value: "1",     label: "Formal challenge submission with full report" },
     ],
-    tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV"],
+    tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV", "Python", "Conda"],
     github: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
     link: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model"
   }
