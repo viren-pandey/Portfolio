@@ -1014,14 +1014,18 @@ const AdsSection: React.FC = () => {
     adsenseClient: '',
     adsenseBetweenPostsSlot: '',
     adsenseBlogPostSlot: '',
+    adsenseTopBlogSlot: '',
+    adsenseLeftSidebarSlot: '',
   });
   const [savingAdSense, setSavingAdSense] = useState(false);
   const [adSenseSaved, setAdSenseSaved] = useState(false);
 
   const POS_META: Record<string, { label:string; color:string }> = {
     between_posts: { label:'Between Posts', color:'#60a5fa' },
+    top_banner:    { label:'Top Banner', color:'#f59e0b' },
+    left_sidebar:  { label:'Left Sidebar', color:'#14b8a6' },
     corner:        { label:'Corner Float', color:'#4ade80' },
-    sidebar:       { label:'Sidebar', color:'#fb923c' },
+    sidebar:       { label:'Sidebar (Legacy)', color:'#fb923c' },
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -1036,12 +1040,16 @@ const AdsSection: React.FC = () => {
       adsenseClient: settings.adsenseClient,
       adsenseBetweenPostsSlot: settings.adsenseBetweenPostsSlot,
       adsenseBlogPostSlot: settings.adsenseBlogPostSlot,
+      adsenseTopBlogSlot: settings.adsenseTopBlogSlot,
+      adsenseLeftSidebarSlot: settings.adsenseLeftSidebarSlot,
     });
   }, [
     settings.adsenseEnabled,
     settings.adsenseClient,
     settings.adsenseBetweenPostsSlot,
     settings.adsenseBlogPostSlot,
+    settings.adsenseTopBlogSlot,
+    settings.adsenseLeftSidebarSlot,
   ]);
 
   const handleAdSenseSave = async (e: React.FormEvent) => {
@@ -1053,6 +1061,8 @@ const AdsSection: React.FC = () => {
       adsenseClient: adsenseForm.adsenseClient.trim(),
       adsenseBetweenPostsSlot: adsenseForm.adsenseBetweenPostsSlot.trim(),
       adsenseBlogPostSlot: adsenseForm.adsenseBlogPostSlot.trim(),
+      adsenseTopBlogSlot: adsenseForm.adsenseTopBlogSlot.trim(),
+      adsenseLeftSidebarSlot: adsenseForm.adsenseLeftSidebarSlot.trim(),
     });
     setSavingAdSense(false);
     setAdSenseSaved(true);
@@ -1071,7 +1081,7 @@ const AdsSection: React.FC = () => {
       </div>
       <div className="mb-4 p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-start gap-3">
         <Radio size={16} className="text-blue-400 mt-0.5 shrink-0" />
-        <p className="text-xs text-gray-400"><strong className="text-blue-400">Blog-only ads:</strong> AdSense and custom ads in this section render only on <strong>/blog</strong> and <strong>/blog/:permalink</strong>, not on the rest of the portfolio.</p>
+        <p className="text-xs text-gray-400"><strong className="text-blue-400">Blog-only ads:</strong> In-between, top, and left-side ad placements render only on <strong>/blog</strong> and <strong>/blog/:permalink</strong>, not on the rest of the portfolio.</p>
       </div>
 
       <form onSubmit={handleAdSenseSave} className="mb-6 p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 space-y-4">
@@ -1102,6 +1112,26 @@ const AdsSection: React.FC = () => {
               placeholder="ca-pub-XXXXXXXXXXXXXXXX"
               value={adsenseForm.adsenseClient}
               onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseClient: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Top Blog Slot ID</label>
+            <input
+              type="text"
+              placeholder="1122334455"
+              value={adsenseForm.adsenseTopBlogSlot}
+              onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseTopBlogSlot: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Left Sidebar Slot ID</label>
+            <input
+              type="text"
+              placeholder="5566778899"
+              value={adsenseForm.adsenseLeftSidebarSlot}
+              onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseLeftSidebarSlot: e.target.value }))}
               className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
             />
           </div>

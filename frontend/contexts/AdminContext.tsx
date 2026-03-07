@@ -23,7 +23,7 @@ export interface SiteAd {
   title: string;
   imageUrl: string;
   linkUrl: string;
-  position: 'between_posts' | 'corner' | 'sidebar';
+  position: 'between_posts' | 'top_banner' | 'left_sidebar' | 'corner' | 'sidebar';
   active: boolean;
   createdAt: string;
 }
@@ -46,6 +46,8 @@ export interface SiteSettings {
   adsenseClient: string;
   adsenseBetweenPostsSlot: string;
   adsenseBlogPostSlot: string;
+  adsenseTopBlogSlot: string;
+  adsenseLeftSidebarSlot: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -58,6 +60,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
   adsenseClient: '',
   adsenseBetweenPostsSlot: '',
   adsenseBlogPostSlot: '',
+  adsenseTopBlogSlot: '',
+  adsenseLeftSidebarSlot: '',
 };
 
 interface AdminCtxType {

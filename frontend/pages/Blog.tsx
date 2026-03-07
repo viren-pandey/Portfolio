@@ -47,9 +47,20 @@ const Blog: React.FC = () => {
   }, []);
 
   const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
+  const topBannerAd = useMemo(() => ads.find(a => a.active && a.position === 'top_banner') ?? null, [ads]);
+  const leftRailAd = useMemo(
+    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar')) ?? null,
+    [ads]
+  );
+
   const adsenseClient = settings.adsenseClient.trim();
   const adsenseBetweenPostsSlot = settings.adsenseBetweenPostsSlot.trim();
+  const adsenseTopBlogSlot = settings.adsenseTopBlogSlot.trim();
+  const adsenseLeftSidebarSlot = settings.adsenseLeftSidebarSlot.trim();
+
   const useAdSenseBetweenPosts = settings.adsenseEnabled && !!adsenseClient && !!adsenseBetweenPostsSlot;
+  const useAdSenseTopBlog = settings.adsenseEnabled && !!adsenseClient && !!adsenseTopBlogSlot;
+  const useAdSenseLeftSidebar = settings.adsenseEnabled && !!adsenseClient && !!adsenseLeftSidebarSlot;
 
   // Track impressions: fire once per session when a card enters the viewport
   const impressionObserver = useRef<IntersectionObserver | null>(null);
@@ -140,6 +151,34 @@ const Blog: React.FC = () => {
           Thoughts on AI, Software Architecture, the future of tech and Coding.
         </p>
       </motion.div>
+
+      {(useAdSenseTopBlog || topBannerAd) && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
+        >
+          <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+            Sponsored
+          </p>
+          {useAdSenseTopBlog ? (
+            <AdSenseUnit
+              enabled={useAdSenseTopBlog}
+              client={adsenseClient}
+              slot={adsenseTopBlogSlot}
+            />
+          ) : (
+            <a href={topBannerAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+              className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
+              {topBannerAd?.imageUrl && (
+                <img src={topBannerAd.imageUrl} alt={topBannerAd.title}
+                  className="w-full max-h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+              )}
+            </a>
+          )}
+        </motion.div>
+      )}
 
       {/* Tag filter pills */}
       {!loading && !error && tagCounts.length > 0 && (
@@ -327,6 +366,32 @@ const Blog: React.FC = () => {
           })}
         </div>
       )}
+      {(useAdSenseLeftSidebar || leftRailAd) && (
+        <div className="hidden 2xl:block fixed left-6 top-1/2 -translate-y-1/2 z-40 w-52">
+          <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/95 dark:bg-[#0d0b22]/95 backdrop-blur-md p-3 shadow-2xl">
+            <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+              Sponsored
+            </p>
+            {useAdSenseLeftSidebar ? (
+              <AdSenseUnit
+                enabled={useAdSenseLeftSidebar}
+                client={adsenseClient}
+                slot={adsenseLeftSidebarSlot}
+              />
+            ) : (
+              <a href={leftRailAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+                className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group">
+                {leftRailAd?.imageUrl && (
+                  <img src={leftRailAd.imageUrl} alt={leftRailAd.title}
+                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+                )}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Floating contact button + mini popup ── */}
       <div className="fixed bottom-36 right-8 z-50 flex flex-col items-end gap-3">
         <AnimatePresence>

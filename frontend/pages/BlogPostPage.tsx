@@ -98,7 +98,13 @@ const BlogPostPage: React.FC = () => {
   const { ads, settings } = useAdmin();
   const adsenseClient = settings.adsenseClient.trim();
   const adsenseBlogPostSlot = settings.adsenseBlogPostSlot.trim();
+  const adsenseTopBlogSlot = settings.adsenseTopBlogSlot.trim();
+  const adsenseLeftSidebarSlot = settings.adsenseLeftSidebarSlot.trim();
   const useAdSenseBlogPost = settings.adsenseEnabled && !!adsenseClient && !!adsenseBlogPostSlot;
+  const useAdSenseTopBlog = settings.adsenseEnabled && !!adsenseClient && !!adsenseTopBlogSlot;
+  const useAdSenseLeftSidebar = settings.adsenseEnabled && !!adsenseClient && !!adsenseLeftSidebarSlot;
+  const topBannerAd = ads.find(a => a.active && a.position === 'top_banner') ?? null;
+  const leftRailAd = ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar')) ?? null;
   const cornerAd = !useAdSenseBlogPost ? (ads.find(a => a.active && a.position === 'corner') ?? null) : null;
   const { permalink } = useParams<{ permalink: string }>();
   const { getPostByPermalink, incrementViews } = useBlog();
@@ -223,11 +229,64 @@ const BlogPostPage: React.FC = () => {
           </Link>
         </motion.div>
 
+        {(useAdSenseTopBlog || topBannerAd) && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="mb-10 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
+          >
+            <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+              Sponsored
+            </p>
+            {useAdSenseTopBlog ? (
+              <AdSenseUnit
+                enabled={useAdSenseTopBlog}
+                client={adsenseClient}
+                slot={adsenseTopBlogSlot}
+              />
+            ) : (
+              <a href={topBannerAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+                className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
+                {topBannerAd?.imageUrl && (
+                  <img src={topBannerAd.imageUrl} alt={topBannerAd.title}
+                    className="w-full max-h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+                )}
+              </a>
+            )}
+          </motion.div>
+        )}
+
         {/* Two-column: invisible left spacer + article (centered) + TOC sidebar */}
         <div className="flex gap-10 items-start">
 
           {/* Left spacer — mirrors TOC width so article stays centered */}
-          <div className="hidden xl:block w-64 flex-shrink-0" />
+          <div className="hidden xl:block w-64 flex-shrink-0">
+            {(useAdSenseLeftSidebar || leftRailAd) ? (
+              <div className="sticky top-28 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3">
+                <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                  Sponsored
+                </p>
+                {useAdSenseLeftSidebar ? (
+                  <AdSenseUnit
+                    enabled={useAdSenseLeftSidebar}
+                    client={adsenseClient}
+                    slot={adsenseLeftSidebarSlot}
+                  />
+                ) : (
+                  <a href={leftRailAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
+                    className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group">
+                    {leftRailAd?.imageUrl && (
+                      <img src={leftRailAd.imageUrl} alt={leftRailAd.title}
+                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+                    )}
+                  </a>
+                )}
+              </div>
+            ) : null}
+          </div>
 
           {/* ── Article ── */}
           <article className="flex-1 min-w-0 max-w-3xl mx-auto">
