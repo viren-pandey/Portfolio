@@ -7,13 +7,14 @@ import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import AdSenseUnit from '../components/ads/AdSenseUnit';
 
 const ACCESS_KEY = '5671fd75-8422-4d8e-859b-ec0e67f6d6db';
 type PopupStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const Blog: React.FC = () => {
   const { posts, loading, error, deletePost, incrementImpressions } = useBlog();
-  const { ads } = useAdmin();
+  const { ads, settings } = useAdmin();
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -46,6 +47,9 @@ const Blog: React.FC = () => {
   }, []);
 
   const betweenAds = useMemo(() => ads.filter(a => a.active && a.position === 'between_posts'), [ads]);
+  const adsenseClient = settings.adsenseClient.trim();
+  const adsenseBetweenPostsSlot = settings.adsenseBetweenPostsSlot.trim();
+  const useAdSenseBetweenPosts = settings.adsenseEnabled && !!adsenseClient && !!adsenseBetweenPostsSlot;
 
   // Track impressions: fire once per session when a card enters the viewport
   const impressionObserver = useRef<IntersectionObserver | null>(null);
@@ -204,7 +208,8 @@ const Blog: React.FC = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post, idx) => {
-            const adAfterThis = (idx + 1) % 3 === 0 && betweenAds.length > 0
+            const shouldShowBetweenAd = (idx + 1) % 3 === 0;
+            const adAfterThis = !useAdSenseBetweenPosts && shouldShowBetweenAd && betweenAds.length > 0
               ? betweenAds[Math.floor(idx / 3) % betweenAds.length]
               : null;
             return (<React.Fragment key={post.id}>
@@ -283,6 +288,24 @@ const Blog: React.FC = () => {
                 </div>
               </div>
             </motion.article>
+              {shouldShowBetweenAd && useAdSenseBetweenPosts && (
+                <motion.div
+                  key={`adsense-after-${idx}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 + 0.2 }}
+                  className="md:col-span-2 lg:col-span-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
+                >
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                    Sponsored
+                  </p>
+                  <AdSenseUnit
+                    enabled={useAdSenseBetweenPosts}
+                    client={adsenseClient}
+                    slot={adsenseBetweenPostsSlot}
+                  />
+                </motion.div>
+              )}
               {adAfterThis && (
                 <motion.div
                   key={`ad-after-${idx}`}

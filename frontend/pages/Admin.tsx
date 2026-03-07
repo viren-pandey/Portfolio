@@ -1006,9 +1006,17 @@ const Key: React.FC<{size?:number}> = ({ size=16 }) => (
 // SECTION: ADS MANAGEMENT
 // ---------------------------------------------------------------------------
 const AdsSection: React.FC = () => {
-  const { ads, addAd, updateAd, deleteAd } = useAdmin();
+  const { ads, addAd, updateAd, deleteAd, settings, saveSettings } = useAdmin();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title:'', imageUrl:'', linkUrl:'', position:'between_posts' as SiteAd['position'], active:true });
+  const [adsenseForm, setAdsenseForm] = useState({
+    adsenseEnabled: false,
+    adsenseClient: '',
+    adsenseBetweenPostsSlot: '',
+    adsenseBlogPostSlot: '',
+  });
+  const [savingAdSense, setSavingAdSense] = useState(false);
+  const [adSenseSaved, setAdSenseSaved] = useState(false);
 
   const POS_META: Record<string, { label:string; color:string }> = {
     between_posts: { label:'Between Posts', color:'#60a5fa' },
@@ -1020,6 +1028,35 @@ const AdsSection: React.FC = () => {
     e.preventDefault();
     await addAd(form);
     setForm({ title:'', imageUrl:'', linkUrl:'', position:'between_posts', active:true }); setShowForm(false);
+  };
+
+  useEffect(() => {
+    setAdsenseForm({
+      adsenseEnabled: settings.adsenseEnabled,
+      adsenseClient: settings.adsenseClient,
+      adsenseBetweenPostsSlot: settings.adsenseBetweenPostsSlot,
+      adsenseBlogPostSlot: settings.adsenseBlogPostSlot,
+    });
+  }, [
+    settings.adsenseEnabled,
+    settings.adsenseClient,
+    settings.adsenseBetweenPostsSlot,
+    settings.adsenseBlogPostSlot,
+  ]);
+
+  const handleAdSenseSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAdSense(true);
+    await saveSettings({
+      ...settings,
+      adsenseEnabled: adsenseForm.adsenseEnabled,
+      adsenseClient: adsenseForm.adsenseClient.trim(),
+      adsenseBetweenPostsSlot: adsenseForm.adsenseBetweenPostsSlot.trim(),
+      adsenseBlogPostSlot: adsenseForm.adsenseBlogPostSlot.trim(),
+    });
+    setSavingAdSense(false);
+    setAdSenseSaved(true);
+    setTimeout(() => setAdSenseSaved(false), 2200);
   };
 
   return (
@@ -1034,8 +1071,76 @@ const AdsSection: React.FC = () => {
       </div>
       <div className="mb-4 p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-start gap-3">
         <Radio size={16} className="text-blue-400 mt-0.5 shrink-0" />
-        <p className="text-xs text-gray-400"><strong className="text-blue-400">Between Posts</strong> � appears between blog cards on the blog listing page. <strong className="text-green-400">Corner Float</strong> � fixed bottom-right overlay on blog post pages. <strong className="text-orange-400">Sidebar</strong> � reserved for future sidebar slot.</p>
+        <p className="text-xs text-gray-400"><strong className="text-blue-400">Blog-only ads:</strong> AdSense and custom ads in this section render only on <strong>/blog</strong> and <strong>/blog/:permalink</strong>, not on the rest of the portfolio.</p>
       </div>
+
+      <form onSubmit={handleAdSenseSave} className="mb-6 p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Google AdSense (Blog Pages)</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Paste your AdSense Publisher ID and slot IDs. Script is loaded only on blog pages.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAdsenseForm((prev) => ({ ...prev, adsenseEnabled: !prev.adsenseEnabled }))}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+              adsenseForm.adsenseEnabled
+                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                : 'bg-gray-500/10 border-gray-500/30 text-gray-400'
+            }`}
+          >
+            {adsenseForm.adsenseEnabled ? 'Enabled' : 'Disabled'}
+          </button>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Publisher ID (ca-pub-...)</label>
+            <input
+              type="text"
+              placeholder="ca-pub-XXXXXXXXXXXXXXXX"
+              value={adsenseForm.adsenseClient}
+              onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseClient: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Blog Listing Slot ID</label>
+            <input
+              type="text"
+              placeholder="1234567890"
+              value={adsenseForm.adsenseBetweenPostsSlot}
+              onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseBetweenPostsSlot: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Blog Post Slot ID</label>
+            <input
+              type="text"
+              placeholder="0987654321"
+              value={adsenseForm.adsenseBlogPostSlot}
+              onChange={(e) => setAdsenseForm((prev) => ({ ...prev, adsenseBlogPostSlot: e.target.value }))}
+              className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={savingAdSense}
+            className={`px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all ${
+              adSenseSaved
+                ? 'bg-emerald-600'
+                : 'bg-gradient-to-r from-emerald-600 to-teal-600'
+            }`}
+          >
+            {savingAdSense ? 'Saving...' : adSenseSaved ? 'Saved!' : 'Save AdSense Settings'}
+          </button>
+        </div>
+      </form>
+
       <AnimatePresence>
         {showForm && (
           <motion.form initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}

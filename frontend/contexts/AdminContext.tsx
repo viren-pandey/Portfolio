@@ -42,6 +42,10 @@ export interface SiteSettings {
   maintenanceMode: boolean;
   randomNotFound: boolean;
   customNotFoundMsg: string;
+  adsenseEnabled: boolean;
+  adsenseClient: string;
+  adsenseBetweenPostsSlot: string;
+  adsenseBlogPostSlot: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -50,6 +54,10 @@ const DEFAULT_SETTINGS: SiteSettings = {
   maintenanceMode: false,
   randomNotFound: true,
   customNotFoundMsg: '',
+  adsenseEnabled: false,
+  adsenseClient: '',
+  adsenseBetweenPostsSlot: '',
+  adsenseBlogPostSlot: '',
 };
 
 interface AdminCtxType {

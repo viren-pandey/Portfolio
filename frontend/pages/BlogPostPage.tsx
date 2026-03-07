@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, Tag, ArrowLeft, User, List, Eye } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
+import AdSenseUnit from '../components/ads/AdSenseUnit';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Heading { level: number; text: string; id: string; }
@@ -94,8 +95,11 @@ const TableOfContents: React.FC<{ headings: Heading[] }> = ({ headings }) => {
 };
 
 const BlogPostPage: React.FC = () => {
-  const { ads } = useAdmin();
-  const cornerAd = ads.find(a => a.active && a.position === 'corner') ?? null;
+  const { ads, settings } = useAdmin();
+  const adsenseClient = settings.adsenseClient.trim();
+  const adsenseBlogPostSlot = settings.adsenseBlogPostSlot.trim();
+  const useAdSenseBlogPost = settings.adsenseEnabled && !!adsenseClient && !!adsenseBlogPostSlot;
+  const cornerAd = !useAdSenseBlogPost ? (ads.find(a => a.active && a.position === 'corner') ?? null) : null;
   const { permalink } = useParams<{ permalink: string }>();
   const { getPostByPermalink, incrementViews } = useBlog();
   const navigate = useNavigate();
@@ -295,6 +299,24 @@ const BlogPostPage: React.FC = () => {
             </div>
           </div>
         </motion.header>
+
+        {useAdSenseBlogPost && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="mb-10 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
+          >
+            <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+              Sponsored
+            </p>
+            <AdSenseUnit
+              enabled={useAdSenseBlogPost}
+              client={adsenseClient}
+              slot={adsenseBlogPostSlot}
+            />
+          </motion.div>
+        )}
 
         {/* Post content */}
         <style>{`
