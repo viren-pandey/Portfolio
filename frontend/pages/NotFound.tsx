@@ -11,6 +11,8 @@ const MSGS = [
   { title: 'rm -rf page.tsx 💀', sub: 'A developer made a mistake. Or maybe you did. Who knows.' },
   { title: 'Lost in the void.', sub: 'Deep space navigation failure. Returning to base.' },
   { title: 'Page.exe has stopped.', sub: 'Windows is looking for a solution… just kidding, use the button below.' },
+  { title: 'There is the Murder.', sub: ' Chill Windows is looking for a solution… just kidding, use the button below.' },
+
 ];
 
 const NotFound: React.FC = () => {

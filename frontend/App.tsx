@@ -21,6 +21,8 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 import NotFound from './pages/NotFound';
 import SpaceDebrisAIPage from './pages/SpaceDebrisAI';
+import SmartCrowdPage from './pages/SmartCrowd';
+import DualityAIPage from './pages/DualityAI';
 import ProjectsPage from './pages/ProjectsPage';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -122,6 +124,8 @@ const App: React.FC = () => {
                 <Route path="/contact" element={<Layout><Contact /></Layout>} />
                 <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
                 <Route path="/project/space-debris-ai" element={<Layout><SpaceDebrisAIPage /></Layout>} />
+                <Route path="/project/smart-crowd" element={<Layout><SmartCrowdPage /></Layout>} />
+                <Route path="/project/duality-ai" element={<Layout><DualityAIPage /></Layout>} />
                 <Route path="*" element={<Layout><NotFound /></Layout>} />
               </Routes>
             </AdminProvider>

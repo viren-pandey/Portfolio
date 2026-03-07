@@ -143,14 +143,16 @@ const Projects: React.FC = () => {
                     <div className="flex gap-2">
                       {project.github && (
                         <a href={project.github} target="_blank" rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-300">
-                          <Github size={18} />
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-black/10 dark:border-white/20 shadow-sm text-xs font-medium text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-400/40 transition-colors">
+                          <Github size={13} />
+                          GitHub
                         </a>
                       )}
-                      {project.link && (
+                      {project.link && project.link !== project.github && (
                         <a href={project.link} target="_blank" rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-300">
-                          <ExternalLink size={18} />
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 shadow-sm text-xs font-medium text-purple-400 hover:bg-purple-500/20 transition-colors">
+                          <ExternalLink size={13} />
+                          Live
                         </a>
                       )}
                     </div>

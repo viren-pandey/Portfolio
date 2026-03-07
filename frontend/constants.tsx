@@ -48,12 +48,10 @@ export const PROJECTS: Project[] = [
     title: "SmartCrowd",
     description: "Intelligent Crowd Analysis, Risk Detection & Simulation Platform",
     points: [
-      "Architected a full-stack React + Vite frontend with Python FastAPI backend, enforcing strict separation of concerns — UI handles routing & interaction while backend owns all business logic, simulation, and data processing.",
-      "Integrated YOLOv8 continuously against live webcam streams at 5 fps, feeding a real-time dashboard that surfaces crowd density metrics, risk scores, and actionable safety alerts under <4 s end-to-end latency.",
-      "Designed RESTful API layer returning structured JSON; implemented dual-layer error handling (both client and server) so the UI degrades gracefully on backend failures — zero blank-screen crashes under edge-case inputs.",
-      "Drove architecture decisions under hackathon time-pressure: environment-variable-driven API base URL (VITE_API_BASE_URL), no hardcoded endpoints, eliminating the most common hackathon deployment blocker.",
-      "Documented real mistakes (accidental Git submodule push, import/export mismatches, deleted frontend folder) and their fixes — turning a hackathon postmortem into a knowledge source for future contributors.",
-      "Deployed live on Netlify with a production-ready folder structure (components / pages / api) that scales to auth, database integration, and Docker containerisation without architectural rewrites."
+      "Full-stack React + Vite frontend with Python FastAPI backend — strict separation of concerns between UI and business logic.",
+      "YOLOv8 on live webcam streams at 5 fps; real-time dashboard showing crowd density, risk scores, and safety alerts under <4 s latency.",
+      "RESTful API with dual-layer error handling (client + server) — UI degrades gracefully on backend failures, zero blank screens.",
+      "Env-var-driven config (VITE_API_BASE_URL), no hardcoded endpoints — deployed live on Netlify."
     ],
     stats: [
       { value: "5fps",  label: "Real-time YOLOv8 webcam inference" },
@@ -65,18 +63,17 @@ export const PROJECTS: Project[] = [
     ],
     tags: ["YOLOv8", "FastAPI", "React.js", "Vite", "TailwindCSS", "Python"],
     github: "https://github.com/viren-pandey/Smartcrowd",
-    link: "https://smartcrowd.netlify.app"
+    link: "https://smartcrowd.netlify.app",
+    detailPath: "/project/smart-crowd"
   },
   {
     title: "DualityAI Safety Detection",
     description: "BuildWithIndia 2.0 — Space Station Safety Object Detection Challenge",
     points: [
-      "Official submission for the DualityAI Space Station Safety Challenge (BuildWithIndia 2.0): custom-trained YOLOv8 model on the Falcon synthetic dataset to detect 7 mission-critical safety objects in real-time.",
-      "Detected classes span the full safety spectrum — OxygenTank, NitrogenTank, FirstAidBox, FireAlarm, SafetySwitchPanel, EmergencyPhone, and FireExtinguisher — achieving 95%+ accuracy across all categories.",
-      "Built a Streamlit web application enabling judges to upload any image, run live YOLO inference, and instantly download annotated prediction images — complete with an integrated Falcon model-update explanation panel.",
-      "Implemented reproducible Conda environment (setup_env.bat → conda activate EDU) ensuring exact library versions (PyTorch, Ultralytics, OpenCV, NumPy, PyYAML) are restored on any machine.",
-      "Delivered a complete auditable pipeline: train.py → predict.py → app.py, with training logs, loss graphs, labeled prediction outputs saved to structured runs/ and predictions/ folders, and a formal PDF report in docs/.",
-      "Supported both pip (requirements.txt) and Conda setup paths, lowering the barrier for judges and reviewers to reproduce results without environment conflicts."
+      "Custom YOLOv8 model fine-tuned on the Falcon synthetic dataset — detects 7 safety-critical objects (OxygenTank, FireAlarm, FireExtinguisher, etc.) at 95%+ accuracy.",
+      "Streamlit web app for judges: upload any image → live YOLO inference → annotated download in <2 s.",
+      "Complete auditable pipeline: train.py → predict.py → app.py, with training logs, P/R curves, and a formal PDF report in docs/.",
+      "Dual environment setup (pip + Conda) ensuring exact reproducibility across any machine."
     ],
     stats: [
       { value: "7",     label: "Safety-critical object classes detected" },
@@ -88,7 +85,8 @@ export const PROJECTS: Project[] = [
     ],
     tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV", "Python", "Conda"],
     github: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
-    link: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model"
+    link: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
+    detailPath: "/project/duality-ai"
   }
 ];
 
