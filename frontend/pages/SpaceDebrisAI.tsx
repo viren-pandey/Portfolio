@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Github,
@@ -73,6 +73,32 @@ const FEATURES = [
   },
 ];
 
+const FEATURED_PAGES = [
+  {
+    title: 'Risk Dashboard',
+    href: 'https://spacedebrisai.vercel.app/',
+    desc: 'Auto-advancing conjunction risk cards with maneuver recommendations.',
+  },
+  {
+    title: 'Satellite Registry',
+    href: 'https://spacedebrisai.vercel.app/satellites',
+    desc: 'Full satellite table with mission metadata and risk highlights.',
+  },
+  {
+    title: 'Live Tracker',
+    href: 'https://spacedebrisai.vercel.app/tracker',
+    desc: 'World-map orbital plotting powered by live tracker positions.',
+  },
+];
+
+const API_LINKS = [
+  { method: 'GET', endpoint: '/simulate', href: 'https://virenn77-spacedebrisai.hf.space/simulate', desc: 'Full conjunction pipeline response' },
+  { method: 'GET', endpoint: '/satellites', href: 'https://virenn77-spacedebrisai.hf.space/satellites', desc: 'Tracked satellite positions' },
+  { method: 'GET', endpoint: '/tracker/positions', href: 'https://virenn77-spacedebrisai.hf.space/tracker/positions', desc: 'Live world-map tracker data' },
+  { method: 'GET', endpoint: '/health', href: 'https://virenn77-spacedebrisai.hf.space/health', desc: 'Backend liveness check' },
+  { method: 'GET', endpoint: '/docs', href: 'https://virenn77-spacedebrisai.hf.space/docs', desc: 'Swagger UI for all endpoints' },
+];
+
 const QA = [
   {
     q: 'What is a conjunction and why does it matter?',
@@ -142,6 +168,9 @@ const QAItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const SpaceDebrisAIPage: React.FC = () => {
+  const [openPipelineIndex, setOpenPipelineIndex] = useState<number | null>(0);
+  const [openFeatureIndex, setOpenFeatureIndex] = useState<number | null>(0);
+
   return (
     <div className="min-h-screen">
       {/* ── Hero ── */}
@@ -196,6 +225,15 @@ const SpaceDebrisAIPage: React.FC = () => {
                 <ExternalLink size={16} />
                 <span>Live Demo</span>
               </a>
+              <a
+                href="https://virenn77-spacedebrisai.hf.space/simulate"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-500 dark:text-blue-300 text-sm font-medium hover:bg-blue-500/20 transition-colors"
+              >
+                <ExternalLink size={16} />
+                <span>Live API</span>
+              </a>
             </div>
           </motion.div>
         </div>
@@ -207,7 +245,7 @@ const SpaceDebrisAIPage: React.FC = () => {
           {[
             { value: '27,000+', label: 'Tracked Objects in Orbit' },
             { value: 'SGP4', label: 'NORAD Propagation Model' },
-            { value: '190', label: 'Pairs Screened (20 sats)' },
+            { value: '19,900', label: 'Pairs Screened (200 sats)' },
             { value: '4-Tier', label: 'Risk Classification System' },
           ].map(({ value, label }) => (
             <div key={label}>
@@ -230,6 +268,56 @@ const SpaceDebrisAIPage: React.FC = () => {
                 <span className={`text-sm font-medium ${text}`}>{label}</span>
               </div>
             ))}
+          </div>
+        </motion.section>
+
+        <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+          <SectionTitle>Featured Pages &amp; API Links</SectionTitle>
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Frontend Pages</h3>
+              <div className="space-y-3">
+                {FEATURED_PAGES.map((page) => (
+                  <a
+                    key={page.title}
+                    href={page.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-2xl border border-blue-500/20 bg-blue-500/[0.06] p-4 hover:bg-blue-500/[0.12] transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-blue-600 dark:text-blue-300">{page.title}</div>
+                      <ExternalLink size={14} className="text-blue-500 dark:text-blue-300 flex-shrink-0" />
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">{page.desc}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Backend API</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
+                Base URL: <span className="font-mono">https://virenn77-spacedebrisai.hf.space</span>
+              </p>
+              <div className="space-y-2.5">
+                {API_LINKS.map((api) => (
+                  <a
+                    key={api.endpoint}
+                    href={api.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-xl border border-purple-500/20 bg-purple-500/[0.06] p-3.5 hover:bg-purple-500/[0.12] transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-purple-500/30 text-purple-500 dark:text-purple-300 font-mono">{api.method}</span>
+                      <span className="text-xs font-mono text-gray-700 dark:text-gray-200">{api.endpoint}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{api.desc}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </motion.section>
 
@@ -277,44 +365,104 @@ const SpaceDebrisAIPage: React.FC = () => {
           </div>
         </motion.section>
 
-        {/* ── Simulation Pipeline ── */}
+        {/* Simulation Pipeline */}
         <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <SectionTitle>Simulation Pipeline</SectionTitle>
           <div className="space-y-3">
-            {PIPELINE_STEPS.map(({ step, label, detail, color }, i) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-                className={`flex items-start space-x-5 p-4 rounded-2xl border ${color.split(' ')[1]} bg-white dark:bg-black/20`}
-              >
-                <span className={`text-xs font-mono font-bold ${color.split(' ')[0]} pt-0.5`}>{step}</span>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm">{label}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{detail}</div>
-                </div>
-              </motion.div>
-            ))}
+            {PIPELINE_STEPS.map(({ step, label, detail, color }, i) => {
+              const isOpen = openPipelineIndex === i;
+              return (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07, duration: 0.4 }}
+                  className={`rounded-2xl border ${color.split(' ')[1]} bg-white dark:bg-black/20 overflow-hidden`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenPipelineIndex(isOpen ? null : i)}
+                    className="w-full flex items-start space-x-5 p-4 text-left"
+                  >
+                    <span className={`text-xs font-mono font-bold ${color.split(' ')[0]} pt-0.5`}>{step}</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 dark:text-white text-sm">{label}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">Click to expand details</div>
+                    </div>
+                    {isOpen ? (
+                      <ChevronUp size={16} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <ChevronDown size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                    )}
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 pl-[3.75rem] text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {detail}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.section>
 
-        {/* ── Key Features ── */}
+        {/* Key Features */}
         <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <SectionTitle>Key Features</SectionTitle>
           <div className="grid sm:grid-cols-2 gap-6">
-            {FEATURES.map(({ icon, title, desc }) => (
-              <div key={title} className="p-6 rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 flex flex-col space-y-3">
-                <div className="p-2.5 w-fit rounded-xl bg-purple-500/10 text-purple-400">{icon}</div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
-              </div>
-            ))}
+            {FEATURES.map(({ icon, title, desc }, i) => {
+              const isOpen = openFeatureIndex === i;
+              return (
+                <div key={title} className="rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFeatureIndex(isOpen ? null : i)}
+                    className="w-full p-6 text-left flex items-start gap-3"
+                  >
+                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 flex-shrink-0">{icon}</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Click to expand details</p>
+                    </div>
+                    {isOpen ? (
+                      <ChevronUp size={16} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <ChevronDown size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                    )}
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 pb-6 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {desc}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </motion.section>
 
-        {/* ── ML Risk Engine ── */}
+        {/* ML Risk Engine */}
         <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <SectionTitle>ML Risk Classification</SectionTitle>
           <div className="grid sm:grid-cols-2 gap-8 items-start">
@@ -439,6 +587,15 @@ LOW      →   0 km (no action needed)`}</pre>
               <ExternalLink size={16} />
               <span>Live Demo</span>
             </a>
+            <a
+              href="https://virenn77-spacedebrisai.hf.space/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-500 dark:text-blue-300 text-sm font-medium hover:bg-blue-500/20 transition-colors"
+            >
+              <Database size={16} />
+              <span>API Docs</span>
+            </a>
           </div>
         </motion.section>
 
@@ -464,9 +621,19 @@ LOW      →   0 km (no action needed)`}</pre>
         >
           <ExternalLink size={18} />
         </a>
+        <a
+          href="https://virenn77-spacedebrisai.hf.space/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Live API Docs"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg backdrop-blur-sm transition-colors text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300"
+        >
+          <Database size={18} />
+        </a>
       </div>
     </div>
   );
 };
 
 export default SpaceDebrisAIPage;
+

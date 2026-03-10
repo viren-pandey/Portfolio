@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Github,
@@ -143,6 +143,9 @@ const QAItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const SmartCrowdPage: React.FC = () => {
+  const [openPipelineIndex, setOpenPipelineIndex] = useState<number | null>(0);
+  const [openFeatureIndex, setOpenFeatureIndex] = useState<number | null>(0);
+
   return (
     <div className="min-h-screen">
       {/* ── Hero ── */}
@@ -266,40 +269,104 @@ const SmartCrowdPage: React.FC = () => {
           </div>
         </motion.section>
 
-        {/* ── Pipeline ── */}
+        {/* Pipeline */}
         <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <SectionTitle>Inference Pipeline</SectionTitle>
           <div className="space-y-3">
-            {PIPELINE_STEPS.map(({ step, label, detail, color }, i) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-                className={`flex items-start space-x-5 p-4 rounded-2xl border ${color.split(' ')[1]} bg-white dark:bg-black/20`}
-              >
-                <span className={`text-xs font-mono font-bold ${color.split(' ')[0]} pt-0.5`}>{step}</span>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm">{label}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{detail}</div>
-                </div>
-              </motion.div>
-            ))}
+            {PIPELINE_STEPS.map(({ step, label, detail, color }, i) => {
+              const isOpen = openPipelineIndex === i;
+
+              return (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07, duration: 0.4 }}
+                  className={`rounded-2xl border ${color.split(' ')[1]} bg-white dark:bg-black/20 overflow-hidden`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenPipelineIndex(isOpen ? null : i)}
+                    className="w-full flex items-start space-x-5 p-4 text-left"
+                  >
+                    <span className={`text-xs font-mono font-bold ${color.split(' ')[0]} pt-0.5`}>{step}</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 dark:text-white text-sm">{label}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">Click to expand details</div>
+                    </div>
+                    {isOpen ? (
+                      <ChevronUp size={16} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <ChevronDown size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                    )}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 pl-[3.75rem] text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {detail}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.section>
 
-        {/* ── Key Features ── */}
+        {/* Key Features */}
         <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <SectionTitle>Key Features</SectionTitle>
           <div className="grid sm:grid-cols-2 gap-6">
-            {FEATURES.map(({ icon, title, desc }) => (
-              <div key={title} className="p-6 rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 flex flex-col space-y-3">
-                <div className="p-2.5 w-fit rounded-xl bg-purple-500/10 text-purple-400">{icon}</div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
-              </div>
-            ))}
+            {FEATURES.map(({ icon, title, desc }, i) => {
+              const isOpen = openFeatureIndex === i;
+
+              return (
+                <div key={title} className="rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFeatureIndex(isOpen ? null : i)}
+                    className="w-full p-6 text-left flex items-start gap-3"
+                  >
+                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 flex-shrink-0">{icon}</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Click to expand details</p>
+                    </div>
+                    {isOpen ? (
+                      <ChevronUp size={16} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <ChevronDown size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                    )}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 pb-6 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {desc}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </motion.section>
 

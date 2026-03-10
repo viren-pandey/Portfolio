@@ -42,6 +42,13 @@ export const PROJECTS: Project[] = [
     tags: ["Python", "FastAPI", "React 19", "SGP4", "Docker", "Vite"],
     github: "https://github.com/viren-pandey/SpaceDebrisAI",
     link: "https://spacedebrisai.vercel.app",
+    apiLink: "https://virenn77-spacedebrisai.hf.space/simulate",
+    featuredLinks: [
+      { label: "Dashboard", url: "https://spacedebrisai.vercel.app/" },
+      { label: "Satellites", url: "https://spacedebrisai.vercel.app/satellites" },
+      { label: "Tracker", url: "https://spacedebrisai.vercel.app/tracker" },
+      { label: "API Docs", url: "https://virenn77-spacedebrisai.hf.space/docs" }
+    ],
     detailPath: "/project/space-debris-ai"
   },
   {
@@ -85,7 +92,7 @@ export const PROJECTS: Project[] = [
     ],
     tags: ["YOLOv8", "Streamlit", "PyTorch", "OpenCV", "Python", "Conda"],
     github: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
-    link: "https://github.com/viren-pandey/DualityAI-Safety-Detection-Model",
+    link: "https://duality-ai-safety-detection-model.vercel.app/",
     detailPath: "/project/duality-ai"
   }
 ];

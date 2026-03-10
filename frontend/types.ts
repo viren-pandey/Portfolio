@@ -4,6 +4,11 @@ export interface ProjectStat {
   label: string;
 }
 
+export interface ProjectLink {
+  label: string;
+  url: string;
+}
+
 export interface Project {
   title: string;
   description: string;
@@ -11,7 +16,9 @@ export interface Project {
   tags: string[];
   stats?: ProjectStat[];
   link?: string;
+  apiLink?: string;
   github?: string;
+  featuredLinks?: ProjectLink[];
   detailPath?: string;
 }
 
