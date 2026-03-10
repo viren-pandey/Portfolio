@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { Calendar, Clock, Tag, ArrowLeft, User, List, Eye } from 'lucide-react';
+import { Calendar, Clock, Tag, ArrowLeft, User, List } from 'lucide-react';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
 import AdSenseUnit from '../components/ads/AdSenseUnit';
@@ -358,10 +358,6 @@ const BlogPostPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Clock size={15} />
               <span>{post.readTime}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Eye size={15} />
-              <span>{(post.views ?? 0).toLocaleString()} {post.views === 1 ? 'view' : 'views'}</span>
             </div>
           </div>
         </motion.header>

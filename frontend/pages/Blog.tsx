@@ -1,7 +1,7 @@
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, Eye, BarChart2 } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, BarChart2 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
@@ -122,6 +122,47 @@ const Blog: React.FC = () => {
     [publishedPosts, activeTag]
   );
 
+  const showEmptyBlogLoader = !loading && !error && posts.length === 0 && publishedPosts.length === 0;
+  const emptyStateMemes = useMemo(() => ([
+    'Coming too soon...',
+    'Shit, server is down. Lemme create one.',
+    'Ohh shit, here we go again.',
+    'Apka swagat hai.',
+    'Wanna see the blooogs?',
+  ]), []);
+  const [emptyMemeIndex, setEmptyMemeIndex] = useState(0);
+  const [emptyProgress, setEmptyProgress] = useState(14);
+
+  useEffect(() => {
+    if (!showEmptyBlogLoader) return;
+
+    const pickAnotherMeme = () => {
+      setEmptyMemeIndex((current) => {
+        if (emptyStateMemes.length <= 1) return current;
+        let next = current;
+        while (next === current) next = Math.floor(Math.random() * emptyStateMemes.length);
+        return next;
+      });
+    };
+
+    pickAnotherMeme();
+    setEmptyProgress(14);
+
+    const memeTimer = window.setInterval(pickAnotherMeme, 1900);
+    const progressTimer = window.setInterval(() => {
+      setEmptyProgress((current) => {
+        const bump = Math.floor(Math.random() * 9) + 4;
+        const next = current + bump;
+        return next >= 96 ? 12 : next;
+      });
+    }, 900);
+
+    return () => {
+      window.clearInterval(memeTimer);
+      window.clearInterval(progressTimer);
+    };
+  }, [showEmptyBlogLoader, emptyStateMemes]);
+
   const errorMessages: Record<string, string> = {
     'permission-denied':   'Firestore rules are blocking reads. Set: allow read: if true in Firebase Console → Firestore → Rules.',
     'unavailable':         'Firestore is unavailable. Check your internet connection.',
@@ -234,10 +275,45 @@ const Blog: React.FC = () => {
           <p className="text-red-400 font-semibold mb-2">Firebase Error: {error}</p>
           <p className="text-gray-400 text-sm">{errorMessages[error] ?? 'Check browser console (F12) for details.'}</p>
         </div>
-      ) : posts.length === 0 && publishedPosts.length === 0 ? (
-        <div className="text-center text-gray-600 dark:text-gray-400 py-12">
-          No posts yet.
-        </div>
+      ) : showEmptyBlogLoader ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="py-8"
+        >
+          <div className="max-w-2xl mx-auto rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 sm:p-8">
+            <p className="text-xs uppercase tracking-[0.24em] text-purple-500 mb-2">Blog Pipeline</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              Brewing fresh blogs...
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-5">
+              Hold on while I spin up the next post.
+            </p>
+
+            <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500"
+                animate={{ width: `${emptyProgress}%` }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
+              />
+            </div>
+
+            <div className="mt-5 min-h-[30px]">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={emptyMemeIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                  className="text-sm sm:text-base font-semibold text-purple-600 dark:text-purple-300"
+                >
+                  {emptyStateMemes[emptyMemeIndex]}
+                </motion.p>
+              </AnimatePresence>
+            </div>
+          </div>
+        </motion.div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post, idx) => {
@@ -281,10 +357,6 @@ const Blog: React.FC = () => {
                     <div className="flex items-center space-x-1">
                       <Clock size={12} />
                       <span>{post.readTime}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Eye size={12} />
-                      <span>{(post.views ?? 0).toLocaleString()}</span>
                     </div>
                   </div>
                   <button 

@@ -6,6 +6,12 @@ import { Code2, Brain, Server, Cloud, X, ExternalLink, Github, ChevronRight } fr
 
 const FONT = "'Montserrat', sans-serif";
 const EASE = [0.16, 1, 0.3, 1];
+const SOFT_EASE = [0.22, 1, 0.36, 1];
+const PANEL_DURATION = 1.15;
+const CARD_EXPAND_DURATION = 1.2;
+const MOBILE_PANEL_DURATION = 1.05;
+const REVEAL_DURATION = 0.85;
+const DETAIL_ITEM_DURATION = 0.65;
 
 const CARD_CONFIG = [
   { Icon: Code2,  accent: '#06b6d4' },
@@ -74,7 +80,7 @@ const DetailPanel = function(props: { category: string; cfg: { accent: string; I
     initial: { opacity: 0, y: -14, scaleY: 0.95 },
     animate: { opacity: 1, y: 0, scaleY: 1 },
     exit: { opacity: 0, y: -8, scaleY: 0.97 },
-    transition: { duration: 0.75, ease: EASE },
+    transition: { duration: PANEL_DURATION, ease: SOFT_EASE },
     className: 'mt-5 rounded-3xl shadow-xl overflow-hidden',
     style: { originY: 0, background: t.panelBg, border: '1px solid ' + t.border }
   },
@@ -119,7 +125,7 @@ const DetailPanel = function(props: { category: string; cfg: { accent: string; I
               return React.createElement(motion.div, {
                 key: i,
                 initial: { opacity: 0, x: -12 }, animate: { opacity: 1, x: 0 },
-                transition: { duration: 0.5, delay: 0.1 + i * 0.1, ease: EASE },
+                transition: { duration: DETAIL_ITEM_DURATION, delay: 0.12 + i * 0.1, ease: SOFT_EASE },
                 className: 'p-5 rounded-2xl relative overflow-hidden',
                 style: { background: t.cardBg, border: '1px solid ' + t.border }
               },
@@ -192,16 +198,16 @@ const Skills = function() {
         var cfg        = CARD_CONFIG[idx % CARD_CONFIG.length];
         var isSelected = selectedIdx === idx;
         var isHovered  = hoveredIdx === idx;
-        var isCollapsed= hoveredIdx !== null && selectedIdx === null && idx === hoveredIdx + 1;
         var active     = isHovered || isSelected;
+        var flexGrow   = isSelected ? 1.35 : (isHovered && selectedIdx === null ? 1.15 : 1);
         return React.createElement(motion.div, {
           key: idx,
           initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.65, delay: idx * 0.1 }, viewport: { once: true, margin: '-40px' },
+          transition: { duration: REVEAL_DURATION, delay: idx * 0.12, ease: SOFT_EASE }, viewport: { once: true, margin: '-40px' },
           style: {
-            flex: isCollapsed ? 0 : ((isHovered && selectedIdx === null) || isSelected) ? 2 : 1,
+            flex: flexGrow,
             minWidth: 0,
-            transition: 'flex 0.75s cubic-bezier(0.16,1,0.3,1)',
+            transition: 'flex ' + CARD_EXPAND_DURATION + 's cubic-bezier(0.22,1,0.36,1)',
           }
         },
           React.createElement('div', {
@@ -210,12 +216,12 @@ const Skills = function() {
             onMouseLeave: function() { setHoveredIdx(null); },
             className: 'h-full rounded-2xl border cursor-pointer relative overflow-hidden bg-white dark:bg-gray-900',
             style: {
-              padding: isCollapsed ? '28px 0' : '24px',
-              opacity: isCollapsed ? 0 : 1,
+              padding: isSelected ? '24px' : '22px',
               borderColor: active ? cfg.accent : undefined,
               border: '1px solid ' + (active ? cfg.accent : t.border),
-              boxShadow: isSelected ? '0 0 0 1.5px ' + cfg.accent + '60, 0 8px 32px ' + cfg.accent + '18' : undefined,
-              transition: 'all 0.3s ease, padding 0.75s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
+              boxShadow: isSelected ? '0 0 0 1.25px ' + cfg.accent + '55, 0 10px 24px ' + cfg.accent + '16' : undefined,
+              transform: isSelected ? 'translateY(-2px)' : 'translateY(0)',
+              transition: 'all 0.45s ease, padding ' + CARD_EXPAND_DURATION + 's cubic-bezier(0.22,1,0.36,1)',
             }
           },
             isSelected && React.createElement('div', { style: { position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: cfg.accent } }),
@@ -257,11 +263,11 @@ const Skills = function() {
         return React.createElement(motion.div, {
           key: idx,
           initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.6, delay: idx * 0.08 }, viewport: { once: true }
+          transition: { duration: REVEAL_DURATION, delay: idx * 0.1, ease: SOFT_EASE }, viewport: { once: true }
         },
           React.createElement('div', {
             onClick: function() { handleClick(idx); },
-            className: 'p-5 rounded-2xl border cursor-pointer relative overflow-hidden transition-all duration-300 bg-white dark:bg-gray-900',
+            className: 'p-5 rounded-2xl border cursor-pointer relative overflow-hidden transition-all duration-500 bg-white dark:bg-gray-900',
             style: {
               border: '1px solid ' + (isSel ? cfg.accent : t.border),
               boxShadow: isSel ? '0 0 0 1.5px ' + cfg.accent + '60, 0 6px 24px ' + cfg.accent + '18' : undefined
@@ -284,7 +290,7 @@ const Skills = function() {
             isSel && React.createElement(motion.div, {
               key: 'mob-detail',
               initial: { opacity: 0, height: 0 }, animate: { opacity: 1, height: 'auto' }, exit: { opacity: 0, height: 0 },
-              transition: { duration: 0.65, ease: EASE }, style: { overflow: 'hidden' }
+              transition: { duration: MOBILE_PANEL_DURATION, ease: SOFT_EASE }, style: { overflow: 'hidden' }
             },
               React.createElement('div', {
                 className: 'mt-3 p-5 rounded-2xl shadow-lg',
