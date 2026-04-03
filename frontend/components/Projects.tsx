@@ -73,23 +73,23 @@ const Projects: React.FC = () => {
   const featuredLinks = project.featuredLinks?.slice(0, 4) ?? [];
 
   return (
-    <section ref={sectionRef} className="max-w-7xl mx-auto px-6">
+    <section ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="flex flex-col items-center mb-14 text-center"
+        className="flex flex-col items-center mb-10 sm:mb-14 text-center"
       >
-        <h2 className="text-5xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight mb-3">Featured Work</h2>
-        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
+        <h2 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight mb-3">Featured Work</h2>
+        <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
           Same flow, cleaner focus. Navigate projects and scan value quickly.
         </p>
       </motion.div>
 
-      <div className="relative px-5 sm:px-8">
+      <div className="relative px-0 sm:px-8">
         <button
           onClick={() => go((active - 1 + PROJECTS.length) % PROJECTS.length)}
-          className="absolute left-[-4px] sm:left-[-8px] top-1/2 -translate-y-1/2 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
+          className="absolute left-[-4px] sm:left-[-8px] top-1/2 -translate-y-1/2 z-20 hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
           aria-label="Previous project"
         >
           <ChevronLeft size={18} />
@@ -97,7 +97,7 @@ const Projects: React.FC = () => {
 
         <button
           onClick={() => go((active + 1) % PROJECTS.length)}
-          className="absolute right-[-4px] sm:right-[-8px] top-1/2 -translate-y-1/2 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
+          className="absolute right-[-4px] sm:right-[-8px] top-1/2 -translate-y-1/2 z-20 hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
           aria-label="Next project"
         >
           <ChevronRight size={18} />
@@ -124,12 +124,12 @@ const Projects: React.FC = () => {
               animate="center"
               exit="exit"
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-white dark:bg-[#030014]/80 dark:backdrop-blur-sm p-8 sm:p-12 lg:p-14"
+              className="bg-white dark:bg-[#030014]/80 dark:backdrop-blur-sm p-5 sm:p-12 lg:p-14"
             >
               <div className="grid lg:grid-cols-2 gap-10 items-start">
                 <div>
-                  <div className="flex items-center gap-3 mb-7">
-                    <div className="flex gap-2">
+                  <div className="flex flex-wrap items-center gap-3 mb-7">
+                    <div className="flex flex-wrap gap-2">
                       {project.github && (
                         <a
                           href={project.github}
@@ -165,16 +165,33 @@ const Projects: React.FC = () => {
                       )}
                     </div>
 
-                    <span className="ml-auto font-mono text-xs sm:text-sm text-gray-400 tabular-nums">
+                    <span className="sm:ml-auto font-mono text-xs sm:text-sm text-gray-400 tabular-nums">
                       {String(active + 1).padStart(2, '0')} / {String(PROJECTS.length).padStart(2, '0')}
                     </span>
+                  </div>
+
+                  <div className="sm:hidden flex items-center justify-between gap-3 mb-6">
+                    <button
+                      onClick={() => go((active - 1 + PROJECTS.length) % PROJECTS.length)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform active:scale-95"
+                      aria-label="Previous project"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={() => go((active + 1) % PROJECTS.length)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-black/10 dark:border-white/15 shadow-lg text-gray-700 dark:text-gray-300 backdrop-blur-sm transition-transform active:scale-95"
+                      aria-label="Next project"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
                   </div>
 
                   <motion.h3
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-3 leading-tight"
+                    className="text-3xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-3 leading-tight"
                   >
                     {project.title}
                   </motion.h3>
@@ -183,7 +200,7 @@ const Projects: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed"
+                    className="text-base sm:text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed"
                   >
                     {project.description}
                   </motion.p>
@@ -250,7 +267,7 @@ const Projects: React.FC = () => {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
                       <Link
                         to={project.detailPath}
-                        className="inline-flex items-center gap-2 text-base sm:text-lg font-semibold text-purple-500 dark:text-purple-300 hover:text-purple-400 transition-colors group/dl"
+                        className="inline-flex max-w-full flex-wrap items-center gap-2 text-base sm:text-lg font-semibold text-purple-500 dark:text-purple-300 hover:text-purple-400 transition-colors group/dl"
                       >
                         <BookOpen size={16} />
                         Deep Dive - Full System Breakdown
@@ -271,7 +288,7 @@ const Projects: React.FC = () => {
                       Impact &amp; Numbers
                     </motion.div>
 
-                    <div className="grid grid-cols-2 gap-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {compactStats.map((stat, i) => (
                         <motion.div
                           key={i}
@@ -280,7 +297,7 @@ const Projects: React.FC = () => {
                           transition={{ delay: 0.16 + i * 0.08, ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
                           className="rounded-2xl border border-purple-500/20 bg-purple-500/5 dark:bg-purple-500/[0.08] px-4 py-5 text-center"
                         >
-                          <div className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent leading-tight">
+                          <div className="text-3xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent leading-tight">
                             {stat.value}
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mt-2 leading-snug">
@@ -297,7 +314,7 @@ const Projects: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-center items-center gap-6">
+      <div className="mt-8 flex justify-center items-center gap-3 sm:gap-6">
         {PROJECTS.map((p, i) => (
           <button
             key={i}
