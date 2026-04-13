@@ -1,6 +1,6 @@
 <div align="center">
 
-# Viren Pandey   Portfolio
+# Viren Pandey    Portfolio
 
 **Computer Science Engineer · AI/ML Specialist · Full-Stack Developer**
 
