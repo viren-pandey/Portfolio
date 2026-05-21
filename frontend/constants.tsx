@@ -100,7 +100,7 @@ export const PROJECTS: Project[] = [
 export const EDUCATION = [
   {
     institution: "Dr. A.P.J. Abdul Kalam Technical University",
-    period: "August 2024 – August 2028",
+    period: "August 2024 – Till now",
     degree: "Bachelor of Technology - BTech, Computer Science And Engineering with Specialisation in Artificial Intelligence and Machine Learning",
     specialization: "Artificial Intelligence And Machine learning"
   },
