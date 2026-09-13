@@ -1,21 +1,43 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Viren Pandey – AI/ML Engineer and Developer. Explore projects in Machine Learning, Deep Learning, Data Science, and Artificial Intelligence." />
-    <meta name="keywords" content="Viren Pandey, AI Engineer, ML Engineer, Machine Learning, Deep Learning, Data Science, Python Developer, AI Portfolio" />
 
+    <!-- Primary SEO -->
+    <title>Viren Pandey — Founder, Developer &amp; Product Builder</title>
+    <meta name="description" content="Personal portfolio of Viren Pandey, founder and software developer building web products, AI systems, automation tools, and scalable digital experiences." />
+    <meta name="keywords" content="Viren Pandey, Founder, Software Developer, Product Builder, AI Engineer, Machine Learning, Full-Stack Developer, Portfolio" />
+    <meta name="author" content="Viren Pandey" />
+    <link rel="canonical" href="https://virenp.vercel.app/" />
 
-    <title>Viren Pandey | Portfolio</title>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://virenp.vercel.app/" />
+    <meta property="og:title" content="Viren Pandey — Founder, Developer &amp; Product Builder" />
+    <meta property="og:description" content="Personal portfolio of Viren Pandey, founder and software developer building web products, AI systems, automation tools, and scalable digital experiences." />
+    <meta property="og:site_name" content="Viren Pandey" />
+    <meta property="og:image" content="https://virenp.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Viren Pandey — Founder, Developer & Product Builder" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Viren Pandey — Founder, Developer &amp; Product Builder" />
+    <meta name="twitter:description" content="Personal portfolio of Viren Pandey, founder and software developer building web products, AI systems, automation tools, and scalable digital experiences." />
+    <meta name="twitter:image" content="https://virenp.vercel.app/og-image.png" />
+
+    <link rel="icon" type="image/svg+xml" href="frontend/components/img/logo.svg" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="google-site-verification" content="Y1XL6bGuc19v2sfLN_4rci6_Sb8WI2y3dZ1tONhsZJ4" />
+    <meta name="google-adsense-account" content="ca-pub-3354596085199308" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" type="image/svg+xml" href="frontend/components/img/logo.svg">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <meta name="google-site-verification" content="Y1XL6bGuc19v2sfLN_4rci6_Sb8WI2y3dZ1tONhsZJ4" />
-    <meta name="google-adsense-account" content="ca-pub-3354596085199308">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
     <!-- Blocking dark-mode script: runs before first paint to prevent flash -->
     <script>
       (function () {
@@ -25,6 +47,7 @@
         }
       })();
     </script>
+
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -32,57 +55,267 @@
           'dark:bg-gray-900', 'dark:bg-gray-800', 'dark:bg-gray-700', 'dark:bg-gray-600',
           'dark:border-gray-700', 'dark:text-white', 'dark:text-gray-100', 'dark:text-gray-200',
           'dark:text-gray-400', 'dark:hover:bg-gray-600', 'dark:placeholder-gray-500',
-          'dark:bg-gray-900\/60',
+          'dark:bg-gray-900\\/60',
         ],
         theme: {
           extend: {
+            colors: {
+              navy: {
+                DEFAULT: '#101828',
+                700: '#344054',
+                500: '#667085',
+                300: '#98a2b3',
+              },
+              ink: '#101828',
+              surface: '#FCFCFD',
+              accent: {
+                DEFAULT: '#7C3AED',
+                600: '#7C3AED',
+                50: '#F5F3FF',
+                100: '#EDE9FE',
+              },
+            },
             fontFamily: {
-              sans: ['"Montserrat"', 'sans-serif'],
-              display: ['"Montserrat"', 'sans-serif'],
+              sans: ['"Inter"', 'system-ui', 'sans-serif'],
+              display: ['"Montserrat"', '"Inter"', 'sans-serif'],
+            },
+            boxShadow: {
+              card: '0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)',
+              lift: '0 12px 24px -6px rgba(16, 24, 40, 0.10), 0 4px 10px -2px rgba(16, 24, 40, 0.05)',
+              cta: '0 8px 20px -4px rgba(124, 58, 237, 0.35)',
+            },
+            borderRadius: {
+              card: '20px',
             },
           },
         },
       }
     </script>
+
     <style>
+      html { scroll-padding-top: 96px; }
       body {
-        font-family: 'Montserrat', sans-serif;
-        background-color: #030014;
-        color: #fff;
+        font-family: 'Inter', system-ui, sans-serif;
+        background-color: #FCFCFD;
+        color: #101828;
         overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
       }
-      .font-display {
-        font-family: 'Montserrat', sans-serif;
+      .dark body { background-color: #0b0916; color: #f4f5fa; }
+      .font-display { font-family: 'Montserrat', 'Inter', sans-serif; }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 10px; }
+      .dark ::-webkit-scrollbar-thumb { background: #2b2840; }
+
+      /* Subtle static ambient glow — pure CSS, no animation loop */
+      .ambient-glow {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(80px);
+        pointer-events: none;
+        background: radial-gradient(closest-side, rgba(124, 58, 237, 0.07), transparent);
       }
-      ::-webkit-scrollbar {
-        width: 8px;
+      .dark .ambient-glow {
+        background: radial-gradient(closest-side, rgba(139, 92, 246, 0.10), transparent);
       }
-      ::-webkit-scrollbar-track {
-        background: #030014;
+
+      /* ── Apple-style glassmorphism system ── */
+
+      /* Colorful gradient mesh behind everything — makes glass read as glass */
+      .mesh-blob {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(90px);
+        pointer-events: none;
+        will-change: transform;
+        animation: mesh-drift 26s ease-in-out infinite alternate;
       }
-      ::-webkit-scrollbar-thumb {
-        background: #2e1065;
-        border-radius: 10px;
+      @keyframes mesh-drift {
+        0%   { transform: translate3d(0, 0, 0) scale(1); }
+        100% { transform: translate3d(40px, -30px, 0) scale(1.08); }
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #4c1d95;
+      @media (prefers-reduced-motion: reduce) {
+        .mesh-blob { animation: none; }
+      }
+      /* Static mesh on small screens — animating blurred layers is expensive on mobile GPUs */
+      @media (max-width: 640px) {
+        .mesh-blob { animation: none; }
+      }
+
+      /* Frosted glass card */
+      .glass {
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow:
+          0 1px 2px rgba(16, 24, 40, 0.04),
+          0 12px 32px -8px rgba(16, 24, 40, 0.10),
+          inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      }
+      .dark .glass {
+        background: rgba(255, 255, 255, 0.045);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        box-shadow:
+          0 12px 32px -8px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      }
+
+      /* Stronger glass for hero/featured panels */
+      .glass-strong {
+        background: rgba(255, 255, 255, 0.68);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        box-shadow:
+          0 1px 2px rgba(16, 24, 40, 0.05),
+          0 24px 48px -12px rgba(16, 24, 40, 0.14),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+      .dark .glass-strong {
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(28px) saturate(150%);
+        -webkit-backdrop-filter: blur(28px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        box-shadow:
+          0 24px 48px -12px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      /* Glass pill / chip */
+      .glass-chip {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+      .dark .glass-chip {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+
+      /* Glass secondary button */
+      .glass-btn {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(16px) saturate(160%);
+        -webkit-backdrop-filter: blur(16px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      }
+      .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.72);
+      }
+      .dark .glass-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .dark .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      /* Dark glass panel — for CTA sections with white text */
+      .glass-dark {
+        background: rgba(16, 24, 40, 0.88);
+        backdrop-filter: blur(24px) saturate(140%);
+        -webkit-backdrop-filter: blur(24px) saturate(140%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 24px 48px -12px rgba(16, 24, 40, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+      .dark .glass-dark {
+        background: rgba(13, 11, 24, 0.85);
+        box-shadow:
+          0 24px 48px -12px rgba(0, 0, 0, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+
+      /* Specular highlight sweep on glass hover (desktop only) */
+      .glass-hover-lift {
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+      }
+      @media (hover: hover) {
+        .glass-hover-lift:hover {
+          transform: translateY(-3px);
+          box-shadow:
+            0 2px 4px rgba(16, 24, 40, 0.05),
+            0 24px 48px -12px rgba(16, 24, 40, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        }
+        .dark .glass-hover-lift:hover {
+          box-shadow:
+            0 24px 48px -12px rgba(0, 0, 0, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+      }
+      .dark .dot-grid { opacity: 0.4; }
+      .dot-grid {
+        background-image: radial-gradient(circle, #101828 0.8px, transparent 0.8px);
+        background-size: 26px 26px;
+        opacity: 0.05;
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
+        -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
+      }
+      /* Scroll reveal */
+      .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+      .reveal.is-visible { opacity: 1; transform: translateY(0); }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal { opacity: 1; transform: none; transition: none; }
+      }
+
+      /* Custom grid-pattern hero (subtle, no canvas) */
+      .hero-lines {
+        background-image:
+          linear-gradient(to right, rgba(16,24,40,0.045) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(16,24,40,0.045) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(ellipse 75% 70% at 50% 20%, black 20%, transparent 78%);
+        -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 20%, black 20%, transparent 78%);
+      }
+      .dark .hero-lines {
+        background-image:
+          linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "framer-motion": "https://esm.sh/framer-motion@^12.25.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+
+    <!-- JSON-LD Person schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Viren Pandey",
+        "url": "https://virenp.vercel.app/",
+        "jobTitle": "Founder, Developer & Product Builder",
+        "description": "Founder and software developer building web products, AI systems, automation tools, and scalable digital experiences.",
+        "email": "mailto:pandeyviren78@gmail.com",
+        "sameAs": [
+          "https://github.com/viren-pandey",
+          "https://linkedin.com/in/viren-pandey"
+        ]
+      }
+    </script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+          "react/": "https://esm.sh/react@^19.2.3/",
+          "react": "https://esm.sh/react@^19.2.3",
+          "framer-motion": "https://esm.sh/framer-motion@^12.25.0",
+          "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+        }
+      }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>

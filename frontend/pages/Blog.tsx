@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, BarChart2 } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, Tag, Trash2, PenLine, X, Send, CheckCircle2, Mail, User, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlog } from '../contexts/BlogContext';
 import { useAdmin } from '../contexts/AdminContext';
+import { Reveal } from '../components/About';
 import AdSenseUnit from '../components/ads/AdSenseUnit';
 import AdCodeSlot from '../components/ads/AdCodeSlot';
 
@@ -36,23 +36,12 @@ const Blog: React.FC = () => {
     [ads]
   );
 
-  const leftCodeAd = useMemo(
-    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar') && !!a.adCode?.trim()) ?? null,
-    [ads]
-  );
-  const leftImageAd = useMemo(
-    () => ads.find(a => a.active && (a.position === 'left_sidebar' || a.position === 'sidebar') && !a.adCode?.trim()) ?? null,
-    [ads]
-  );
-
   const adsenseClient = settings.adsenseClient.trim();
   const adsenseBetweenPostsSlot = settings.adsenseBetweenPostsSlot.trim();
   const adsenseTopBlogSlot = settings.adsenseTopBlogSlot.trim();
-  const adsenseLeftSidebarSlot = settings.adsenseLeftSidebarSlot.trim();
 
   const useAdSenseBetweenPosts = settings.adsenseEnabled && !!adsenseClient && !!adsenseBetweenPostsSlot;
   const useAdSenseTopBlog = settings.adsenseEnabled && !!adsenseClient && !!adsenseTopBlogSlot;
-  const useAdSenseLeftSidebar = settings.adsenseEnabled && !!adsenseClient && !!adsenseLeftSidebarSlot;
 
   // Track impressions: fire once per session when a card enters the viewport
   const impressionObserver = useRef<IntersectionObserver | null>(null);
@@ -81,7 +70,7 @@ const Blog: React.FC = () => {
     impressionObserver.current.observe(el);
   }, [incrementImpressions]);
 
-  // ── Floating contact popup state ──
+  // Floating contact popup state
   const [popupOpen, setPopupOpen]   = useState(false);
   const [pName,     setPName]       = useState('');
   const [pEmail,    setPEmail]      = useState('');
@@ -121,6 +110,10 @@ const Blog: React.FC = () => {
     },
     [publishedPosts, activeTag]
   );
+
+  // Featured = most recent post; the rest are "latest"
+  const featured = filteredPosts[0] ?? null;
+  const latest = useMemo(() => filteredPosts.slice(1), [filteredPosts]);
 
   const showEmptyBlogLoader = !loading && !error && posts.length === 0 && publishedPosts.length === 0;
   const emptyStateMemes = useMemo(() => ([
@@ -171,40 +164,31 @@ const Blog: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center mb-16"
-      >
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-500 leading-tight">
-          Engineering Blogs
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl text-lg">
-          Thoughts on AI, Software Architecture, the future of tech and Coding.
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+      {/* Header */}
+      <Reveal className="flex flex-col items-center mb-12 sm:mb-16 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-fuchsia-500 dark:from-violet-400 dark:to-fuchsia-400 mb-3">
+          Blog
         </p>
-      </motion.div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold tracking-tight text-ink dark:text-white mb-4">
+          Notes from the build
+        </h1>
+        <p className="text-navy-500 dark:text-gray-400 text-center max-w-2xl text-base sm:text-lg">
+          Thoughts on AI, software architecture, the future of tech, and coding.
+        </p>
+      </Reveal>
 
+      {/* Top banner ad */}
       {(topCodeAd || useAdSenseTopBlog || topImageAd) && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
-        >
-          <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
-            Sponsored
-          </p>
+        <div className="mb-12 rounded-2xl glass p-4">
+          <p className="text-[10px] uppercase tracking-widest text-navy-500 dark:text-gray-400 mb-2">Sponsored</p>
           {topCodeAd ? (
             <AdCodeSlot code={topCodeAd.adCode ?? ''} />
           ) : useAdSenseTopBlog ? (
-            <AdSenseUnit
-              enabled={useAdSenseTopBlog}
-              client={adsenseClient}
-              slot={adsenseTopBlogSlot}
-            />
+            <AdSenseUnit enabled={useAdSenseTopBlog} client={adsenseClient} slot={adsenseTopBlogSlot} />
           ) : (
             <a href={topImageAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
-              className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
+              className="block relative overflow-hidden rounded-xl border border-violet-500/20 hover:border-violet-500/50 transition-all group shadow-lg">
               {topImageAd?.imageUrl && (
                 <img src={topImageAd.imageUrl} alt={topImageAd.title}
                   className="w-full max-h-40 object-cover group-hover:scale-105 transition-transform duration-500"
@@ -212,31 +196,25 @@ const Blog: React.FC = () => {
               )}
             </a>
           )}
-        </motion.div>
+        </div>
       )}
 
-      {/* Tag filter pills */}
+      {/* Topic pills */}
       {!loading && !error && tagCounts.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-2 mb-14"
-        >
-          {/* "All" pill */}
+        <div className="flex flex-wrap justify-center gap-2 mb-12 sm:mb-16">
           <button
             onClick={() => setActiveTag(null)}
             className={[
               'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200',
               activeTag === null
-                ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
-                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-400',
+                ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 border-transparent text-white shadow-lg shadow-violet-500/30'
+                : 'glass-chip text-navy-500 dark:text-gray-300 hover:text-ink dark:hover:text-white',
             ].join(' ')}
           >
             All
             <span className={[
               'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-              activeTag === null ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400',
+              activeTag === null ? 'bg-white/25 text-white' : 'bg-black/10 dark:bg-white/10 text-navy-500 dark:text-gray-400',
             ].join(' ')}>
               {publishedPosts.length}
             </span>
@@ -249,26 +227,26 @@ const Blog: React.FC = () => {
               className={[
                 'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200',
                 activeTag === tag
-                  ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
-                  : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-400',
+                  ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 border-transparent text-white shadow-lg shadow-violet-500/30'
+                  : 'glass-chip text-navy-500 dark:text-gray-300 hover:text-ink dark:hover:text-white',
               ].join(' ')}
             >
               <Tag size={11} />
               {tag}
               <span className={[
                 'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                activeTag === tag ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400',
+                activeTag === tag ? 'bg-white/25 text-white' : 'bg-black/10 dark:bg-white/10 text-navy-500 dark:text-gray-400',
               ].join(' ')}>
                 {count}
               </span>
             </button>
           ))}
-        </motion.div>
+        </div>
       )}
 
       {loading ? (
         <div className="flex justify-center items-center py-24">
-          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
         <div className="max-w-xl mx-auto text-center py-16 px-6 rounded-2xl border border-red-500/30 bg-red-500/5">
@@ -276,23 +254,15 @@ const Blog: React.FC = () => {
           <p className="text-gray-400 text-sm">{errorMessages[error] ?? 'Check browser console (F12) for details.'}</p>
         </div>
       ) : showEmptyBlogLoader ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="py-8"
-        >
-          <div className="max-w-2xl mx-auto rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 sm:p-8">
-            <p className="text-xs uppercase tracking-[0.24em] text-purple-500 mb-2">Blog Pipeline</p>
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Brewing fresh blogs...
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-5">
-              Hold on while I spin up the next post.
-            </p>
+        <div className="py-8">
+          <div className="max-w-2xl mx-auto glass rounded-[20px] p-6 sm:p-8">
+            <p className="text-xs uppercase tracking-[0.24em] text-violet-600 dark:text-violet-400 mb-2">Blog Pipeline</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-ink dark:text-white">Brewing fresh blogs...</h3>
+            <p className="text-sm text-navy-500 dark:text-gray-400 mt-2 mb-5">Hold on while I spin up the next post.</p>
 
             <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500"
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-blue-500"
                 animate={{ width: `${emptyProgress}%` }}
                 transition={{ duration: 0.8, ease: 'easeInOut' }}
               />
@@ -306,178 +276,216 @@ const Blog: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.35 }}
-                  className="text-sm sm:text-base font-semibold text-purple-600 dark:text-purple-300"
+                  className="text-sm sm:text-base font-semibold text-violet-600 dark:text-violet-300"
                 >
                   {emptyStateMemes[emptyMemeIndex]}
                 </motion.p>
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post, idx) => {
-            const shouldShowBetweenAd = (idx + 1) % 3 === 0;
-            const codeAdAfterThis = shouldShowBetweenAd && betweenCodeAds.length > 0
-              ? betweenCodeAds[Math.floor(idx / 3) % betweenCodeAds.length]
-              : null;
-            const adAfterThis = !codeAdAfterThis && !useAdSenseBetweenPosts && shouldShowBetweenAd && betweenImageAds.length > 0
-              ? betweenImageAds[Math.floor(idx / 3) % betweenImageAds.length]
-              : null;
-            return (<React.Fragment key={post.id}>
-            <motion.article
-              key={post.id}
-              ref={(el) => observeCard(el, post.id)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="group relative bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl overflow-hidden hover:border-purple-500/50 dark:hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 flex flex-col"
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              {post.image && (
-                <Link to={`/blog/${post.permalink}`} className="block h-48 overflow-hidden relative">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </Link>
-              )}
-
-              <div className="p-5 sm:p-8 relative z-10 flex flex-col flex-grow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-4 text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wider">
-                    <div className="flex items-center space-x-1">
-                      <Calendar size={12} />
-                      <span>{post.date}</span>
+        <>
+          {/* Featured post */}
+          {featured && (
+            <Reveal className="mb-12 sm:mb-16">
+              <Link to={`/blog/${featured.permalink}`} className="group block">
+                <article className="glass glass-hover-lift rounded-[20px] overflow-hidden">
+                  <div className="grid md:grid-cols-2">
+                    {/* Featured visual / panel */}
+                    <div className="relative min-h-[220px] md:min-h-[300px] bg-gradient-to-br from-violet-600/90 via-fuchsia-600/80 to-blue-600/90 overflow-hidden">
+                      {featured.image ? (
+                        <img
+                          src={featured.image}
+                          alt={featured.title}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      ) : null}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-ink text-[11px] font-bold uppercase tracking-wider shadow-card">
+                          <Sparkles size={11} className="text-violet-600" />
+                          Featured
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Clock size={12} />
-                      <span>{post.readTime}</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={(e) => { e.preventDefault(); deletePost(post.id); }}
-                    className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                    title="Delete Post"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
 
-                <Link to={`/blog/${post.permalink}`} className="block flex-grow">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-snug break-words">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                </Link>
+                    {/* Featured content */}
+                    <div className="p-6 sm:p-9 flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-4 text-xs text-navy-500 dark:text-gray-400 font-medium">
+                        <span className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 font-semibold uppercase tracking-wider">
+                          {featured.tags[0] ?? 'Article'}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                        <span className="inline-flex items-center gap-1"><Clock size={11} /> {featured.readTime}</span>
+                        <span className="inline-flex items-center gap-1"><Calendar size={11} /> {featured.date}</span>
+                      </div>
 
-                <div className="flex items-center justify-between mt-auto pt-6 border-t border-black/5 dark:border-white/5">
-                  <div className="flex flex-wrap gap-2">
-                    {post.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="px-2 py-1 rounded-md bg-black/5 dark:bg-white/5 text-[10px] text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5 flex items-center">
-                        <Tag size={10} className="mr-1" />
-                        {tag}
+                      <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold tracking-tight text-ink dark:text-white mb-3 leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-violet-600 group-hover:to-fuchsia-500 dark:group-hover:from-violet-400 dark:group-hover:to-fuchsia-400 transition-all">
+                        {featured.title}
+                      </h2>
+                      <p className="text-sm sm:text-[15px] text-navy-500 dark:text-gray-400 leading-relaxed line-clamp-3 mb-5">
+                        {featured.excerpt}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 dark:text-violet-400">
+                        Read article
+                        <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                       </span>
-                    ))}
+                    </div>
                   </div>
-                  <Link
-                    to={`/blog/${post.permalink}`}
-                    className="p-2 rounded-full bg-black/5 dark:bg-white/5 group-hover:bg-purple-500 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]"
-                    aria-label={`Read ${post.title}`}
-                  >
-                    <ChevronRight size={16} />
+                </article>
+              </Link>
+            </Reveal>
+          )}
+
+          {/* Latest articles */}
+          {latest.length > 0 && (
+            <Reveal className="mb-6">
+              <h2 className="text-xl sm:text-2xl font-display font-bold tracking-tight text-ink dark:text-white">
+                Latest articles
+              </h2>
+            </Reveal>
+          )}
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {latest.map((post, idx) => {
+              const shouldShowBetweenAd = (idx + 1) % 6 === 0;
+              const codeAdAfterThis = shouldShowBetweenAd && betweenCodeAds.length > 0
+                ? betweenCodeAds[Math.floor(idx / 6) % betweenCodeAds.length]
+                : null;
+              const adAfterThis = !codeAdAfterThis && !useAdSenseBetweenPosts && shouldShowBetweenAd && betweenImageAds.length > 0
+                ? betweenImageAds[Math.floor(idx / 6) % betweenImageAds.length]
+                : null;
+              return (<React.Fragment key={post.id}>
+              <motion.article
+                ref={(el) => observeCard(el, post.id)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: (idx % 3) * 0.08 }}
+                className="glass glass-hover-lift group relative rounded-[20px] overflow-hidden flex flex-col"
+              >
+                {post.image && (
+                  <Link to={`/blog/${post.permalink}`} className="block h-40 overflow-hidden relative">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   </Link>
+                )}
+
+                <div className="p-5 sm:p-6 flex flex-col flex-grow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3 text-xs text-navy-500 dark:text-gray-400 font-medium">
+                      <span className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 font-semibold uppercase tracking-wider">
+                        {post.tags[0] ?? 'Article'}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                      <span className="inline-flex items-center gap-1"><Clock size={10} /> {post.readTime}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.preventDefault(); deletePost(post.id); }}
+                      className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete Post"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  <Link to={`/blog/${post.permalink}`} className="block flex-grow">
+                    <h3 className="text-base sm:text-lg font-bold mb-2 text-ink dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors leading-snug break-words">
+                      {post.title}
+                    </h3>
+                    <p className="text-navy-500 dark:text-gray-400 text-sm mb-5 leading-relaxed line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                  </Link>
+
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/60 dark:border-white/10">
+                    <span className="inline-flex items-center gap-1 text-[11px] text-navy-300 dark:text-gray-500">
+                      <Calendar size={10} />
+                      {post.date}
+                    </span>
+                    <Link
+                      to={`/blog/${post.permalink}`}
+                      className="inline-flex items-center gap-1 text-[13px] font-semibold text-violet-600 dark:text-violet-400 group/arrow"
+                    >
+                      Read
+                      <ArrowRight size={13} className="transition-transform group-hover/arrow:translate-x-0.5" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.article>
+              </motion.article>
               {shouldShowBetweenAd && codeAdAfterThis && (
-                <motion.div
-                  key={`code-ad-after-${idx}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 + 0.2 }}
-                  className="md:col-span-2 lg:col-span-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
-                >
-                  <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
-                    Sponsored
-                  </p>
+                <div className="sm:col-span-2 lg:col-span-3 rounded-2xl glass p-4">
+                  <p className="text-[10px] uppercase tracking-widest text-navy-500 dark:text-gray-400 mb-2">Sponsored</p>
                   <AdCodeSlot code={codeAdAfterThis.adCode ?? ''} />
-                </motion.div>
+                </div>
               )}
               {shouldShowBetweenAd && !codeAdAfterThis && useAdSenseBetweenPosts && (
-                <motion.div
-                  key={`adsense-after-${idx}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 + 0.2 }}
-                  className="md:col-span-2 lg:col-span-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4"
-                >
-                  <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
-                    Sponsored
-                  </p>
-                  <AdSenseUnit
-                    enabled={useAdSenseBetweenPosts}
-                    client={adsenseClient}
-                    slot={adsenseBetweenPostsSlot}
-                  />
-                </motion.div>
+                <div className="sm:col-span-2 lg:col-span-3 rounded-2xl glass p-4">
+                  <p className="text-[10px] uppercase tracking-widest text-navy-500 dark:text-gray-400 mb-2">Sponsored</p>
+                  <AdSenseUnit enabled={useAdSenseBetweenPosts} client={adsenseClient} slot={adsenseBetweenPostsSlot} />
+                </div>
               )}
               {adAfterThis && (
-                <motion.div
-                  key={`ad-after-${idx}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 + 0.2 }}
-                  className="md:col-span-2 lg:col-span-3"
-                >
+                <div className="sm:col-span-2 lg:col-span-3">
                   <a href={adAfterThis.linkUrl} target="_blank" rel="noreferrer sponsored"
-                    className="block relative overflow-hidden rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all group shadow-lg">
+                    className="block relative overflow-hidden rounded-2xl border border-violet-500/20 hover:border-violet-500/50 transition-all group shadow-lg">
                     <img src={adAfterThis.imageUrl} alt={adAfterThis.title}
                       className="w-full max-h-36 object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
                     <div className="absolute top-2 right-3 text-[10px] font-semibold bg-black/50 text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">Sponsored</div>
                   </a>
-                </motion.div>
+                </div>
               )}
             </React.Fragment>);
-          })}
-        </div>
-      )}
-      {(leftCodeAd || useAdSenseLeftSidebar || leftImageAd) && (
-        <div className="hidden 2xl:block fixed left-6 top-1/2 -translate-y-1/2 z-40 w-52">
-          <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/95 dark:bg-[#0d0b22]/95 backdrop-blur-md p-3 shadow-2xl">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
-              Sponsored
-            </p>
-            {leftCodeAd ? (
-              <AdCodeSlot code={leftCodeAd.adCode ?? ''} />
-            ) : useAdSenseLeftSidebar ? (
-              <AdSenseUnit
-                enabled={useAdSenseLeftSidebar}
-                client={adsenseClient}
-                slot={adsenseLeftSidebarSlot}
-              />
-            ) : (
-              <a href={leftImageAd?.linkUrl} target="_blank" rel="noreferrer sponsored"
-                className="block relative overflow-hidden rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group">
-                {leftImageAd?.imageUrl && (
-                  <img src={leftImageAd.imageUrl} alt={leftImageAd.title}
-                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none'; }} />
-                )}
-              </a>
-            )}
+            })}
           </div>
-        </div>
+
+          {/* Newsletter / write-for-us block */}
+          {publishedPosts.length > 0 && (
+            <Reveal className="mt-14 sm:mt-20">
+              <div className="glass-dark rounded-[24px] px-6 sm:px-12 py-12 text-center">
+                <div className="flex justify-center mb-5">
+                  <span className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 text-violet-200">
+                    <Mail size={22} />
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white mb-3">
+                  Get practical dev guides, weekly
+                </h2>
+                <p className="text-sm sm:text-base text-gray-400 max-w-lg mx-auto mb-7">
+                  One email a week with AI, web, and systems engineering notes that actually help. No spam, unsubscribe anytime.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button
+                    onClick={() => setPopupOpen(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-fuchsia-500/30 hover:shadow-fuchsia-500/50 transition-shadow"
+                  >
+                    <PenLine size={15} />
+                    Write for us
+                  </button>
+                  <button
+                    onClick={() => navigate('/contact', { state: { from: location.pathname } })}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white border border-white/15 text-sm font-semibold rounded-xl hover:bg-white/15 transition-colors"
+                  >
+                    <Mail size={15} />
+                    Get in touch
+                  </button>
+                </div>
+              </div>
+            </Reveal>
+          )}
+        </>
       )}
 
-      {/* ── Floating contact button + mini popup ── */}
+      {/* Floating contact button + mini popup */}
       <div className="fixed bottom-36 right-8 z-50 flex flex-col items-end gap-3">
         <AnimatePresence>
           {popupOpen && (
@@ -486,26 +494,23 @@ const Blog: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="w-80 bg-white dark:bg-[#0d0b22] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+              className="w-80 glass-strong rounded-2xl overflow-hidden"
             >
-              {/* Accent */}
-              <div className="h-0.5 w-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400" />
-
               {pStatus === 'success' ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-5">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
                     <CheckCircle2 size={26} className="text-emerald-500" />
                   </div>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">Message sent!</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Thanks — I'll get back to you soon.</p>
+                  <p className="font-bold text-ink dark:text-white text-sm">Message sent!</p>
+                  <p className="text-xs text-navy-500 dark:text-gray-400">Thanks, I'll get back to you soon.</p>
                 </div>
               ) : (
                 <>
                   {/* Header */}
-                  <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-black/5 dark:border-white/5">
+                  <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/60 dark:border-white/10">
                     <div>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm">Write for us / Feedback</p>
-                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Got ideas or want to contribute?</p>
+                      <p className="font-bold text-ink dark:text-white text-sm">Write for us / Feedback</p>
+                      <p className="text-[11px] text-navy-500 dark:text-gray-400">Got ideas or want to contribute?</p>
                     </div>
                     <button onClick={() => setPopupOpen(false)} className="text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors">
                       <X size={16} />
@@ -515,33 +520,33 @@ const Blog: React.FC = () => {
                   {/* Form */}
                   <form onSubmit={handlePopupSubmit} className="px-4 py-4 space-y-3">
                     {pStatus === 'error' && (
-                      <p className="text-xs text-red-500 bg-red-500/10 rounded-lg px-3 py-2 border border-red-500/20">Something went wrong — try again.</p>
+                      <p className="text-xs text-red-500 bg-red-500/10 rounded-lg px-3 py-2 border border-red-500/20">Something went wrong, try again.</p>
                     )}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="relative">
                         <User size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <input required type="text" value={pName} onChange={e => setPName(e.target.value)} placeholder="Name"
-                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all" />
+                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-white/60 dark:bg-white/5 border border-white/70 dark:border-white/10 text-ink dark:text-white placeholder-gray-400 outline-none focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/15 transition-all" />
                       </div>
                       <div className="relative">
                         <Mail size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <input required type="email" value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email"
-                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all" />
+                          className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-white/60 dark:bg-white/5 border border-white/70 dark:border-white/10 text-ink dark:text-white placeholder-gray-400 outline-none focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/15 transition-all" />
                       </div>
                     </div>
                     <div className="relative">
                       <MessageSquare size={12} className="absolute left-2.5 top-2.5 text-gray-400 pointer-events-none" />
                       <textarea required rows={3} value={pMessage} onChange={e => setPMessage(e.target.value)} placeholder="Your idea, suggestion, or topic you'd like to write about…"
-                        className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all resize-none" />
+                        className="w-full pl-7 pr-2 py-2 rounded-xl text-xs bg-white/60 dark:bg-white/5 border border-white/70 dark:border-white/10 text-ink dark:text-white placeholder-gray-400 outline-none focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/15 transition-all resize-none" />
                     </div>
                     <div className="flex items-center gap-2">
                       <button type="submit" disabled={pStatus === 'loading'}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-60 text-white text-xs font-semibold py-2 rounded-xl shadow-lg shadow-purple-500/20 transition-all">
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 disabled:opacity-60 text-white text-xs font-semibold py-2 rounded-xl shadow-lg shadow-violet-500/25 transition-all">
                         {pStatus === 'loading' ? <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Send size={12} />}
                         {pStatus === 'loading' ? 'Sending…' : 'Send'}
                       </button>
                       <button type="button" onClick={() => navigate('/contact', { state: { from: location.pathname } })}
-                        className="px-3 py-2 rounded-xl text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 border border-black/10 dark:border-white/10 hover:border-purple-500/40 transition-all">
+                        className="px-3 py-2 rounded-xl text-xs font-semibold text-navy-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 glass-chip transition-all">
                         Full form
                       </button>
                     </div>
@@ -557,7 +562,7 @@ const Blog: React.FC = () => {
           whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.94 }}
           onClick={() => setPopupOpen(prev => !prev)}
           title="Write for us / Contact"
-          className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30 text-white relative overflow-hidden group"
+          className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-xl shadow-fuchsia-500/30 text-white relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
           <AnimatePresence mode="wait">

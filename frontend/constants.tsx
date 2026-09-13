@@ -55,10 +55,10 @@ export const PROJECTS: Project[] = [
     title: "SmartCrowd",
     description: "Intelligent Crowd Analysis, Risk Detection & Simulation Platform",
     points: [
-      "Full-stack React + Vite frontend with Python FastAPI backend — strict separation of concerns between UI and business logic.",
+      "Full-stack React + Vite frontend with Python FastAPI backend, with strict separation of concerns between UI and business logic.",
       "YOLOv8 on live webcam streams at 5 fps; real-time dashboard showing crowd density, risk scores, and safety alerts under <4 s latency.",
-      "RESTful API with dual-layer error handling (client + server) — UI degrades gracefully on backend failures, zero blank screens.",
-      "Env-var-driven config (VITE_API_BASE_URL), no hardcoded endpoints — deployed live on Netlify."
+      "RESTful API with dual-layer error handling (client + server): UI degrades gracefully on backend failures, zero blank screens.",
+      "Env-var-driven config (VITE_API_BASE_URL), no hardcoded endpoints, deployed live on Netlify."
     ],
     stats: [
       { value: "5fps",  label: "Real-time YOLOv8 webcam inference" },
@@ -75,9 +75,9 @@ export const PROJECTS: Project[] = [
   },
   {
     title: "DualityAI Safety Detection",
-    description: "BuildWithIndia 2.0 — Space Station Safety Object Detection Challenge",
+    description: "BuildWithIndia 2.0: Space Station Safety Object Detection Challenge",
     points: [
-      "Custom YOLOv8 model fine-tuned on the Falcon synthetic dataset — detects 7 safety-critical objects (OxygenTank, FireAlarm, FireExtinguisher, etc.) at 95%+ accuracy.",
+      "Custom YOLOv8 model fine-tuned on the Falcon synthetic dataset, detecting 7 safety-critical objects (OxygenTank, FireAlarm, FireExtinguisher, etc.) at 95%+ accuracy.",
       "Streamlit web app for judges: upload any image → live YOLO inference → annotated download in <2 s.",
       "Complete auditable pipeline: train.py → predict.py → app.py, with training logs, P/R curves, and a formal PDF report in docs/.",
       "Dual environment setup (pip + Conda) ensuring exact reproducibility across any machine."

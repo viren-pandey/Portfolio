@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
-import { Mail, MessageCircle, Terminal } from 'lucide-react';
+import { Mail, Github, Linkedin, MessageCircle, Terminal } from 'lucide-react';
 import Navbar from './components/Navbar';
 import AIChat from './components/AIChat';
 import Home from './pages/Home';
@@ -133,23 +133,35 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [notificationPermission]);
 
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-[#030014] text-gray-900 dark:text-white selection:bg-purple-500/30 transition-colors duration-300">
+    <div className="relative min-h-screen bg-surface dark:bg-[#0b0916] text-ink dark:text-white selection:bg-violet-500/25 transition-colors duration-300">
       <AnimatedBackground />
       <Navbar />
 
-      <main className="relative z-10 pt-20">
+      <main className="relative z-10 pt-16">
         {children}
       </main>
 
-      <footer className="relative z-10 py-12 border-t border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#030014] transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-          <div className="text-gray-500 text-sm">
-            © March 2026 Viren Pandey. Built with React & Love.
+      <footer className="relative z-10 py-10 glass-strong transition-colors duration-300">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3">
+            <span className="font-display text-base font-bold tracking-tight text-ink dark:text-white">Viren</span>
+            <span className="hidden sm:block w-px h-3.5 bg-gray-200 dark:bg-white/15" aria-hidden="true" />
+            <span className="text-xs text-navy-300 dark:text-gray-500">
+              Founder · Developer · Builder
+            </span>
           </div>
-          <div className="flex space-x-6">
-            <a href="mailto:pandeyviren78@gmail.com" className="text-gray-400 hover:text-purple-400 flex items-center space-x-2 transition-colors">
+          <p className="text-xs text-navy-300 dark:text-gray-500 text-center">
+            © {new Date().getFullYear()} Viren Pandey. Built with React, Tailwind & care.
+          </p>
+          <div className="flex space-x-5">
+            <a href="https://github.com/viren-pandey" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="text-navy-300 dark:text-gray-500 hover:text-ink dark:hover:text-white transition-colors">
+              <Github size={16} />
+            </a>
+            <a href="https://linkedin.com/in/viren-pandey" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-navy-300 dark:text-gray-500 hover:text-ink dark:hover:text-white transition-colors">
+              <Linkedin size={16} />
+            </a>
+            <a href="mailto:pandeyviren78@gmail.com" aria-label="Email" className="text-navy-300 dark:text-gray-500 hover:text-ink dark:hover:text-white transition-colors">
               <Mail size={16} />
-              <span>Contact</span>
             </a>
           </div>
         </div>

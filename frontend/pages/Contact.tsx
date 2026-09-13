@@ -56,7 +56,7 @@ const Contact: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
           onClick={() => navigate(from)}
-          className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 mb-8 transition-colors"
+          className="flex items-center gap-2 text-sm text-navy-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-violet-400 mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
           Back
@@ -66,10 +66,10 @@ const Contact: React.FC = () => {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="relative bg-white dark:bg-[#0c0a20] border border-black/10 dark:border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden"
+          className="relative bg-white dark:bg-[#12101f] border border-gray-200 dark:border-white/10 rounded-[20px] p-8 shadow-card overflow-hidden"
         >
           {/* Top accent bar */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500" />
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-accent dark:bg-violet-500" />
 
           {/* Success state */}
           {status === 'success' ? (
@@ -98,12 +98,12 @@ const Contact: React.FC = () => {
             <>
               {/* Header */}
               <div className="mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-4">
-                  <Mail size={24} className="text-purple-500" />
+                <div className="w-12 h-12 rounded-2xl bg-accent-50 dark:bg-violet-500/10 border border-accent-100 dark:border-violet-500/20 flex items-center justify-center mb-4">
+                  <Mail size={24} className="text-accent-600 dark:text-violet-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Get in touch</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ideas for improving the blog, want to write a guest post, or just say hi?
+                <h2 className="text-2xl font-bold text-ink dark:text-white mb-1">Get in touch</h2>
+                <p className="text-sm text-navy-500 dark:text-gray-400">
+                  Product ideas, collaborations, software projects, or technical questions: my inbox is open.
                 </p>
               </div>
 
@@ -111,7 +111,7 @@ const Contact: React.FC = () => {
               {status === 'error' && (
                 <div className="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                   <AlertCircle size={15} />
-                  Something went wrong — please try again.
+                  Something went wrong, please try again.
                 </div>
               )}
 
@@ -160,8 +160,7 @@ const Contact: React.FC = () => {
                   <input
                     type="text"
                     value={subject}
-                    onChange={e => setSubject(e.target.value)}
-                    placeholder="Wanna become editor , sugestion ( giving me JOB?)"
+                    onChange={e => setSubject(e.target.value)}                        placeholder="Product inquiry · Collaboration · Something else"
                     className="w-full px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   />
                 </div>
@@ -187,7 +186,7 @@ const Contact: React.FC = () => {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 text-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-ink dark:bg-white hover:bg-navy-700 dark:hover:bg-gray-200 disabled:opacity-60 text-white dark:text-ink font-semibold py-3 rounded-xl shadow-card hover:shadow-lift transition-all duration-200 text-sm"
                 >
                   {status === 'loading' ? (
                     <>

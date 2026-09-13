@@ -1,24 +1,47 @@
+import React, { useEffect, useState } from 'react';
+import { Github, Linkedin, Sun, Moon, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Sun, Moon, Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+const NAV_LINKS = [
+  { label: 'Home', href: '/', type: 'route' as const },
+  { label: 'About', href: '/#about', type: 'hash' as const },
+  { label: 'Work', href: '/#work', type: 'hash' as const },
+  { label: 'Projects', href: '/#projects', type: 'hash' as const },
+  { label: 'Experience', href: '/#experience', type: 'hash' as const },
+  { label: 'Contact', href: '/contact', type: 'route' as const },
+];
+
+const GITHUB_URL = 'https://github.com/viren-pandey';
+const LINKEDIN_URL = 'https://linkedin.com/in/viren-pandey';
+
+function scrollToHash(hash: string) {
+  const id = hash.replace('/#', '');
+  if (window.location.pathname !== '/') {
+    window.location.href = `/#${id}`;
+    return;
+  }
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      return (
+        localStorage.getItem('theme') === 'dark' ||
+        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      );
     }
-    return true;
+    return false;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 12);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -32,133 +55,170 @@ const Navbar: React.FC = () => {
     }
   }, [isDark]);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
-  const name = "Viren Pandey";
-
-  const letterVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0 },
+  const isActive = (link: (typeof NAV_LINKS)[number]) => {
+    if (link.type === 'route') return location.pathname === link.href;
+    if (link.type === 'hash' && location.pathname === '/') {
+      const id = link.href.replace('/#', '');
+      return location.hash === `#${id}`;
+    }
+    return false;
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 dark:bg-[#030014]/80 backdrop-blur-xl border-b border-black/10 dark:border-white/10 py-4 shadow-sm dark:shadow-none' : 'bg-transparent py-6'}`}>
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <Link to="/" className="flex items-center space-x-2 cursor-pointer group">
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            transition={{ staggerChildren: 0.1 }}
-            className="flex items-center"
-          >
-            {name.split("").map((char, index) => (
-              <motion.span
-                key={index}
-                variants={letterVariants}
-                className="text-xl font-display font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
+    <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div
+          className={`pointer-events-auto mt-3 sm:mt-4 flex items-center justify-between gap-2 rounded-2xl px-4 sm:px-5 transition-all duration-300 ${
+            scrolled ? 'glass-strong h-14 shadow-lift' : 'glass h-14'
+          }`}
+        >
+          {/* Brand */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <span className="font-display text-lg font-bold tracking-tight text-ink dark:text-white transition-colors group-hover:text-accent-600 dark:group-hover:text-violet-400">
+              Viren
+            </span>
+            <span className="hidden sm:block w-px h-4 bg-gray-200 dark:bg-white/15" aria-hidden="true" />
+            <span className="hidden sm:block text-xs font-medium tracking-wide text-navy-500 dark:text-gray-400">
+              Founder · Developer · Builder
+            </span>
+          </Link>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  if (link.type === 'hash') {
+                    e.preventDefault();
+                    scrollToHash(link.href);
+                  }
+                }}
+                aria-current={isActive(link) ? 'page' : undefined}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive(link)
+                    ? 'text-ink dark:text-white'
+                    : 'text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white'
+                }`}
               >
-                {char === " " ? "\u00A0" : char}
-              </motion.span>
+                {link.label}
+              </a>
             ))}
-          </motion.div>
-        </Link>
-        
-        <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
-            Home
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
-          </Link>
-          <Link to="/projects" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
-            Projects
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
-          </Link>
-          <Link to="/blog" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
-            Blog
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
-          </Link>
-          <a href="https://virenp.vercel.app/blog/about-me-btech-cse-aiml-student-developer-and-doomscroller" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
-            About
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
-          </a>
-          <Link to="/contact" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors relative group">
-            Contact
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 dark:bg-purple-500 transition-all group-hover:w-full" />
-          </Link>
-          
-          <div className="w-px h-4 bg-black/10 dark:bg-white/20" />
-          
-          <div className="flex space-x-4">
-            <a href="https://github.com/viren-pandey" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors transform hover:scale-110">
-                <Github size={20} />
-            </a>
-            <a href="https://linkedin.com/in/viren-pandey" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors transform hover:scale-110">
-                <Linkedin size={20} />
-            </a>
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleTheme}
-            className="p-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors relative overflow-hidden"
-          >
-            <AnimatePresence mode='wait'>
-              <motion.div
-                key={isDark ? 'dark' : 'light'}
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-1 mr-1">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="p-2 rounded-lg text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
               >
-                {isDark ? <Moon size={20} className="text-purple-400" /> : <Sun size={20} className="text-yellow-500" />}
-              </motion.div>
-            </AnimatePresence>
-          </motion.button>
-        </div>
+                <Github size={17} />
+              </a>
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="p-2 rounded-lg text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+              >
+                <Linkedin size={17} />
+              </a>
+            </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center space-x-4">
-           <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleTheme}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            {isDark ? <Moon size={20} className="text-purple-400" /> : <Sun size={20} className="text-yellow-400" />}
-          </motion.button>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            <button
+              onClick={() => setIsDark(!isDark)}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="p-2 rounded-lg text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+            >
+              {isDark ? <Moon size={17} /> : <Sun size={17} />}
+            </button>
+
+            <Link
+              to="/contact"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-ink dark:bg-white text-white dark:text-ink hover:bg-navy-700 dark:hover:bg-gray-200 transition-colors"
+            >
+              Let's Talk
+              <ArrowUpRight size={14} />
+            </Link>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileMenuOpen}
+              className="md:hidden p-2 rounded-lg text-ink dark:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#030014]/95 backdrop-blur-xl border-b border-white/10 overflow-hidden"
-          >
-            <div className="px-6 py-4 flex flex-col space-y-4">
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Home</Link>
-              <Link to="/projects" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Projects</Link>
-              <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Blog</Link>
-              <a href="https://virenp.vercel.app/blog/about-me-btech-cse-aiml-student-developer-and-doomscroller" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">About</a>
-              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white py-2">Contact</Link>
-              <div className="flex space-x-4 py-2">
-                <a href="https://github.com/viren-pandey" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-                    <Github size={20} />
-                </a>
-                <a href="https://linkedin.com/in/viren-pandey" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-                    <Linkedin size={20} />
-                </a>
-              </div>
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden mt-2 mx-4 sm:mx-6 rounded-2xl glass-strong overflow-hidden pointer-events-auto">
+          <div className="px-4 py-4 flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  if (link.type === 'hash') {
+                    e.preventDefault();
+                    scrollToHash(link.href);
+                  }
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`px-3 py-2.5 text-[15px] font-medium rounded-lg transition-colors ${
+                  isActive(link)
+                    ? 'text-ink dark:text-white bg-gray-100 dark:bg-white/5'
+                    : 'text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white'
+                }`}
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="mt-2 pt-3 border-t border-gray-200/80 dark:border-white/10 flex items-center gap-2">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors"
+                aria-label="GitHub"
+              >
+                <Github size={18} />
+              </a>
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg text-navy-500 dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={18} />
+              </a>
+              <Link
+                to="/contact"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-ink dark:bg-white text-white dark:text-ink"
+              >
+                Let's Talk
+                <ArrowUpRight size={14} />
+              </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
